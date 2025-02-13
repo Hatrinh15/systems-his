@@ -10,7 +10,7 @@ import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
-import  {Patients}  from'./collections/Patients'
+import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
@@ -26,11 +26,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
- 
-  admin:{
-  
+  admin: {
     components: {
-      
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin'],
@@ -70,8 +67,19 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories,Users, Patients, MedicalRecods, Appointments, Rooms,Departments, 
+  collections: [
+    Pages,
+    Posts,
+    Categories,
+    Media,
+    { ...Users, admin: { group: 'Quản lý nội dung' } },
+    { ...Patients, admin: { group: 'Quản lý nội dung' } },
+    { ...MedicalRecods, admin: { group: 'Quản lý nội dung' } },
+    { ...Appointments, admin: { group: 'Quản lý nội dung' } },
+    { ...Rooms, admin: { group: 'Phòng ban' } },
+    { ...Departments, admin: { group: 'Phòng ban' } },
   ],
+
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -96,6 +104,6 @@ export default buildConfig({
         return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
     },
-    tasks: []
+    tasks: [],
   },
 })

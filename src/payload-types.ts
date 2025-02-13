@@ -13,8 +13,8 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
-    media: Media;
     categories: Category;
+    media: Media;
     users: User;
     patients: Patient;
     MedicalRecods: MedicalRecod;
@@ -38,8 +38,8 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     patients: PatientsSelect<false> | PatientsSelect<true>;
     MedicalRecods: MedicalRecodsSelect<false> | MedicalRecodsSelect<true>;
@@ -1085,12 +1085,12 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -1346,6 +1346,26 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  parent?: T;
+  breadcrumbs?:
+    | T
+    | {
+        doc?: T;
+        url?: T;
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1436,26 +1456,6 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  slugLock?: T;
-  parent?: T;
-  breadcrumbs?:
-    | T
-    | {
-        doc?: T;
-        url?: T;
-        label?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

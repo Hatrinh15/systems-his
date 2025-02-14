@@ -9,6 +9,11 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    khoatai: KhoataiAuthOperations;
+    khoamui: KhoamuiAuthOperations;
+    khoahong: KhoahongAuthOperations;
+    khoaungbuou: KhoaungbuouAuthOperations;
+    khoahscc: KhoahsccAuthOperations;
   };
   collections: {
     pages: Page;
@@ -16,6 +21,11 @@ export interface Config {
     categories: Category;
     media: Media;
     users: User;
+    khoatai: Khoatai;
+    khoamui: Khoamui;
+    khoahong: Khoahong;
+    khoaungbuou: Khoaungbuou;
+    khoahscc: Khoahscc;
     patients: Patient;
     MedicalRecods: MedicalRecod;
     appointments: Appointment;
@@ -41,6 +51,11 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    khoatai: KhoataiSelect<false> | KhoataiSelect<true>;
+    khoamui: KhoamuiSelect<false> | KhoamuiSelect<true>;
+    khoahong: KhoahongSelect<false> | KhoahongSelect<true>;
+    khoaungbuou: KhoaungbuouSelect<false> | KhoaungbuouSelect<true>;
+    khoahscc: KhoahsccSelect<false> | KhoahsccSelect<true>;
     patients: PatientsSelect<false> | PatientsSelect<true>;
     MedicalRecods: MedicalRecodsSelect<false> | MedicalRecodsSelect<true>;
     appointments: AppointmentsSelect<false> | AppointmentsSelect<true>;
@@ -67,9 +82,25 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (Khoatai & {
+        collection: 'khoatai';
+      })
+    | (Khoamui & {
+        collection: 'khoamui';
+      })
+    | (Khoahong & {
+        collection: 'khoahong';
+      })
+    | (Khoaungbuou & {
+        collection: 'khoaungbuou';
+      })
+    | (Khoahscc & {
+        collection: 'khoahscc';
+      });
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -82,6 +113,96 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface KhoataiAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface KhoamuiAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface KhoahongAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface KhoaungbuouAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface KhoahsccAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -733,6 +854,326 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoatai".
+ */
+export interface Khoatai {
+  id: string;
+  IDnhansu?: string | null;
+  profilePicture: string | Media;
+  name: string;
+  cccd: string;
+  gioitinh?: ('nam' | 'nu' | 'khac') | null;
+  ngaysinh: string;
+  sdt: string;
+  diachi: string;
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  chucvu: 'bacsi' | 'yta';
+  ngayvaolam: string;
+  tinhtranglamviec: 'danglam' | 'nghiviec';
+  bangcap: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  kinhnghiem: number;
+  chungchi: {
+    tencc?: string | null;
+    filecc?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoamui".
+ */
+export interface Khoamui {
+  id: string;
+  IDnhansu?: string | null;
+  profilePicture: string | Media;
+  name: string;
+  cccd: string;
+  gioitinh?: ('nam' | 'nu' | 'khac') | null;
+  ngaysinh: string;
+  sdt: string;
+  diachi: string;
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  chucvu: 'bacsi' | 'yta';
+  ngayvaolam: string;
+  tinhtranglamviec: 'danglam' | 'nghiviec';
+  bangcap: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  kinhnghiem: number;
+  chungchi: {
+    tencc?: string | null;
+    filecc?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoahong".
+ */
+export interface Khoahong {
+  id: string;
+  IDnhansu?: string | null;
+  profilePicture: string | Media;
+  name: string;
+  cccd: string;
+  gioitinh?: ('nam' | 'nu' | 'khac') | null;
+  ngaysinh: string;
+  sdt: string;
+  diachi: string;
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  chucvu: 'bacsi' | 'yta';
+  ngayvaolam: string;
+  tinhtranglamviec: 'danglam' | 'nghiviec';
+  bangcap: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  kinhnghiem: number;
+  chungchi: {
+    tencc?: string | null;
+    filecc?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoaungbuou".
+ */
+export interface Khoaungbuou {
+  id: string;
+  IDnhansu?: string | null;
+  profilePicture: string | Media;
+  name: string;
+  cccd: string;
+  gioitinh?: ('nam' | 'nu' | 'khac') | null;
+  ngaysinh: string;
+  sdt: string;
+  diachi: string;
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  chucvu: 'bacsi' | 'yta';
+  ngayvaolam: string;
+  tinhtranglamviec: 'danglam' | 'nghiviec';
+  bangcap: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  kinhnghiem: number;
+  chungchi: {
+    tencc?: string | null;
+    filecc?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoahscc".
+ */
+export interface Khoahscc {
+  id: string;
+  IDnhansu?: string | null;
+  profilePicture: string | Media;
+  name: string;
+  cccd: string;
+  gioitinh?: ('nam' | 'nu' | 'khac') | null;
+  ngaysinh: string;
+  sdt: string;
+  diachi: string;
+  notes?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  chucvu: 'bacsi' | 'yta';
+  ngayvaolam: string;
+  tinhtranglamviec: 'danglam' | 'nghiviec';
+  bangcap: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  kinhnghiem: number;
+  chungchi: {
+    tencc?: string | null;
+    filecc?: (string | null) | Media;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "patients".
  */
 export interface Patient {
@@ -1097,6 +1538,26 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'khoatai';
+        value: string | Khoatai;
+      } | null)
+    | ({
+        relationTo: 'khoamui';
+        value: string | Khoamui;
+      } | null)
+    | ({
+        relationTo: 'khoahong';
+        value: string | Khoahong;
+      } | null)
+    | ({
+        relationTo: 'khoaungbuou';
+        value: string | Khoaungbuou;
+      } | null)
+    | ({
+        relationTo: 'khoahscc';
+        value: string | Khoahscc;
+      } | null)
+    | ({
         relationTo: 'patients';
         value: string | Patient;
       } | null)
@@ -1137,10 +1598,31 @@ export interface PayloadLockedDocument {
         value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'khoatai';
+        value: string | Khoatai;
+      }
+    | {
+        relationTo: 'khoamui';
+        value: string | Khoamui;
+      }
+    | {
+        relationTo: 'khoahong';
+        value: string | Khoahong;
+      }
+    | {
+        relationTo: 'khoaungbuou';
+        value: string | Khoaungbuou;
+      }
+    | {
+        relationTo: 'khoahscc';
+        value: string | Khoahscc;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1150,10 +1632,31 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'khoatai';
+        value: string | Khoatai;
+      }
+    | {
+        relationTo: 'khoamui';
+        value: string | Khoamui;
+      }
+    | {
+        relationTo: 'khoahong';
+        value: string | Khoahong;
+      }
+    | {
+        relationTo: 'khoaungbuou';
+        value: string | Khoaungbuou;
+      }
+    | {
+        relationTo: 'khoahscc';
+        value: string | Khoahscc;
+      };
   key?: string | null;
   value?:
     | {
@@ -1473,6 +1976,186 @@ export interface UsersSelect<T extends boolean = true> {
   notes?: T;
   chucvu?: T;
   chuyenkhoa?: T;
+  ngayvaolam?: T;
+  tinhtranglamviec?: T;
+  bangcap?: T;
+  kinhnghiem?: T;
+  chungchi?:
+    | T
+    | {
+        tencc?: T;
+        filecc?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoatai_select".
+ */
+export interface KhoataiSelect<T extends boolean = true> {
+  IDnhansu?: T;
+  profilePicture?: T;
+  name?: T;
+  cccd?: T;
+  gioitinh?: T;
+  ngaysinh?: T;
+  sdt?: T;
+  diachi?: T;
+  notes?: T;
+  chucvu?: T;
+  ngayvaolam?: T;
+  tinhtranglamviec?: T;
+  bangcap?: T;
+  kinhnghiem?: T;
+  chungchi?:
+    | T
+    | {
+        tencc?: T;
+        filecc?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoamui_select".
+ */
+export interface KhoamuiSelect<T extends boolean = true> {
+  IDnhansu?: T;
+  profilePicture?: T;
+  name?: T;
+  cccd?: T;
+  gioitinh?: T;
+  ngaysinh?: T;
+  sdt?: T;
+  diachi?: T;
+  notes?: T;
+  chucvu?: T;
+  ngayvaolam?: T;
+  tinhtranglamviec?: T;
+  bangcap?: T;
+  kinhnghiem?: T;
+  chungchi?:
+    | T
+    | {
+        tencc?: T;
+        filecc?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoahong_select".
+ */
+export interface KhoahongSelect<T extends boolean = true> {
+  IDnhansu?: T;
+  profilePicture?: T;
+  name?: T;
+  cccd?: T;
+  gioitinh?: T;
+  ngaysinh?: T;
+  sdt?: T;
+  diachi?: T;
+  notes?: T;
+  chucvu?: T;
+  ngayvaolam?: T;
+  tinhtranglamviec?: T;
+  bangcap?: T;
+  kinhnghiem?: T;
+  chungchi?:
+    | T
+    | {
+        tencc?: T;
+        filecc?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoaungbuou_select".
+ */
+export interface KhoaungbuouSelect<T extends boolean = true> {
+  IDnhansu?: T;
+  profilePicture?: T;
+  name?: T;
+  cccd?: T;
+  gioitinh?: T;
+  ngaysinh?: T;
+  sdt?: T;
+  diachi?: T;
+  notes?: T;
+  chucvu?: T;
+  ngayvaolam?: T;
+  tinhtranglamviec?: T;
+  bangcap?: T;
+  kinhnghiem?: T;
+  chungchi?:
+    | T
+    | {
+        tencc?: T;
+        filecc?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "khoahscc_select".
+ */
+export interface KhoahsccSelect<T extends boolean = true> {
+  IDnhansu?: T;
+  profilePicture?: T;
+  name?: T;
+  cccd?: T;
+  gioitinh?: T;
+  ngaysinh?: T;
+  sdt?: T;
+  diachi?: T;
+  notes?: T;
+  chucvu?: T;
   ngayvaolam?: T;
   tinhtranglamviec?: T;
   bangcap?: T;

@@ -16,6 +16,7 @@ import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
+import { Medicalorders } from './collections/Users/Medicalorders'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -71,6 +72,7 @@ export default buildConfig({
     Pages,
     Posts,
     Categories,
+    Medicalorders,
     Media,
     { ...Users, admin: { group: 'Quản lý nội dung' } },
     { ...Patients, admin: { group: 'Quản lý nội dung' } },

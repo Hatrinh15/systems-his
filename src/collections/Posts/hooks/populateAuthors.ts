@@ -10,23 +10,35 @@ export const populateAuthors: CollectionAfterReadHook = async ({ doc, req, req: 
     const authorDocs: User[] = []
 
     for (const author of doc.authors) {
-      const authorDoc = await payload.findByID({
-        id: typeof author === 'object' ? author?.id : author,
-        collection: 'users',
-        depth: 0,
-        req,
-      })
-
-      if (authorDoc) {
-        authorDocs.push(authorDoc)
+      const authorId = typeof author === 'object' ? author?.id : author;
+      
+      if (!authorId) {
+        console.warn('Author ID is missing or invalid:', author);
+        continue; // Bỏ qua tác giả nếu không có ID hợp lệ
+      }
+    
+      try {
+        const authorDoc = await payload.findByID({
+          id: authorId,
+          collection: 'users',
+          depth: 0,
+        });
+      
+        // Kiểm tra nếu không tìm thấy tác giả
+        if (!authorDoc) {
+          throw new Error(`Author with ID ${authorId} not found.`);
+        }
+      
+        // Nếu tìm thấy tác giả, thực hiện các thao tác tiếp theo
+        return authorDoc;
+      
+      } catch (error) {
+        console.error('Error fetching author:', error);
+        
+        // Tùy vào cách bạn muốn xử lý: trả về null hoặc một giá trị mặc định
+        return null; 
       }
     }
 
-    doc.populatedAuthors = authorDocs.map((authorDoc) => ({
-      id: authorDoc.id,
-      name: authorDoc.name,
-    }))
-  }
-
   return doc
-}
+} }

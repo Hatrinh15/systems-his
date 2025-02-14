@@ -19,6 +19,7 @@ export interface Config {
     pages: Page;
     posts: Post;
     categories: Category;
+    medicalorders: Medicalorder;
     media: Media;
     users: User;
     khoatai: Khoatai;
@@ -49,6 +50,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    medicalorders: MedicalordersSelect<false> | MedicalordersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     khoatai: KhoataiSelect<false> | KhoataiSelect<true>;
@@ -1174,6 +1176,53 @@ export interface Khoahscc {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medicalorders".
+ */
+export interface Medicalorder {
+  id: string;
+  benhnhan: string | Patient;
+  'khoa,': 'khoatai' | 'khoamui' | 'khoahong' | 'khoacapcuu' | 'khoagaymehoisuc' | 'khoaduoc';
+  bacsi: string | User;
+  ngayLap: string;
+  chiDinh: {
+    loaiChiDinh: 'xetnghiem' | 'chanDoanHinhAnh' | 'thuoc' | 'khac';
+    moTa: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    id?: string | null;
+  }[];
+  ghiChu?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "patients".
  */
 export interface Patient {
@@ -1530,6 +1579,10 @@ export interface PayloadLockedDocument {
         value: string | Category;
       } | null)
     | ({
+        relationTo: 'medicalorders';
+        value: string | Medicalorder;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1864,6 +1917,26 @@ export interface CategoriesSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medicalorders_select".
+ */
+export interface MedicalordersSelect<T extends boolean = true> {
+  benhnhan?: T;
+  'khoa,'?: T;
+  bacsi?: T;
+  ngayLap?: T;
+  chiDinh?:
+    | T
+    | {
+        loaiChiDinh?: T;
+        moTa?: T;
+        id?: T;
+      };
+  ghiChu?: T;
   updatedAt?: T;
   createdAt?: T;
 }

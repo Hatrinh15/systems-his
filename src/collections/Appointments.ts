@@ -10,6 +10,7 @@ labels: {
     singular: 'ĐẶT LỊCH KHÁM',
     plural: 'ĐẶT LỊCH KHÁM',
 },
+admin: { group: 'Quản lý nội dung' },
 fields:[
     {
       name: 'patients',

@@ -19,6 +19,7 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'email'],
     useAsTitle: 'name',
+    group: 'Quản lý nội dung',
   },
   auth: true,
   fields: [
@@ -68,18 +69,9 @@ export const Users: CollectionConfig = {
               label: 'Giới tính',
               type: 'select',
               options: [
-                {
-                  label: 'Nam',
-                  value: 'nam',
-                },
-                {
-                  label: 'Nữ',
-                  value: 'nu',
-                },
-                {
-                  label: 'Khác',
-                  value: 'khac',
-                },
+                { label: 'Nam', value: 'nam' },
+                { label: 'Nữ', value: 'nu' },
+                { label: 'Khác', value: 'khac' },
               ],
             },
             {
@@ -87,6 +79,12 @@ export const Users: CollectionConfig = {
               label: 'Ngày sinh',
               type: 'date',
               required: true,
+              admin: {
+                date: {
+                  pickerAppearance: 'dayOnly',
+                  displayFormat: 'd MMM yyy',
+                },
+              },
             },
             {
               name: 'sdt',
@@ -121,56 +119,37 @@ export const Users: CollectionConfig = {
               type: 'select',
               required: true,
               options: [
-                {
-                  label: 'Bác sĩ',
-                  value: 'bacsi',
-                },
-                {
-                  label: 'Y tá/Điều dưỡng',
-                  value: 'yta',
-                },
-                {
-                  label: 'Kỹ thuật viên',
-                  value: 'kythuatvien',
-                },
-                {
-                  label: 'Lễ tân',
-                  value: 'letan',
-                },
-                {
-                  label: 'Quản lý',
-                  value: 'quanly',
-                },
-                {
-                  label: 'Khác',
-                  value: 'khac',
-                },
+                { label: 'Bác sĩ', value: 'bacsi' },
+                { label: 'Y tá/Điều dưỡng', value: 'yta' },
+                { label: 'Kỹ thuật viên', value: 'kythuatvien' },
+                { label: 'Lễ tân', value: 'letan' },
+                { label: 'Trưởng phòng', value: 'truongphong' },
+                { label: 'Trưởng khoa', value: 'truongkhoa' },
+                { label: 'Khác', value: 'khac' },
               ],
+            },{
+              name: 'vitri',
+              label: 'Vị trí',
+              type: 'richText',
+              admin:{
+                condition: (data)=> data?.chucvu==='khac',
+              }
             },
             {
-              name: 'chuyenkhoa',
-              label: 'Chuyên khoa',
-              type: 'select',
-              required: true,
-              options: [
-                {
-                  label: 'Tai',
-                  value: 'tai',
-                },
-                {
-                  label: 'Mũi',
-                  value: 'mui',
-                },
-                {
-                  label: 'Họng-Thanh quản',
-                  value: 'hong',
-                },
-                {
-                  label: 'Cấp cứu',
-                  value: 'capcuu',
-                },
-                {label:'Gây mê hồi sức', value:'gaymehoisuc'},
-              ],
+              name: 'khoa',
+              label: ' Khoa',
+              type: 'text',
+              admin: { readOnly: true,
+                condition: (data) => data?.chucvu === 'bacsi' || data?.chucvu === 'yta'|| data?.chucvu==='truongkhoa', // Chỉ hiển thị khi là bác sĩ hoặc y tá
+              },
+            },
+            {
+              name: 'phong',
+              label: 'Phòng',
+              type:'text',
+              admin: { readOnly: false,
+                condition: (data) => data?.chucvu === 'letan' || data?.chucvu === 'kythuatvien'|| data?.chucvu==='truongphong',
+               },
             },
             {
               name: 'ngayvaolam',
@@ -194,10 +173,7 @@ export const Users: CollectionConfig = {
                   label: 'Đang làm',
                   value: 'danglam',
                 },
-                {
-                  label: 'Nghỉ việc',
-                  value: 'nghiviec',
-                },
+                { label: 'Nghỉ việc', value: 'nghiviec' },
               ],
             },
           ],

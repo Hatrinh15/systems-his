@@ -10,13 +10,13 @@ export const Patients: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'ten',
+    group: 'Quản lý nội dung',
   },
   fields: [
     {
       name: 'IDbenhnhan',
       label: 'ID Bệnh nhân',
       type: 'text',
-
       admin: {
         readOnly: true,
       },

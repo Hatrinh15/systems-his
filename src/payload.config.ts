@@ -14,20 +14,20 @@ import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
-import Departments from './collections/phongban/Departments'
-import { Users } from './collections/Users'
 
-import { Khoatai } from './collections/Users/Khoa_tai'
-import { Khoamui } from './collections/Users/Khoa_mui'
-import { Khoahong } from './collections/Users/Khoa_hong'
-import { Khoaungbuou } from './collections/Users/Khoa_ungbuou'
-import { Khoahscc } from './collections/Users/Khoa_hscc'
+import Departments from './collections/phongban/Departments'
+
+
+import { Users } from './collections/Users'
+import { Medicalorders } from './collections/Users/Medicalorders'
 
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+
+import Class from './collections/phongban/class'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -75,22 +75,10 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   collections: [
-    Pages,
-    Posts,
-    Categories,
-    Medicalorders,
-    Media,
-    { ...Users, admin: { group: 'Quản lý nội dung' } },
-    { ...Khoatai, admin: { group: 'Nhân sự' } },
-    { ...Khoamui, admin: { group: 'Nhân sự' } },
-    { ...Khoahong, admin: { group: 'Nhân sự' } },
-    { ...Khoaungbuou, admin: { group: 'Nhân sự' } },
-    { ...Khoahscc, admin: { group: 'Nhân sự' } },
-    { ...Patients, admin: { group: 'Quản lý nội dung' } },
-    { ...MedicalRecods, admin: { group: 'Quản lý nội dung' } },
-    { ...Appointments, admin: { group: 'Quản lý nội dung' } },
-    { ...Rooms, admin: { group: 'Quản lý nội dung' } },
-    { ...Departments, admin: { group: 'Phòng ban' } },
+    Pages, Posts, Categories, Medicalorders,Media,Users,
+    Patients, MedicalRecods,
+    Appointments, Rooms,
+    Departments, Class, 
   ],
 
   cors: [getServerSideURL()].filter(Boolean),

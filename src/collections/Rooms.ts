@@ -1,76 +1,91 @@
-import { Khoa } from "@/fields/sky/tai_mui_hong";
-import { APIError, CollectionConfig } from "payload";
+import { APIError, CollectionConfig } from 'payload'
 
 const Rooms: CollectionConfig = {
-    slug: "Rooms",
-    labels: {
-        singular: "PHÒNG BỆNH",
-        plural: "PHÒNG BỆNH",
+  slug: 'Rooms',
+  labels: {
+    singular: 'PHÒNG BỆNH',
+    plural: 'PHÒNG BỆNH',
+  },
+  admin: { group: 'Quản lý nội dung' },
+  fields: [
+    {
+      name: 'khoa',
+      label: 'Khoa',
+      type: 'relationship',
+      relationTo: 'departments',
+      required: true,
     },
-    fields: [
-        ...Khoa,
-        {
-            name:'Loaiphong',label:'Loại phòng',
-            type:'radio',
-            options:[
-                {label:'Phòng thường(500.000/đêm)',value:'phongthuong',},
-                {label:'Phòng Vip(1.200.000/đêm)',value:'phongvip'},
-            ]
-        },
-        {
-            name: "Sogiuong",
-            label: "Số giường",
-            type: "number",
-            required: true,
-            min: 1,
-            max: 50,
-        },
+    {
+      name: 'totalRooms',
+      type: 'number',
+      label: 'Tổng số phòng',
+      required: true,
+      min: 1,
+      max: 100,
+    },
+    {
+      name: 'stt',
+      type: 'array',
+      label: 'Danh sách phòng',
 
+      fields: [
         {
-            name: "Trangthai",
-            label: "Trạng thái",
-            type: "select",
-            options: [
-                { label: "Đang được sử dụng", value: "dang-su-dung" },
-                { label: "Đã đầy", value: "da-day" },
-            ],
-            admin: {
-                readOnly: true,
-            },
+          name: 'totalBeds',
+          type: 'number',
+          label: 'Tổng số giường',
+          required: true,
+          min: 1,
+          max: 100,
         },
-    ],
-
-    hooks: { 
+        {
+          name: 'hosobenhnhan',
+          label: 'Hồ sơ bệnh nhân',
+          type: 'relationship',
+          relationTo: 'MedicalRecods',
+          hasMany: true,
+          required: true,
+          filterOptions: {},
+        },
+        {
+          name: 'bsi',
+          label: 'Bác sĩ phụ trách',
+          type: 'relationship',
+          relationTo: 'users', // Liên kết tới bảng Users (bác sĩ)
+          hasMany: true,
+          required: true,
+        },
+      ],
+      hooks: {
         beforeChange: [
-            async ({ data, req, operation }) => {
-                const { Sogiuong, id } = data;
+          async ({ data, operation }) => {
+            if (operation !== 'create' && operation !== 'update') return
+            const totalRooms = data?.totalRooms || 0
+            const totalCurrentRooms = data?.stt?.length || 0
 
-                // Nếu là thao tác "create" hoặc "update"
-                if (operation === "create" || operation === "update") {
-                    const query: any = {
-                        collection: "Rooms",
-                        where: {
-                            Sogiuong: {
-                                equals: Sogiuong,
-                            },
-                        },
-                    };
+            // Kiểm tra nếu tổng số phòng vượt quá giới hạn
+            if (totalCurrentRooms > totalRooms) {
+              throw new APIError(
+                `Không thể thêm phòng mới, vì tổng số phòng đã đạt giới hạn (${totalRooms}).`,
+                400,
+              )
+            }
+            if (data?.stt?.length > 0) {
+              data?.stt.forEach((room, index) => {
+                const totalBeds = room.totalBeds || 0
+                const patientCount = room.hosobenhnhan?.length || 0
 
-                    // Nếu đang cập nhật, bỏ qua phòng hiện tại
-                    if (id) {
-                        query.where.id = { not_equals: id };
-                    }
-
-                    // Kiểm tra số giường đã tồn tại chưa
-                    const existingRoom = await req.payload.find(query);
-
-                    if (existingRoom.docs.length > 0) {
-                        throw new APIError("❌ Phòng này đã được chọn, vui lòng chọn số giường khác!",400);
-                    }
+                if (patientCount > totalBeds) {
+                  throw new APIError(
+                    `Phòng ${index + 1} có số lượng bệnh nhân là (${patientCount}) vượt quá (${totalBeds}) giường.`,
+                    400,
+                  )
                 }
-            },
+              })
+            }
+          },
         ],
+      },
     },
-    
+  ],
 }
-export default Rooms;
+export default Rooms

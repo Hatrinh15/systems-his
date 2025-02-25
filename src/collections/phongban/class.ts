@@ -36,67 +36,7 @@ const Class: CollectionConfig = {
                   
                 }
               },
-            },
-            {
-              name: 'nhanvien',
-              label: 'Nhân viên',
-              type: 'relationship',
-              relationTo: 'users',
-              hasMany: true,
-              filterOptions: async ({ req, data }) => {
-                try {
-                  console.log('Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2));
-            
-                  // Danh sách nhân viên đã chọn
-                  const selectedNhanVien = Array.isArray(data?.nhanvien)
-                    ? data.nhanvien
-                        .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
-                        .filter(Boolean)
-                    : [];
-            
-                  console.log('Nhân viên đang được chọn:', selectedNhanVien);
-            
-                  // Lấy danh sách nhân viên đã có phòng trong hệ thống
-                  //dùng req.payload.find để tìm tất cả các nhân viên đã có khoa
-                  const existingNhanVienData = await req.payload.find({
-                    collection: 'class',
-                    where: { nhanvien: { exists: true } },
-                    limit: 999, // Giới hạn kết quả
-                  });
-            
-                  // Lấy danh sách ID nhân viên đã có phòng (existingNhanvien)
-                  const existingNhanVien = existingNhanVienData?.docs?.flatMap((doc) =>
-                    (doc?.nhanvien ?? [])
-                      .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
-                      .filter(Boolean)
-                  ) ?? [];
-            
-                  console.log(' Nhân viên đã có phòng:', existingNhanVien);
-            
-                  // Điều kiện lọc nhân viên theo phòng ban
-                  const baseCondition = data?.tenphong === 'hanhchinhquantri'
-                    ? { chucvu: { equals: 'letan' } } // Lễ tân cho phòng hành chính quản trị
-                    : { chucvu: { equals: 'kythuatvien' } }; // Kỹ thuật viên cho phòng khác
-            
-                  return {
-                    and: [
-                      baseCondition,
-                      { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Không hiển thị nhân viên đã nghỉ việc
-                      {
-                        or: [
-                          { id: { not_in: existingNhanVien } }, // Không hiển thị nhân viên đã có phòng
-                          { id: { in: selectedNhanVien } }, // Giữ lại nhân viên đã chọn trước đó
-                        ],
-                      },
-                    ],
-                  };
-                } catch (error) {
-                  console.error(' Lỗi truy vấn danh sách nhân viên:', error);
-                  return {};
-                }
-              },
-            },
-                      
+            },    
             {
               name: 'thongtin',
               label: 'Thông tin hoạt động',

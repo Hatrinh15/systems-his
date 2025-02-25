@@ -58,12 +58,13 @@ const Departments: CollectionConfig = {
                   console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
                   const selectedDoctors = Array.isArray(data?.doctors)
-                    ? data.doctors
+                    ? data.doctorsd
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
                   console.log('Bác sĩ đang được chọn (sau khi xử lý):', selectedDoctors)
                   // Lấy danh sách bác sĩ đã có khoa
+                  // dùng req.payload.find để tìm những bác sĩ đã có khoa
                   const checkDoctors = await req.payload.find({
                     collection: 'departments',
                     where: { doctors: { exists: true } },
@@ -76,7 +77,7 @@ const Departments: CollectionConfig = {
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
-                  console.log(' Bác Sĩ đã có khoa:', checkoutDoctors)
+                  console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
                   return {
                     and: [
                       { chucvu: { equals: 'bacsi' } }, // Chỉ lấy bác sĩ
@@ -90,7 +91,7 @@ const Departments: CollectionConfig = {
                     ],
                   }
                 } catch (error) {
-                  console.error('Lỗi truy vấn danh sách bác sĩ:', error)
+                  console.error('Lỗi truy vấn danh sách y tá:', error)
                   return {}
                 }
               },
@@ -105,12 +106,12 @@ const Departments: CollectionConfig = {
                 try {
                   console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
-                  const selecteNures = Array.isArray(data?.nures)
+                  const selectedNures = Array.isArray(data?.nures)
                     ? data.nures
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
-                  console.log('Y Tá đang được chọn (sau khi xử lý):', selecteNures)
+                  console.log('Y Tá đang được chọn (sau khi xử lý):', selectedNures)
                   // Lấy danh sách bác sĩ đã có khoa
                   // dùng req.payload.find để tìm những y tá đã có khoa
                   const checkNures = await req.payload.find({
@@ -133,7 +134,7 @@ const Departments: CollectionConfig = {
                       {
                         or: [
                           { id: { not_in: checkoutNures } }, // không chọn y tá đã có khoa
-                          { id: { in: selecteNures } }, //  Giữ lại y tá đã chọn
+                          { id: { in: selectedNures } }, //  Giữ lại y tá đã chọn
                         ],
                       },
                     ],

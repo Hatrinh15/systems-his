@@ -16,16 +16,17 @@ import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
 
 import Departments from './collections/phongban/Departments'
-
-
 import { Users } from './collections/Users'
 import { Medicalorders } from './collections/Users/Medicalorders'
-
+import { Suppliers } from './collections/Suppliers'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { Medications } from './collections/Medications'
+import { Medicalsupplies } from './collections/Medicalsupplies'
+
 
 import Class from './collections/phongban/class'
 
@@ -76,9 +77,10 @@ export default buildConfig({
   }),
   collections: [
     Pages, Posts, Categories, Medicalorders,Media,Users,
-    Patients, MedicalRecods,
+    Patients, MedicalRecods,Suppliers,Medications,Medicalsupplies,
     Appointments, Rooms,
     Departments, Class, 
+
   ],
 
   cors: [getServerSideURL()].filter(Boolean),

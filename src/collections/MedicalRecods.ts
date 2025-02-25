@@ -1,10 +1,15 @@
 import { Hoso } from '@/fields/resume/ho_so'
-
 import { CollectionConfig } from 'payload'
+import { APIError } from 'payload';
+import { valueho_so,valuemedicalrecord,preventDuplicateMedicalRecord } from '@/hooks/Hookmedicalrecord';
+import { Medicalorders } from './Users/Medicalorders';
+import { lazy } from 'react';
+import { Label } from '@radix-ui/react-select';
+import { join } from 'path';
+
 
 const MedicalRecods: CollectionConfig = {
-  slug: 'MedicalRecods', // Đường dẫn API: /api/products
-
+  slug: 'MedicalRecods', 
   labels: {
     singular: 'HỒ SƠ BỆNH ÁN',
     plural: 'HỒ SƠ BỆNH ÁN',
@@ -36,34 +41,77 @@ const MedicalRecods: CollectionConfig = {
               label: 'Hồ sơ',
               type: 'array',
               fields: [
+
                 { name: 'khoa', label: 'KHoa', type: 'relationship', relationTo: 'departments' },
                 { name: 'bacsi', label: 'Bác sĩ phụ trách', type: 'text' },
-                { name: 'chandoan', label: 'Chẩn đoán', type: 'text' },
+                {
+                  name: 'dieuduong',
+                  label: 'Điều dưỡng thực hiện',
+                  type: 'text', 
+
+                },
+                {
+                  name: 'ngaynhapvien',
+                  label: 'Ngày nhập viện',
+                  type: 'date',
+
+                  admin: {
+                    date: {
+                      pickerAppearance: 'dayOnly',
+                      displayFormat: 'd MMM yyyy',  // Đảm bảo format đúng
+                    },
+                  },
+                },
+                {
+                  name: 'sophong',
+                  label: 'Số phòng',
+                  type: 'text',
+                },
+                { name: 'chuandoan', label: 'Chuẩn đoán', type: 'textarea' },
                 {
                   name: 'tomtat',
                   label: 'Tóm tắt quá trình điều trị',
                   type: 'group',
                   fields: [
-                    { name: 'lydo', label: 'Lý do vào viện', type: 'text' },
+                    { name: 'lydo', label: 'Lý do vào viện', type: 'textarea' },
                     {
                       name: 'tomtat',
                       label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
                       type: 'text',
                     },
                     { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'text', required: true },
+
                     {
-                      name: 'phuongphap',
-                      label: 'Phương pháp điều trị',
-                      type: 'group',
+                      name: 'dienBienBenh',
+                      label: 'Diễn biến bệnh',
+                      type: 'array',
+                      labels: {
+                        singular: 'Ghi nhận diễn biến',
+                        plural: 'Danh sách diễn biến',
+                      },
                       fields: [
                         {
-                          name: 'phauthuat',
-                          label: 'Phẫu thuật, thủ thuật',
-                          type: 'radio',
-                          options: [
-                            { label: 'Có', value: 'co' },
-                            { label: 'Không', value: 'khong' },
-                          ],
+                          name: 'ngay',
+                          label: 'Ngày',
+                          type: 'date',
+        
+                          admin: {
+                            date: {
+                              pickerAppearance: 'dayOnly',
+                              displayFormat: 'dd/MM/yyyy',
+                            },
+                          },
+                        },
+                        {
+                          name: 'dienBien',
+                          label: 'Diễn biến bệnh',
+                          type: 'textarea',
+        
+                        },
+                        {
+                          name: 'ghiChu',
+                          label: 'Ghi chú',
+                          type: 'text',
                         },
                         {
                           name: 'noikhoa',
@@ -81,6 +129,23 @@ const MedicalRecods: CollectionConfig = {
                         },
                       ],
                     },
+                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
+                    {
+                      name: 'phuongphap',
+                      label: 'Phương pháp điều trị',
+    
+                      type: 'radio',
+                      options:[
+                        {label: 'Điều trị can thiệp', value: 'dieutricanthiep' },
+                       { label: 'Điều trị hỗ trợ', value: 'dieutrihotro' },
+                      ]
+                    },
+                    {
+                    name: 'text',
+                    label: 'Mô tả chi tiết',
+                    type: 'textarea',
+                    },
+                   
                   ],
                 },
                 {
@@ -107,13 +172,37 @@ const MedicalRecods: CollectionConfig = {
                   },
                   type: 'group',
                   fields: [
-                    { name: 'khoi', label: 'Khỏi', type: 'checkbox' },
-                    { name: 'do', label: 'Đỡ', type: 'checkbox' },
-                    { name: 'khongthaydoi', label: 'Không thay đổi', type: 'checkbox' },
-                    { name: 'nang', label: 'Nặng hơn', type: 'checkbox' },
-                    { name: 'tuvong', label: 'Tử vong', type: 'checkbox' },
-                    { name: 'tienluongnang', label: 'Tiên lượng nặng xin về', type: 'checkbox' },
-                    { name: 'chuaxacdinh', label: 'Chưa xác định được', type: 'checkbox' },
+                    {
+                      name: 'ngayRaVien',
+                      label: 'Ngày ra viện',
+                      type: 'date',
+    
+                      admin: {
+                        date: {
+                          pickerAppearance: 'dayOnly',
+                          displayFormat: 'dd/MM/yyyy',
+                        },
+                      },
+                    },
+                    {
+                      name: 'xuatvien', 
+                      label: 'Tình trạng',
+                      type :'select',
+                      options :[
+                        { value: 'khoi', label: 'Khỏi' },
+                        { value: 'do', label: 'Đỡ' },
+                        { value: 'khongthaydoi', label: 'Không thay đổi' },
+                        { value: 'nang', label: 'Nặng hơn' },
+                        { value: 'tuvong', label: 'Tử vong' },
+                        { value: 'tienluongnang', label: 'Tiên lượng nặng xin về' },
+                        { value: 'chuaxacdinh', label: 'Chưa xác định được' },
+                      ],
+                    },
+                    {
+                      name: 'ghichu',
+                      label: 'Ghi chú (nếu có)',
+                      type: 'textarea'
+                    }
                   ],
                 },
               ],
@@ -124,6 +213,18 @@ const MedicalRecods: CollectionConfig = {
           fields: [...Hoso],
           label: 'Kết quả nội soi',
         },
+        {
+          fields: [
+            {
+            name: 'ylenh',
+            label: '',
+            type: 'join',
+            collection: 'medicalorders',
+            on: 'hosobenhan',
+            }
+          ],
+          label: 'Y Lệnh',
+        }
       ],
     },
   ],
@@ -144,6 +245,9 @@ const MedicalRecods: CollectionConfig = {
       },
     ],
   },
+    beforeChange:[valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord],
+  }
+
 }
 
 export default MedicalRecods

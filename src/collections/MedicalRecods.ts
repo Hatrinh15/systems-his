@@ -13,26 +13,36 @@ const MedicalRecods: CollectionConfig = {
   labels: {
     singular: 'HỒ SƠ BỆNH ÁN',
     plural: 'HỒ SƠ BỆNH ÁN',
-  },   
+  },
+  admin: { group: 'Quản lý nội dung', useAsTitle: 'tenBenhNhan' },
   fields: [
     {
       type: 'tabs',
       tabs: [
         {
           label: 'Hồ sơ bệnh án ',
-          fields: [ 
+          fields: [
             {
-              name: 'lichsubenhan',
+              name: 'tenBenhNhan',
+              label: 'Tên bệnh nhân',
+              type: 'text',
+              admin: { readOnly: true, hidden: true }, // Chỉ đọc, không cho phép chỉnh sửa
+            },
+            {
+              name: 'thongtinbenhnhan',
               label: 'THÔNG TIN BỆNH NHÂN',
               type: 'relationship',
-              relationTo: 'patients',
+              relationTo: 'patients', // Tham chiếu tới collection 'patients'
+              required: true,
+              hasMany: false,
             },
             {
               name: 'hoso',
               label: 'Hồ sơ',
               type: 'array',
               fields: [
-                { name: 'khoa', label: 'Khoa', type: 'text' },
+
+                { name: 'khoa', label: 'KHoa', type: 'relationship', relationTo: 'departments' },
                 { name: 'bacsi', label: 'Bác sĩ phụ trách', type: 'text' },
                 {
                   name: 'dieuduong',
@@ -65,6 +75,13 @@ const MedicalRecods: CollectionConfig = {
                   fields: [
                     { name: 'lydo', label: 'Lý do vào viện', type: 'textarea' },
                     {
+                      name: 'tomtat',
+                      label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
+                      type: 'text',
+                    },
+                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'text', required: true },
+
+                    {
                       name: 'dienBienBenh',
                       label: 'Diễn biến bệnh',
                       type: 'array',
@@ -96,6 +113,20 @@ const MedicalRecods: CollectionConfig = {
                           label: 'Ghi chú',
                           type: 'text',
                         },
+                        {
+                          name: 'noikhoa',
+                          label: 'Nội khoa',
+                          admin: {
+                            condition: (data) => {
+                              // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
+                              if (!data?.hoso || data.hoso.length === 0) return false
+                              // Lấy giá trị 'phauthuat' từ nhóm 'phuongphap'
+                              const phauthuat = data.hoso[0]?.tomtat?.phuongphap?.phauthuat
+                              return phauthuat === 'khong'
+                            },
+                          },
+                          type: 'text',
+                        },
                       ],
                     },
                     { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
@@ -119,7 +150,26 @@ const MedicalRecods: CollectionConfig = {
                 },
                 {
                   name: 'tinhtrang',
+                  label: 'Tình trạng',
+                  type: 'radio',
+                  options: [
+                    { label: 'Đã xuất viện ', value: 'yes' },
+                    { label: 'Nhập viện', value: 'no' },
+                  ],
+                },
+                {
+                  name: 'tinhtrangxuatvien',
                   label: 'Tình trạng xuất viện',
+                  admin: {
+                    condition: (data) => {
+                      // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
+                      if (!data?.hoso || data.hoso.length === 0) return false
+
+                      // Lấy giá trị tinhtrang từ phần tử đầu tiên trong hoso
+                      const tinhtrang = data.hoso[0]?.tinhtrang
+                      return tinhtrang === 'yes'
+                    },
+                  },
                   type: 'group',
                   fields: [
                     {
@@ -179,8 +229,25 @@ const MedicalRecods: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeChange: [
+      async ({ data, req }) => {
+        if (data.thongtinbenhnhan) {
+          // Lấy thông tin bệnh nhân từ database
+          const patient = await req.payload.findByID({
+            collection: 'patients',
+            id: data.thongtinbenhnhan,
+          })
+
+          if (patient) {
+            data.tenBenhNhan = patient.ten // Cập nhật tên bệnh nhân
+          }
+        }
+      },
+    ],
+  },
     beforeChange:[valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord],
   }
+
 }
 
 export default MedicalRecods

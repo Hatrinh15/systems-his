@@ -14,6 +14,7 @@ import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
+
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
 import { Medicalorders } from './collections/Users/Medicalorders'
@@ -26,6 +27,8 @@ import { getServerSideURL } from './utilities/getURL'
 import { Medications } from './collections/Medications'
 import { Medicalsupplies } from './collections/Medicalsupplies'
 
+
+import Class from './collections/phongban/class'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -73,20 +76,11 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   collections: [
-    Pages,
-    Posts,
-    Categories,
-    Medicalorders,
-    Suppliers,
-    Medications,
-    Medicalsupplies,
-    Media,
-    { ...Users, admin: { group: 'Quản lý nội dung' } },
-    { ...Patients, admin: { group: 'Quản lý nội dung' } },
-    { ...MedicalRecods, admin: { group: 'Quản lý nội dung' } },
-    { ...Appointments, admin: { group: 'Quản lý nội dung' } },
-    { ...Rooms, admin: { group: 'Quản lý nội dung' } },
-    { ...Departments, admin: { group: 'Phòng ban' } },
+    Pages, Posts, Categories, Medicalorders,Media,Users,
+    Patients, MedicalRecods,Suppliers,Medications,Medicalsupplies,
+    Appointments, Rooms,
+    Departments, Class, 
+
   ],
 
   cors: [getServerSideURL()].filter(Boolean),

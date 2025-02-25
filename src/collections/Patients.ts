@@ -11,6 +11,7 @@ export const Patients: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'ten',
+    group: 'Quản lý nội dung',
   },
   fields: [
     {

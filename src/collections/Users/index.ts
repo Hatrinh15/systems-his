@@ -1,8 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { checkvalueuser } from '@/hooks/checkvalueusers'
-// import { lichlamviec } from '@/fields/sky/look'
-
+import { v4 as uuidv4 } from 'uuid';
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
@@ -27,6 +26,7 @@ export const Users: CollectionConfig = {
       label: 'ID Nhân sự',
       type: 'text',
       unique: true,
+      index: true,
       admin: {
         readOnly: true,
       },
@@ -41,26 +41,22 @@ export const Users: CollectionConfig = {
               name: 'profilePicture',
               type: 'upload',
               label: 'Ảnh hồ sơ',
-              required: true,
               relationTo: 'media',
             },
             {
               name: 'name',
               label: 'Họ và tên',
               type: 'text',
-              required: true,
             },
             {
               name: 'cccd',
               label: 'Căn cước công dân',
               type: 'text',
-              required: true,
+              index:true,
               unique: true,
               validate: (value) => {
-                const regex = /^(0\d{8}|\d{11}$)/ // Chấp nhận 9 hoặc 12 chữ số (hàm biểu thức chính quy)
-                return regex.test(value)
-                  ? true
-                  : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
+                const regex = /^(\d{9}|\d{12})$/; // Chấp nhận 9 hoặc 12 chữ số (hàm biểu thức chính quy)
+                return regex.test(value) ? true: 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
               },
             },
             {
@@ -86,16 +82,37 @@ export const Users: CollectionConfig = {
               name: 'ngaysinh',
               label: 'Ngày sinh',
               type: 'date',
-              required: true,
+              validate: (value: unknown) => {
+                if (!value) {
+                  return 'Không được để trống'
+                }
+
+                if (typeof value !== 'string') {
+                  return 'Giá trị phải là chuỗi ngày tháng'
+                }
+                const birthDate = new Date(value)
+                const today = new Date()
+                const age = today.getFullYear() - birthDate.getFullYear()
+                const monthDiff = today.getMonth() - birthDate.getMonth()
+                const dayDiff = today.getDate() - birthDate.getDate()
+                if (
+                  age < 18 ||
+                  (age === 18 && monthDiff < 0)|| 
+                  (age === 18 && monthDiff === 0 && dayDiff < 0)
+                ) {
+                  return 'Bạn phải đủ 18 tuổi'
+                }
+                return true
+              },
             },
             {
               name: 'sdt',
               label: 'Số điện thoại',
               type: 'text',
+              index: true,
               unique: true,
-              required: true,
               validate: (value) => {
-                const regex = /^0\d{9}$/ //hàm biểu thức chính quy
+                const regex = /^(0[2-9])[0-9]{8}$/;  //hàm biểu thức chính quy
                 return regex.test(value) ? true : 'Số điện thoại không hợp lệ!'
               },
             },
@@ -103,11 +120,10 @@ export const Users: CollectionConfig = {
               name: 'diachi',
               label: 'Địa chỉ',
               type: 'text',
-              required: true,
             },
             {
               name: 'notes',
-              type: 'richText',
+              type: 'textarea',
               label: 'Ghi chú (nếu có)',
             },
           ],
@@ -119,7 +135,6 @@ export const Users: CollectionConfig = {
               name: 'chucvu',
               label: 'Chức vụ',
               type: 'select',
-              required: true,
               options: [
                 {
                   label: 'Bác sĩ',
@@ -151,7 +166,6 @@ export const Users: CollectionConfig = {
               name: 'chuyenkhoa',
               label: 'Chuyên khoa',
               type: 'select',
-              required: true,
               options: [
                 {
                   label: 'Tai',
@@ -176,7 +190,6 @@ export const Users: CollectionConfig = {
               name: 'ngayvaolam',
               label: 'Ngày vào làm',
               type: 'date',
-              required: true,
               admin: {
                 date: {
                   pickerAppearance: 'dayOnly',
@@ -188,7 +201,6 @@ export const Users: CollectionConfig = {
               name: 'tinhtranglamviec',
               label: 'Tình trạng làm việc',
               type: 'radio',
-              required: true,
               options: [
                 {
                   label: 'Đang làm',
@@ -208,21 +220,18 @@ export const Users: CollectionConfig = {
             {
               name: 'bangcap',
               label: 'Bằng cấp chuyên môn',
-              type: 'richText',
-              required: true,
+              type: 'textarea',
             },
             {
               name: 'kinhnghiem',
               label: 'Kinh nghiệm làm việc (năm)',
               type: 'number',
-              required: true,
               min: 0,
               max: 100,
             },
             {
               name: 'chungchi',
               label: 'Chứng chỉ hành nghề',
-              required: true,
               type: 'array',
               fields: [
                 {
@@ -240,10 +249,6 @@ export const Users: CollectionConfig = {
             },
           ],
         },
-        // {
-        //   label: 'LỊCH LÀM VIỆC',
-        //   fields: [lichlamviec],
-        // },
       ],
     },
   ],
@@ -253,7 +258,7 @@ export const Users: CollectionConfig = {
         if (!data) return
 
         if (!data.IDnhansu) {
-          data.IDnhansu = `ID-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+          data.IDnhansu = `NS-${uuidv4()}`;
         }
       },
     ],

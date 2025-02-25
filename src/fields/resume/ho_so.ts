@@ -1,17 +1,25 @@
-import { Field } from "payload";
+import { APIError, Field } from "payload";
 export const Hoso: Field[]=[
    
-      {
-        name: 'ketqua',
-        label: 'Kết quả',
-        type: 'array',
+  {
+    name: 'ketqua',
+    label: 'Kết quả',
+    type: 'array',
         fields: [
           {
             name: 'infomation',
             label: 'THÔNG TIN NỘI SOI',
             type: 'group',
             fields: [
-              { name: 'ngay', label: 'Ngày thực hiện', type: 'date' },
+              { name: 'ngay', label: 'Ngày thực hiện', type: 'date',
+               
+                admin: {
+                  date: {
+                    pickerAppearance: 'dayOnly',
+                    displayFormat: 'dd/MM/yyyy',
+                  },
+                },
+               },
               { name: 'bacsi', label: 'Bác sĩ thực hiện', type: 'text' },
               {
                 name: 'lydo',
@@ -30,8 +38,9 @@ export const Hoso: Field[]=[
             ],
           },
           {
-            name: 'ketqua',
+            name: 'ketquanoisoi',
             label: 'KẾT QUẢ NỘI SOI ',
+           
             type: 'blocks',
             blocks: [
               {
@@ -72,6 +81,7 @@ export const Hoso: Field[]=[
             name: 'hinhanh',
             label: 'HÌNH ẢNH NỘI SOI',
             type: 'upload',
+           
             relationTo: 'media',
           },
           {
@@ -80,7 +90,7 @@ export const Hoso: Field[]=[
               {
                 label: 'Chẩn đoán',
                 fields: [
-                  { name: 'chandoan', label: ' Chẩn đoán', type: 'text' },
+                  { name: 'chandoan', label: ' Chẩn đoán', type: 'textarea' },
                   {
                     name: 'mucdo',
                     label: 'Mức độ tổn thương',
@@ -99,7 +109,7 @@ export const Hoso: Field[]=[
               {
                 label: 'Kết luận và hướng điều trị',
                 fields: [
-                    { name: 'huongdieutri', label: 'Hướng điều trị', type: 'text' },
+                    { name: 'huongdieutri', label: 'Hướng điều trị', type: 'textarea' },
                   {
                     name: 'sosanh',
                     label: 'So sánh',

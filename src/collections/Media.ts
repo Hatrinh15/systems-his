@@ -1,18 +1,19 @@
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload';
 
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
   lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
+} from '@payloadcms/richtext-lexical';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
-import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { anyone } from '../access/anyone';
+import { authenticated } from '../access/authenticated';
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -26,55 +27,61 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      //required: true,
     },
     {
       name: 'caption',
       type: 'richText',
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
+          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()];
         },
       }),
     },
+    {
+      name: 'hash',
+      type: 'text',
+      admin: {
+        hidden: true, // Ẩn trường này trong giao diện admin
+      },
+    },
   ],
   upload: {
-    // Upload to the public/media directory in Next.js making them publicly accessible even outside of Payload
     staticDir: path.resolve(dirname, '../../public/media'),
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 300,
-      },
-      {
-        name: 'square',
-        width: 500,
-        height: 500,
-      },
-      {
-        name: 'small',
-        width: 600,
-      },
-      {
-        name: 'medium',
-        width: 900,
-      },
-      {
-        name: 'large',
-        width: 1400,
-      },
-      {
-        name: 'xlarge',
-        width: 1920,
-      },
-      {
-        name: 'og',
-        width: 1200,
-        height: 630,
-        crop: 'center',
+      { name: 'thumbnail', width: 300 },
+      { name: 'square', width: 500, height: 500 },
+      { name: 'small', width: 600 },
+      { name: 'medium', width: 900 },
+      { name: 'large', width: 1400 },
+      { name: 'xlarge', width: 1920 },
+      { name: 'og', width: 1200, height: 630, crop: 'center' },
+    ],
+  },
+  hooks: {
+    beforeChange: [
+      async ({ data, req, operation }) => {
+        if ((operation === 'create' || operation === 'update') && req.file) {
+          const buffer = req.file.data; 
+          const hash = crypto.createHash('md5').update(buffer).digest('hex'); // Tạo hash MD5 của file
+
+          // Kiểm tra hash có tồn tại trong database không
+          const existingMedia = await req.payload.find({
+            collection: 'media',
+            where: { hash: { equals: hash } },
+          });
+
+          if (existingMedia.docs.length > 0) {
+            throw new APIError('File đã tồn tại trong hệ thống! Vui lòng chọn một file khác.',400);
+          }
+
+          // Gán giá trị hash cho tệp mới
+          data.hash = hash;
+        }
+
+        return data;
       },
     ],
   },
-}
+};

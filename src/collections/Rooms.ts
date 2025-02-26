@@ -1,3 +1,4 @@
+import { beforeChange } from '@/hooks/HookDepartments'
 import { APIError, CollectionConfig } from 'payload'
 
 const Rooms: CollectionConfig = {
@@ -24,11 +25,17 @@ const Rooms: CollectionConfig = {
       max: 100,
     },
     {
-      name: 'stt',
+      name: 'Phong',
       type: 'array',
       label: 'Danh sách phòng',
 
       fields: [
+        {name:'tenphongbenh',
+          label:'Tên Phòng',
+          type:'relationship',
+          relationTo:'MedicalRecods',
+          hidden:true,
+        },
         {
           name: 'totalBeds',
           type: 'number',
@@ -87,5 +94,6 @@ const Rooms: CollectionConfig = {
       },
     },
   ],
+  hooks:{beforeChange:[]}
 }
 export default Rooms

@@ -244,9 +244,7 @@ const MedicalRecods: CollectionConfig = {
         }
       },
     ],
-  },
-    beforeChange:[valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord],
-  }
+  },valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord
 
 }
 

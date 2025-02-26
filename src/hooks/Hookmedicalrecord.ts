@@ -1,48 +1,41 @@
-import { APIError, CollectionBeforeValidateHook, CollectionBeforeChangeHook } from 'payload'
-import { set } from 'react-hook-form'
+import { APIError, CollectionBeforeValidateHook } from 'payload'
 
 export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
-  if (!data) return
+  if (!data || !Array.isArray(data.hoso)) {
+    throw new APIError('Hãy nhập thông tin hồ sơ hợp lệ!', 400)
+  }
+
+  console.log('Dữ liệu đầu vào:', data)
 
   const error: string[] = []
-  // if(data.hoso.length === 0){
-  // error.push('Hãy nhập thông tin hồ sơ!')
-  // console.log('run')
-  // }
-  console.log('check:', data)
-  data?.hoso.forEach((err, index) => {
+
+  data.hoso.forEach((record, index) => {
+    if (!record || typeof record !== 'object') {
+      error.push(`Hồ sơ ${index + 1} không hợp lệ!`)
+      return
+    }
+
     const errorArray: string[] = []
-    if (!err.khoa) {
-      errorArray.push('Khoa')
+
+    if (!record.khoa) errorArray.push('Khoa')
+    if (!record.bacsi) errorArray.push('Bác sĩ')
+    if (!record.dieuduong) errorArray.push('Điều dưỡng')
+    if (!record.ngaynhapvien) errorArray.push('Ngày nhập viện')
+    if (!record.chuandoan) errorArray.push('Chuẩn đoán')
+
+    if (errorArray.length > 0) {
+      error.push(`Hồ sơ ${index + 1} hãy điền đủ thông tin: ${errorArray.join(', ')}`)
     }
-    if (!err.bacsi) {
-      errorArray.push('bác sĩ')
-    }
-    if (!err.dieuduong) {
-      errorArray.push('điều dưỡng')
-    }
-    if (!err.ngaynhapvien) {
-      errorArray.push('ngày nhập viện')
-    }
-    // if(!err.tomtat.dienBienBenh) {
-    //     errorArray.push('diễn biến bệnh')
-    // }
-    if (!err.chuandoan) {
-      errorArray.push('chuẩn đoán')
-    }
-    // if(!err.phuongphap) {
-    //     errorArray.push('phương pháp điều trị')
-    // }
-    const throwErrorArray = errorArray.map((err) => err).join(',')
-    error.push(`Hồ sơ ${index + 1} hãy điền đủ thông tin: ${throwErrorArray}`)
   })
 
-  const throwError = error.map((err) => `• ${err}`).join('\n')
   if (error.length > 0) {
-    throw new APIError(throwError.trim(), 400)
+    throw new APIError(error.join('\n'), 400)
   }
 }
+
 export const valueho_so: CollectionBeforeValidateHook = ({ data }) => {
+  console.log('Chạy hook validation cho hồ sơ y tế!') // Kiểm tra xem có chạy không
+
   if (!data) return
 
   const error: string[] = []

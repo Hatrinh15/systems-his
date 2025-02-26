@@ -898,7 +898,7 @@ export interface Patient {
   id: string;
   IDbenhnhan?: string | null;
   ten?: string | null;
-  bhyt?: ('co' | 'khong') | null;
+  bhyt: 'co' | 'khong';
   idbaohiem?: string | null;
   cccd?: string | null;
   ngaysinh?: string | null;
@@ -1029,8 +1029,9 @@ export interface Room {
   id: string;
   khoa: string | Department;
   totalRooms: number;
-  stt?:
+  Phong?:
     | {
+        tenphongbenh?: (string | null) | MedicalRecod;
         totalBeds: number;
         hosobenhnhan: (string | MedicalRecod)[];
         bsi: (string | User)[];
@@ -1048,6 +1049,7 @@ export interface Class {
   id: string;
   tenphong?: ('hanhchinhquantri' | 'taichinhketoan' | 'anninh') | null;
   truongphong?: (string | User)[] | null;
+  nhanvien?: (string | User)[] | null;
   thongtin?: {
     mota?: string | null;
     ngaythanhlap?: string | null;
@@ -1929,9 +1931,10 @@ export interface AppointmentsSelect<T extends boolean = true> {
 export interface RoomsSelect<T extends boolean = true> {
   khoa?: T;
   totalRooms?: T;
-  stt?:
+  Phong?:
     | T
     | {
+        tenphongbenh?: T;
         totalBeds?: T;
         hosobenhnhan?: T;
         bsi?: T;
@@ -1965,6 +1968,7 @@ export interface DepartmentsSelect<T extends boolean = true> {
 export interface ClassSelect<T extends boolean = true> {
   tenphong?: T;
   truongphong?: T;
+  nhanvien?: T;
   thongtin?:
     | T
     | {

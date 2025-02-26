@@ -76,7 +76,7 @@ const MedicalRecods: CollectionConfig = {
                       label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
                       type: 'text',
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea'},
+                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
 
                     {
                       name: 'dienBienBenh',
@@ -223,7 +223,8 @@ const MedicalRecods: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [valuemedicalrecord, valueho_so, preventDuplicateMedicalRecord, namePatient],
+    beforeChange: [preventDuplicateMedicalRecord, namePatient],
+    beforeValidate: [valuemedicalrecord, valueho_so],
   },
 }
 

@@ -3,7 +3,7 @@ import { CollectionBeforeChangeHook } from "payload";
 import { APIError } from "payload";
  export const checkvalueuser : CollectionBeforeChangeHook =
     async ({ data, req , operation }) => {
-        if (operation === 'create'|| operation==='update'){
+        if (operation === 'create'){
                 const errors: string[] = [];
           
                 // Kiểm tra trùng Số điện thoại

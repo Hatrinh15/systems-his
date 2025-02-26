@@ -58,7 +58,7 @@ const Departments: CollectionConfig = {
                   console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
                   const selectedDoctors = Array.isArray(data?.doctors)
-                    ? data.doctorsd
+                    ? data.doctors
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
@@ -91,7 +91,7 @@ const Departments: CollectionConfig = {
                     ],
                   }
                 } catch (error) {
-                  console.error('Lỗi truy vấn danh sách y tá:', error)
+                  console.error('Lỗi truy vấn danh sách bác sĩ:', error)
                   return {}
                 }
               },

@@ -1,11 +1,8 @@
 import { Hoso } from '@/fields/resume/ho_so'
 import { CollectionConfig } from 'payload'
-import { APIError } from 'payload';
 import { valueho_so,valuemedicalrecord,preventDuplicateMedicalRecord } from '@/hooks/Hookmedicalrecord';
-import { Medicalorders } from './Users/Medicalorders';
-import { lazy } from 'react';
-import { Label } from '@radix-ui/react-select';
-import { join } from 'path';
+import { nameBenhNhan } from '@/hooks/checkvaluepatients';
+
 
 
 const MedicalRecods: CollectionConfig = {
@@ -230,22 +227,10 @@ const MedicalRecods: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      async ({ data, req }) => {
-        if (data.thongtinbenhnhan) {
-          // Lấy thông tin bệnh nhân từ database
-          const patient = await req.payload.findByID({
-            collection: 'patients',
-            id: data.thongtinbenhnhan,
-          })
-
-          if (patient) {
-            data.tenBenhNhan = patient.ten // Cập nhật tên bệnh nhân
-          }
-        }
-      },
+     valueho_so,preventDuplicateMedicalRecord,nameBenhNhan
     ],
-  },valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord
-
+    beforeValidate: [valuemedicalrecord]
+  },
 }
 
 export default MedicalRecods

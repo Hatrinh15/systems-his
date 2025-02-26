@@ -69,3 +69,17 @@ export const checkvalue: CollectionBeforeChangeHook = async ({ data, req, operat
     }
   }
 }
+
+export const nameBenhNhan : CollectionBeforeChangeHook =  async ({ data, req }) => {
+  if (data.thongtinbenhnhan) {
+    // Lấy thông tin bệnh nhân từ database
+    const patient = await req.payload.findByID({
+      collection: 'patients',
+      id: data.thongtinbenhnhan,
+    })
+
+    if (patient) {
+      data.tenBenhNhan = patient.ten // Cập nhật tên bệnh nhân
+    }
+  }
+}

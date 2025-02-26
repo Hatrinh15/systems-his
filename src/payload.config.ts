@@ -10,27 +10,32 @@ import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
-import  {Patients}  from'./collections/Patients'
+import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
+
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
+import { Medicalorders } from './collections/Users/Medicalorders'
+import { Suppliers } from './collections/Suppliers'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { Medications } from './collections/Medications'
+import { Medicalsupplies } from './collections/Medicalsupplies'
+
+
+import Class from './collections/phongban/class'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
- 
-  admin:{
-  
+  admin: {
     components: {
-      
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin'],
@@ -70,8 +75,14 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories,Users, Patients, MedicalRecods, Appointments, Rooms,Departments, 
+  collections: [
+    Pages, Posts, Categories, Medicalorders,Media,Users,
+    Patients, MedicalRecods,Suppliers,Medications,Medicalsupplies,
+    Appointments, Rooms,
+    Departments, Class, 
+
   ],
+
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -96,6 +107,6 @@ export default buildConfig({
         return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
     },
-    tasks: []
+    tasks: [],
   },
 })

@@ -13,14 +13,19 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
-    media: Media;
     categories: Category;
+    medicalorders: Medicalorder;
+    suppliers: Supplier;
+    medications: Medication;
+    medicalsupplies: Medicalsupply;
+    media: Media;
     users: User;
     patients: Patient;
     MedicalRecods: MedicalRecod;
     appointments: Appointment;
     Rooms: Room;
     departments: Department;
+    class: Class;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -33,19 +38,28 @@ export interface Config {
   collectionsJoins: {
     patients: {
       benhan: 'appointments';
+      hosobenhan: 'MedicalRecods';
+    };
+    MedicalRecods: {
+      ylenh: 'medicalorders';
     };
   };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    medicalorders: MedicalordersSelect<false> | MedicalordersSelect<true>;
+    suppliers: SuppliersSelect<false> | SuppliersSelect<true>;
+    medications: MedicationsSelect<false> | MedicationsSelect<true>;
+    medicalsupplies: MedicalsuppliesSelect<false> | MedicalsuppliesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     patients: PatientsSelect<false> | PatientsSelect<true>;
     MedicalRecods: MedicalRecodsSelect<false> | MedicalRecodsSelect<true>;
     appointments: AppointmentsSelect<false> | AppointmentsSelect<true>;
     Rooms: RoomsSelect<false> | RoomsSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
+    class: ClassSelect<false> | ClassSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -234,6 +248,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  hash?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -332,9 +347,9 @@ export interface Category {
 export interface User {
   id: string;
   IDnhansu?: string | null;
-  profilePicture: string | Media;
-  name: string;
-  cccd: string;
+  profilePicture?: (string | null) | Media;
+  name?: string | null;
+  cccd?: string | null;
   gioitinh?: ('nam' | 'nu' | 'khac') | null;
   ngaysinh: string;
   sdt: string;
@@ -354,8 +369,24 @@ export interface User {
     };
     [k: string]: unknown;
   } | null;
-  chucvu: 'bacsi' | 'yta' | 'kythuatvien' | 'letan' | 'quanly' | 'khac';
-  chuyenkhoa: 'tai' | 'mui' | 'hong' | 'capcuu' | 'gaymehoisuc';
+  chucvu: 'bacsi' | 'yta' | 'kythuatvien' | 'letan' | 'truongphong' | 'truongkhoa' | 'khac';
+  vitri?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  khoa?: string | null;
+  phong?: string | null;
   ngayvaolam: string;
   tinhtranglamviec: 'danglam' | 'nghiviec';
   bangcap: {
@@ -733,40 +764,40 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "patients".
+ * via the `definition` "medicalorders".
  */
-export interface Patient {
+export interface Medicalorder {
   id: string;
-  IDbenhnhan?: string | null;
-  ten: string;
-  bhyt: 'co' | 'khong';
-  idbaohiem?: string | null;
-  cccd: string;
-  tuoi: number;
-  gioitinh?: ('nam' | 'nu' | 'khac') | null;
-  nghenghiep?: string | null;
-  diachi?: string | null;
-  sdt: string;
-  email: string;
-  benhan?: {
-    docs?: (string | Appointment)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "appointments".
- */
-export interface Appointment {
-  id: string;
-  patients: string | Patient;
-  ngaykham: string;
-  giokham: '08:00' | '09:00' | '10:00' | '13:00' | '14:00' | '15:00';
-  trieuchung: ('dau_hong' | 'nghet_mui' | 'chay_mau_cam' | 'u_tai' | 'khac')[];
-  yeucaudacbiet?: string | null;
-  xacnhanthongtin: boolean;
+  hosobenhan?: (string | null) | MedicalRecod;
+  khoa?: ('khoatai' | 'khoamui' | 'khoahong' | 'khoacapcuu' | 'khoagaymehoisuc' | 'khoaduoc') | null;
+  bacsi?: (string | null) | User;
+  dieuduong?: string | null;
+  ngaynhapvien?: string | null;
+  ngayLap?: string | null;
+  chuandoan?: string | null;
+  hinhthucdieutri?: ('benhnhannoitru' | 'benhnhanngoaitru') | null;
+  thuoc?:
+    | {
+        thuocId?: (string | null) | Medication;
+        hamLuong?: string | null;
+        lieuDung?: string | null;
+        cachDung?: string | null;
+        thoiGian?: string | null;
+        trangThai?: ('dangthuchien' | 'dacapphat') | null;
+        id?: string | null;
+      }[]
+    | null;
+  xetNghiem?:
+    | {
+        loaiXetNghiem?: string | null;
+        moTa?: string | null;
+        ngayChiDinh?: string | null;
+        hinhAnh?: (string | null) | Media;
+        fileDinhKem?: (string | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  ghichu?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -776,22 +807,33 @@ export interface Appointment {
  */
 export interface MedicalRecod {
   id: string;
-  lichsubenhan: string | Patient;
+  tenBenhNhan?: string | null;
+  thongtinbenhnhan: string | Patient;
+
   hoso?:
     | {
-        khoa?: string | null;
+        khoa?: (string | null) | Department;
         bacsi?: string | null;
-        chandoan?: string | null;
-        tomtat: {
+        dieuduong?: string | null;
+        ngaynhapvien?: string | null;
+        sophong?: string | null;
+        chuandoan?: string | null;
+        tomtat?: {
           lydo?: string | null;
-          tomtat?: string | null;
-          tiensu: string;
-          phuongphap?: {
-            phauthuat?: ('co' | 'khong') | null;
-            noikhoa?: string | null;
-          };
+          dienBienBenh?:
+            | {
+                ngay?: string | null;
+                dienBien?: string | null;
+                ghiChu?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          tiensu?: string | null;
+          phuongphap?: ('dieutricanthiep' | 'dieutrihotro') | null;
+          text?: string | null;
         };
-        tinhtrang?: {
+        tinhtrang?: ('yes' | 'no') | null;
+        tinhtrangxuatvien?: {
           khoi?: boolean | null;
           do?: boolean | null;
           khongthaydoi?: boolean | null;
@@ -818,7 +860,7 @@ export interface MedicalRecod {
             khac?: string | null;
           };
         };
-        ketqua?:
+        ketquanoisoi?:
           | (
               | {
                   binhthuong?: boolean | null;
@@ -870,21 +912,122 @@ export interface MedicalRecod {
         id?: string | null;
       }[]
     | null;
+  ylenh?: {
+    docs?: (string | Medicalorder)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Rooms".
+ * via the `definition` "patients".
  */
-export interface Room {
+export interface Patient {
   id: string;
-  tenbenhnhan: string | Patient;
-  khoa?: string | null;
-  bacsiphutrach?: string | null;
-  Loaiphong?: ('phongthuong' | 'phongvip') | null;
-  Sogiuong: number;
-  Trangthai?: ('dang-su-dung' | 'da-day') | null;
+  IDbenhnhan?: string | null;
+  ten?: string | null;
+  bhyt?: ('co' | 'khong') | null;
+  idbaohiem?: string | null;
+  cccd?: string | null;
+  ngaysinh?: string | null;
+  gioitinh?: ('nam' | 'nu' | 'khac') | null;
+  nghenghiep?: string | null;
+  diachi?: string | null;
+  sdt?: string | null;
+  email?: string | null;
+  benhan?: {
+    docs?: (string | Appointment)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  hosobenhan?: {
+    docs?: (string | MedicalRecod)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "appointments".
+ */
+export interface Appointment {
+  id: string;
+  patients?: (string | null) | Patient;
+  bacsi?: (string | null) | User;
+  ngaykham?: string | null;
+  giokham?: ('08:00' | '09:00' | '10:00' | '13:00' | '14:00' | '15:00') | null;
+  trieuchung?: ('dau_hong' | 'nghet_mui' | 'chay_mau_cam' | 'u_tai' | 'khac')[] | null;
+  yeucaudacbiet?: string | null;
+  xacnhanthongtin?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medications".
+ */
+export interface Medication {
+  id: string;
+  name: string;
+  activeIngredient: string;
+  category:
+    | 'khangsinh'
+    | 'giamdau'
+    | 'hasot'
+    | 'timmach'
+    | 'tieudhoa'
+    | 'taimuihong'
+    | 'khangviem'
+    | 'diung'
+    | 'satkhuan'
+    | 'xitmui'
+    | 'siroho';
+  dosageForm: 'viennen' | 'tiem' | 'siro' | 'xitmui' | 'sucmieng';
+  strength: string;
+  unit: 'vien' | 'lo' | 'ong' | 'chai' | 'goi';
+  manufacturer?: (string | null) | Supplier;
+  quantity: number;
+  ngayNhapKho: string;
+  expiryDate: string;
+  importPrice?: number | null;
+  sellPrice?: number | null;
+  status: 'conhang' | 'saphet' | 'hethang' | 'expired';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "suppliers".
+ */
+export interface Supplier {
+  id: string;
+  name?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  businessLicense?: string | null;
+  businessLicenseFile?: (string | null) | Media;
+  medications?: (string | Medication)[] | null;
+  medical_supplies?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medicalsupplies".
+ */
+export interface Medicalsupply {
+  id: string;
+  tenVatTu: string;
+  loaiVatTu: 'tieuhao' | 'taisudung' | 'dungmotlan' | 'vattucapcuu' | 'vattuphautuat';
+  donViTinh?: ('hop' | 'cai' | 'goi' | 'lo' | 'bich' | 'thung') | null;
+  nhaCungCap?: (string | null) | Supplier;
+  soLuongTon: number;
+  ngayNhapKho: string;
+  hanSuDung?: string | null;
+  giaNhap?: number | null;
+  trangThai: 'conhang' | 'saphet' | 'hethang' | 'hethansudung';
   updatedAt: string;
   createdAt: string;
 }
@@ -894,8 +1037,46 @@ export interface Room {
  */
 export interface Department {
   id: string;
-  tenphong?: ('tai' | 'mui' | 'hong' | 'capcuu' | 'gaymehoisuc') | null;
-  bacsiphutrach?: (string | User)[] | null;
+  tenkhoa?:
+    | ('tai' | 'mui' | 'hong' | 'capcuu' | 'gaymehoisuc' | 'chandoanhinhanh' | 'khoaxetnghiem' | 'khoakhac')
+    | null;
+  truongkhoa?: (string | User)[] | null;
+  doctors?: (string | User)[] | null;
+  nures?: (string | User)[] | null;
+  thongtin?: {
+    mota?: string | null;
+    ngaythanhlap?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Rooms".
+ */
+export interface Room {
+  id: string;
+  khoa: string | Department;
+  totalRooms: number;
+  stt?:
+    | {
+        totalBeds: number;
+        hosobenhnhan: (string | MedicalRecod)[];
+        bsi: (string | User)[];
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "class".
+ */
+export interface Class {
+  id: string;
+  tenphong?: ('hanhchinhquantri' | 'taichinhketoan' | 'anninh') | null;
+  truongphong?: (string | User)[] | null;
   nhanvien?: (string | User)[] | null;
   thongtin?: {
     mota?: string | null;
@@ -1085,12 +1266,28 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'medicalorders';
+        value: string | Medicalorder;
+      } | null)
+    | ({
+        relationTo: 'suppliers';
+        value: string | Supplier;
+      } | null)
+    | ({
+        relationTo: 'medications';
+        value: string | Medication;
+      } | null)
+    | ({
+        relationTo: 'medicalsupplies';
+        value: string | Medicalsupply;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -1115,6 +1312,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'departments';
         value: string | Department;
+      } | null)
+    | ({
+        relationTo: 'class';
+        value: string | Class;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1346,11 +1547,124 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  slugLock?: T;
+  parent?: T;
+  breadcrumbs?:
+    | T
+    | {
+        doc?: T;
+        url?: T;
+        label?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medicalorders_select".
+ */
+export interface MedicalordersSelect<T extends boolean = true> {
+  hosobenhan?: T;
+  khoa?: T;
+  bacsi?: T;
+  dieuduong?: T;
+  ngaynhapvien?: T;
+  ngayLap?: T;
+  chuandoan?: T;
+  hinhthucdieutri?: T;
+  thuoc?:
+    | T
+    | {
+        thuocId?: T;
+        hamLuong?: T;
+        lieuDung?: T;
+        cachDung?: T;
+        thoiGian?: T;
+        trangThai?: T;
+        id?: T;
+      };
+  xetNghiem?:
+    | T
+    | {
+        loaiXetNghiem?: T;
+        moTa?: T;
+        ngayChiDinh?: T;
+        hinhAnh?: T;
+        fileDinhKem?: T;
+        id?: T;
+      };
+  ghichu?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "suppliers_select".
+ */
+export interface SuppliersSelect<T extends boolean = true> {
+  name?: T;
+  address?: T;
+  phone?: T;
+  email?: T;
+  businessLicense?: T;
+  businessLicenseFile?: T;
+  medications?: T;
+  medical_supplies?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medications_select".
+ */
+export interface MedicationsSelect<T extends boolean = true> {
+  name?: T;
+  activeIngredient?: T;
+  category?: T;
+  dosageForm?: T;
+  strength?: T;
+  unit?: T;
+  manufacturer?: T;
+  quantity?: T;
+  ngayNhapKho?: T;
+  expiryDate?: T;
+  importPrice?: T;
+  sellPrice?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "medicalsupplies_select".
+ */
+export interface MedicalsuppliesSelect<T extends boolean = true> {
+  tenVatTu?: T;
+  loaiVatTu?: T;
+  donViTinh?: T;
+  nhaCungCap?: T;
+  soLuongTon?: T;
+  ngayNhapKho?: T;
+  hanSuDung?: T;
+  giaNhap?: T;
+  trangThai?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  hash?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1439,26 +1753,6 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  slugLock?: T;
-  parent?: T;
-  breadcrumbs?:
-    | T
-    | {
-        doc?: T;
-        url?: T;
-        label?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1472,7 +1766,9 @@ export interface UsersSelect<T extends boolean = true> {
   diachi?: T;
   notes?: T;
   chucvu?: T;
-  chuyenkhoa?: T;
+  vitri?: T;
+  khoa?: T;
+  phong?: T;
   ngayvaolam?: T;
   tinhtranglamviec?: T;
   bangcap?: T;
@@ -1504,13 +1800,14 @@ export interface PatientsSelect<T extends boolean = true> {
   bhyt?: T;
   idbaohiem?: T;
   cccd?: T;
-  tuoi?: T;
+  ngaysinh?: T;
   gioitinh?: T;
   nghenghiep?: T;
   diachi?: T;
   sdt?: T;
   email?: T;
   benhan?: T;
+  hosobenhan?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1519,36 +1816,40 @@ export interface PatientsSelect<T extends boolean = true> {
  * via the `definition` "MedicalRecods_select".
  */
 export interface MedicalRecodsSelect<T extends boolean = true> {
-  lichsubenhan?: T;
+  tenBenhNhan?: T;
+  thongtinbenhnhan?: T;
   hoso?:
     | T
     | {
         khoa?: T;
         bacsi?: T;
-        chandoan?: T;
+        dieuduong?: T;
+        ngaynhapvien?: T;
+        sophong?: T;
+        chuandoan?: T;
         tomtat?:
           | T
           | {
               lydo?: T;
-              tomtat?: T;
-              tiensu?: T;
-              phuongphap?:
+              dienBienBenh?:
                 | T
                 | {
-                    phauthuat?: T;
-                    noikhoa?: T;
+                    ngay?: T;
+                    dienBien?: T;
+                    ghiChu?: T;
+                    id?: T;
                   };
+              tiensu?: T;
+              phuongphap?: T;
+              text?: T;
             };
-        tinhtrang?:
+        tinhtrang?: T;
+        tinhtrangxuatvien?:
           | T
           | {
-              khoi?: T;
-              do?: T;
-              khongthaydoi?: T;
-              nang?: T;
-              tuvong?: T;
-              tienluongnang?: T;
-              chuaxacdinh?: T;
+              ngayRaVien?: T;
+              xuatvien?: T;
+              ghichu?: T;
             };
         id?: T;
       };
@@ -1572,7 +1873,7 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
                     khac?: T;
                   };
             };
-        ketqua?:
+        ketquanoisoi?:
           | T
           | {
               primaryhero?:
@@ -1630,6 +1931,7 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  ylenh?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1639,6 +1941,7 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
  */
 export interface AppointmentsSelect<T extends boolean = true> {
   patients?: T;
+  bacsi?: T;
   ngaykham?: T;
   giokham?: T;
   trieuchung?: T;
@@ -1652,12 +1955,16 @@ export interface AppointmentsSelect<T extends boolean = true> {
  * via the `definition` "Rooms_select".
  */
 export interface RoomsSelect<T extends boolean = true> {
-  tenbenhnhan?: T;
   khoa?: T;
-  bacsiphutrach?: T;
-  Loaiphong?: T;
-  Sogiuong?: T;
-  Trangthai?: T;
+  totalRooms?: T;
+  stt?:
+    | T
+    | {
+        totalBeds?: T;
+        hosobenhnhan?: T;
+        bsi?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1666,8 +1973,26 @@ export interface RoomsSelect<T extends boolean = true> {
  * via the `definition` "departments_select".
  */
 export interface DepartmentsSelect<T extends boolean = true> {
+  tenkhoa?: T;
+  truongkhoa?: T;
+  doctors?: T;
+  nures?: T;
+  thongtin?:
+    | T
+    | {
+        mota?: T;
+        ngaythanhlap?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "class_select".
+ */
+export interface ClassSelect<T extends boolean = true> {
   tenphong?: T;
-  bacsiphutrach?: T;
+  truongphong?: T;
   nhanvien?: T;
   thongtin?:
     | T

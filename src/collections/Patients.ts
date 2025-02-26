@@ -138,6 +138,7 @@ export const Patients: CollectionConfig = {
               type: 'join',
               collection: 'MedicalRecods',
               on: 'thongtinbenhnhan',
+
             },
           ],
           label: 'Hồ Sơ Bệnh Án',

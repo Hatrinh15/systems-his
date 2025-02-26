@@ -228,4 +228,5 @@ const MedicalRecods: CollectionConfig = {
   },
 }
 
+
 export default MedicalRecods

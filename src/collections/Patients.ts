@@ -36,6 +36,7 @@ export const Patients: CollectionConfig = {
         { label: 'Có', value: 'co' },
         { label: 'Không', value: 'khong' },
       ],
+      defaultValue: 'khong'
     },
     {
       name: 'idbaohiem',

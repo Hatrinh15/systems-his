@@ -79,7 +79,7 @@ const MedicalRecods: CollectionConfig = {
                       label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
                       type: 'text',
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'text', required: true },
+                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
 
                     {
                       name: 'dienBienBenh',
@@ -129,7 +129,6 @@ const MedicalRecods: CollectionConfig = {
                         },
                       ],
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
                     {
                       name: 'phuongphap',
                       label: 'Phương pháp điều trị',
@@ -242,12 +241,9 @@ const MedicalRecods: CollectionConfig = {
             data.tenBenhNhan = patient.ten // Cập nhật tên bệnh nhân
           }
         }
-      },
-    ],
+      },valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord
+    ]
   },
-    beforeChange:[valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord],
   }
-
-}
 
 export default MedicalRecods

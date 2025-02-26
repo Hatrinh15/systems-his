@@ -11,7 +11,7 @@ export const checkvalue: CollectionBeforeChangeHook = async ({ data, req, operat
       { key: 'ten', label: 'Họ và tên' },
       { key: 'sdt', label: 'Số điện thoại' },
       { key: 'cccd', label: 'Căn cước công dân' },
-      { key: 'tuoi', label: 'Tuổi' },
+      { key: 'ngaysinh', label: 'Tuổi' },
       { key: 'gioitinh', label: 'Giới tính' },
       { key: 'diachi', label: 'Địa chỉ' },
     ];

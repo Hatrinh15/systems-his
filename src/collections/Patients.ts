@@ -1,8 +1,7 @@
 import { CollectionConfig } from 'payload'
 import { lichkham } from '@/fields/sky/look'
 import { checkvalue } from '@/hooks/checkvaluepatients'
-import { APIError } from 'payload'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 export const Patients: CollectionConfig = {
   slug: 'patients',
   labels: {
@@ -32,6 +31,7 @@ export const Patients: CollectionConfig = {
       name: 'bhyt',
       label: 'Bảo hiểm y tế',
       type: 'radio',
+      required: true,
       options: [
         { label: 'Có', value: 'co' },
         { label: 'Không', value: 'khong' },
@@ -64,21 +64,20 @@ export const Patients: CollectionConfig = {
       type: 'text',
       index: true,
       validate: (value) => {
-        const regex = /^(\d{9}|\d{12})$/; // Chấp nhận 9 hoặc 12 chữ số
-        return regex.test(value) ? true : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!';
+        const regex = /^(\d{9}|\d{12})$/ // Chấp nhận 9 hoặc 12 chữ số
+        return regex.test(value) ? true : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
       },
     },
     {
       name: 'ngaysinh',
       label: 'Ngày sinh',
-       type: 'date',
-              admin: {
-                date: {
-                  pickerAppearance: 'dayOnly',
-                  displayFormat: 'd MMM yyy',
-                },
-              },
-      
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyy',
+        },
+      },
     },
     {
       name: 'gioitinh',
@@ -135,14 +134,15 @@ export const Patients: CollectionConfig = {
           fields: [
             {
               name: 'hosobenhan',
-              label:'',
+              label: '',
               type: 'join',
-              collection:'MedicalRecods',
-              on:'lichsubenhan',
+              collection: 'MedicalRecods',
+              on: 'thongtinbenhnhan',
+
             },
           ],
           label: 'Hồ Sơ Bệnh Án',
-        }
+        },
       ],
     },
   ],
@@ -152,7 +152,7 @@ export const Patients: CollectionConfig = {
         if (!data) return
 
         if (!data.IDbenhnhan) {
-          data.IDbenhnhan = `BN-${uuidv4()}`;
+          data.IDbenhnhan = `BN-${uuidv4()}`
         }
       },
     ],

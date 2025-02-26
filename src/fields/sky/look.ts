@@ -6,19 +6,11 @@ export const lichkham: Field = {
   collection: 'appointments',
   on: 'patients',
 }
-export const lichsu: Field = {
-    name: 'lichsu',
-    label: ' ',
-    type: 'join',
-    collection: 'MedicalRecods',
-    on:'lichsubenhan',
-    }
- export const lichlamviec: Field= {
-      name: 'lichlamviec',
-      label: ' ',
-      type: 'join',
-      collection: 'appointments',
-       on: 'bacsi',
-  }
-  
 
+export const lichlamviec: Field = {
+  name: 'lichlamviec',
+  label: ' ',
+  type: 'join',
+  collection: 'appointments',
+  on: 'bacsi',
+}

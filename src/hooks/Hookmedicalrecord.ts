@@ -70,17 +70,16 @@ export const valueho_so: CollectionBeforeValidateHook = ({ data }) => {
 }
 
 export const preventDuplicateMedicalRecord = async ({ data, req }) => {
-  if (!data.lichsubenhan) return // Nếu không có thông tin bệnh nhân thì không cần kiểm tra
+  if (!data.thongtinbenhnhan) return // Nếu không có thông tin bệnh nhân thì không cần kiểm tra
 
   const existingRecord = await req.payload.find({
     collection: 'MedicalRecods',
     where: {
-      lichsubenhan: {
-        equals: data.lichsubenhan, // Kiểm tra nếu bệnh nhân đã có hồ sơ
+      thongtinbenhnhan: {
+        equals: data.thongtinbenhnhan, // Kiểm tra nếu bệnh nhân đã có hồ sơ
       },
     },
   })
-
   if (existingRecord.docs.length > 0) {
     throw new APIError('Bệnh nhân này đã có hồ sơ bệnh án, không thể tạo thêm!', 400)
   }

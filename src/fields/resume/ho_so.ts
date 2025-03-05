@@ -1,5 +1,5 @@
 import { APIError, Field } from "payload";
-export const Hoso: Field[]=[
+export const Hoso: Field=
    
   {
     name: 'ketqua',
@@ -125,5 +125,5 @@ export const Hoso: Field[]=[
             ],
           },
         ],
-      },
-    ]
+      }
+

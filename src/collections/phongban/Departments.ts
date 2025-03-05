@@ -15,7 +15,7 @@ const Departments: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Thông tin Khoa',
+          label: 'Thông Tin Khoa',
           fields: [
             {
               name: 'tenkhoa',
@@ -155,6 +155,45 @@ const Departments: CollectionConfig = {
               ],
             },
           ],
+        },
+        { label: 'Kho Khoa',
+          fields: [
+            {
+              name: 'departmentInventory',
+              label: 'Danh sách sản phẩm',
+              type: 'array',
+              fields:[
+                  {
+                      name: 'item',
+                      label: 'Sản phẩm',
+                      type: 'relationship',
+                      relationTo: ['medications', 'medicalSupplies'],
+                      required: true,
+                    },
+                    {
+                      name: 'batchnumber',
+                      label: 'Số lô sản phẩm',
+                      type: 'text',
+                    },
+                    {
+                      name: 'currentquantity',
+                      label: 'Số lượng hiện tại',
+                      type: 'number',
+                      min: 0,
+                    },
+                    {
+                        name: 'unit',
+                        label:'Đơn vị tính',
+                        type: 'text',
+                    },
+                    {
+                      name: 'expirydate',
+                      label: 'Hạn sử dụng',
+                      type: 'date',
+                    },
+            ]
+           }
+          ]
         },
       ],
     },

@@ -1,10 +1,7 @@
 import { Hoso } from '@/fields/resume/ho_so'
 import { CollectionConfig } from 'payload'
-import { valueho_so,valuemedicalrecord,preventDuplicateMedicalRecord } from '@/hooks/Hookmedicalrecord';
+import { valueho_so,valuemedicalrecord,preventDuplicateMedicalRecord, namePatient } from '@/hooks/Hookmedicalrecord';
 import { nameBenhNhan } from '@/hooks/checkvaluepatients';
-
-
-
 const MedicalRecods: CollectionConfig = {
   slug: 'MedicalRecods', 
   labels: {
@@ -76,7 +73,7 @@ const MedicalRecods: CollectionConfig = {
                       label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
                       type: 'text',
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'text', required: true },
+                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
 
                     {
                       name: 'dienBienBenh',
@@ -126,7 +123,6 @@ const MedicalRecods: CollectionConfig = {
                         },
                       ],
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
                     {
                       name: 'phuongphap',
                       label: 'Phương pháp điều trị',
@@ -207,7 +203,7 @@ const MedicalRecods: CollectionConfig = {
           ],
         },
         {
-          fields: [...Hoso],
+          fields: [Hoso],
           label: 'Kết quả nội soi',
         },
         {
@@ -226,9 +222,7 @@ const MedicalRecods: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [
-     valueho_so,preventDuplicateMedicalRecord,nameBenhNhan
-    ],
+    beforeChange: [valueho_so,preventDuplicateMedicalRecord,namePatient],
     beforeValidate: [valuemedicalrecord]
   },
 }

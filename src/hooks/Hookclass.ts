@@ -1,18 +1,15 @@
 import { APIError, CollectionBeforeChangeHook } from 'payload'
 
-export const beforeChangeclass: CollectionBeforeChangeHook = async ({data, req, operation,}) => {
+export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === 'create') {
-    const check = await req.payload.find({
+    const existingClass = await req.payload.find({
       collection: 'class',
-      where: {
-        id: { exists: true },
-      },
+      where: { tenphong: { equals: data?.tenphong } },
     })
-    const checkout = check.docs.map((ten) => {
-      if (ten?.tenphong === data?.tenphong) {
-        throw new APIError(' Phòng đã có. Vui lòng chọn phòng khác', 400)
-      }
-    })
+
+    if (existingClass.docs.length > 0) {
+      throw new APIError(`Phòng này đã có trong danh sách ! Vui lòng chọn phòng khác.`, 400)
+    }
   }
   if (operation === 'create' || operation === 'update') {
     if (!data?.nhanvien || data.nhanvien.length === 0) {

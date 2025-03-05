@@ -2,17 +2,14 @@ import { APIError, CollectionBeforeChangeHook } from 'payload'
 
 export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === 'create') {
-    const check = await req.payload.find({
+    const existingDepartments = await req.payload.find({
       collection: 'departments',
-      where: {
-        id: { exists: true },
-      },
+      where: { tenkhoa: { equals: data?.tenkhoa } },
     })
-    const checkout = check.docs.map((ten) => {
-      if (ten?.tenkhoa === data?.tenkhoa) {
-        throw new APIError(' Khoa đã được tạo, Vui lòng chọn khoa khác', 400)
-      }
-    })
+
+    if (existingDepartments.docs.length > 0) {
+      throw new APIError(`Khoa này đã tồn tại trong danh sách! Vui lòng chọn khoa khác.`, 400)
+    }
   }
   if (operation === 'create' || operation === 'update') {
     if (!data?.doctors || data.doctors.length === 0) {

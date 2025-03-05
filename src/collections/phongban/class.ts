@@ -102,7 +102,7 @@ const Class: CollectionConfig = {
               label: 'Thông tin hoạt động',
               type: 'group',
               fields: [
-                { name: 'mota', label: 'Mô tả', type: 'text' },
+                { name: 'mota', label: 'Mô tả', type: 'richText' },
                 { name: 'ngaythanhlap', label: 'Ngày thành lập', type: 'date' },
               ],
             },

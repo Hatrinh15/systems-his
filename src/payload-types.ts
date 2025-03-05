@@ -752,7 +752,7 @@ export interface Medicalorder {
   hinhthucdieutri?: ('benhnhannoitru' | 'benhnhanngoaitru') | null;
   thuoc?:
     | {
-        thuocId?: (string | null) | Medication;
+        thuocId?: string | null;
         hamLuong?: string | null;
         lieuDung?: string | null;
         cachDung?: string | null;
@@ -782,7 +782,7 @@ export interface Medicalorder {
 export interface MedicalRecod {
   id: string;
   tenBenhNhan?: string | null;
-  thongtinbenhnhan: string | Patient;
+  thongtinbenhnhan?: (string | null) | Patient;
   hoso?:
     | {
         khoa?: (string | null) | Department;
@@ -791,10 +791,10 @@ export interface MedicalRecod {
         ngaynhapvien?: string | null;
         sophong?: string | null;
         chuandoan?: string | null;
-        tomtat?: {
+        tomtat: {
           lydo?: string | null;
           tomtat?: string | null;
-          tiensu?: string | null;
+          tiensu: string;
           dienBienBenh?:
             | {
                 ngay?: string | null;
@@ -807,7 +807,7 @@ export interface MedicalRecod {
           phuongphap?: ('dieutricanthiep' | 'dieutrihotro') | null;
           text?: string | null;
         };
-        tinhtrang?: ('yes' | 'no') | null;
+        tinhtrang: 'yes' | 'no';
         tinhtrangxuatvien?: {
           ngayRaVien?: string | null;
           xuatvien?: ('khoi' | 'do' | 'khongthaydoi' | 'nang' | 'tuvong' | 'tienluongnang' | 'chuaxacdinh') | null;
@@ -947,9 +947,40 @@ export interface Department {
   doctors?: (string | User)[] | null;
   nures?: (string | User)[] | null;
   thongtin?: {
-    mota?: string | null;
+    mota?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     ngaythanhlap?: string | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "suppliers".
+ */
+export interface Supplier {
+  id: string;
+  name?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  businessLicense?: string | null;
+  businessLicenseFile?: (string | null) | Media;
+  medications?: (string | Medication)[] | null;
+  medical_supplies?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -988,23 +1019,6 @@ export interface Medication {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "suppliers".
- */
-export interface Supplier {
-  id: string;
-  name?: string | null;
-  address?: string | null;
-  phone?: string | null;
-  email?: string | null;
-  businessLicense?: string | null;
-  businessLicenseFile?: (string | null) | Media;
-  medications?: (string | Medication)[] | null;
-  medical_supplies?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "medicalsupplies".
  */
 export interface Medicalsupply {
@@ -1033,8 +1047,8 @@ export interface Room {
     | {
         tenphongbenh?: (string | null) | MedicalRecod;
         totalBeds: number;
-        hosobenhnhan: (string | MedicalRecod)[];
-        bsi: (string | User)[];
+        benhnhan?: (string | Patient)[] | null;
+        bsi?: (string | User)[] | null;
         id?: string | null;
       }[]
     | null;
@@ -1051,7 +1065,21 @@ export interface Class {
   truongphong?: (string | User)[] | null;
   nhanvien?: (string | User)[] | null;
   thongtin?: {
-    mota?: string | null;
+    mota?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     ngaythanhlap?: string | null;
   };
   updatedAt: string;
@@ -1936,7 +1964,7 @@ export interface RoomsSelect<T extends boolean = true> {
     | {
         tenphongbenh?: T;
         totalBeds?: T;
-        hosobenhnhan?: T;
+        benhnhan?: T;
         bsi?: T;
         id?: T;
       };

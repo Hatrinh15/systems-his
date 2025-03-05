@@ -148,7 +148,7 @@ export const Users: CollectionConfig = {
               name: 'khoa',
               label: ' Khoa',
               type: 'text',
-              admin: { readOnly: false,
+              admin: { readOnly: true,
                 condition: (data) => data?.chucvu === 'bacsi' || data?.chucvu === 'yta'|| data?.chucvu==='truongkhoa', // Chỉ hiển thị khi là bác sĩ hoặc y tá
               },
             },
@@ -156,7 +156,7 @@ export const Users: CollectionConfig = {
               name: 'phong',
               label: 'Phòng',
               type:'text',
-              admin: { readOnly: false,
+              admin: { readOnly: true,
                 condition: (data) => data?.chucvu === 'letan' || data?.chucvu === 'kythuatvien'|| data?.chucvu==='truongphong',
                },
             },

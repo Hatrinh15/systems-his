@@ -1,86 +1,70 @@
-import { APIError,CollectionBeforeValidateHook,CollectionBeforeChangeHook } from "payload";
- 
-export const valuemedicalorder : CollectionBeforeValidateHook= ({data})=> {
-    if(!data)return
+import { APIError, CollectionBeforeValidateHook, CollectionBeforeChangeHook } from 'payload'
 
-    const error : string[] = []
+export const valuemedicalorder: CollectionBeforeValidateHook = ({ data }) => {
+  if (!data) return
 
-    
-    if(!data.khoa) {
-        error.push('khoa')
-    }
-    if(!data.bacsi) {
-        error.push('bác sĩ')
-    }
-    if(!data.dieuduong) {
-        error.push('điều dưỡng')
-    }
-    if(!data.ngaynhapvien) {
-        error.push('ngày nhập viện')
-    }
-    if(!data.ngayLap) {
-        error.push('ngày lập')
-    }
-    if(!data.chuandoan) {
-        error.push('chuẩn đoán')
-    }
-    if(!data.hinhthucdieutri) {
-        error.push('hình thức điều trị')
-    }
-    if(data.hinhthucdieutri === 'benhnhannoitru'&& !data.hosobenhan) {
-        error.push('hồ sơ bệnh án')
-    }
-    
+  const error: string[] = []
 
-    data?.thuoc.forEach((err,index) => {
-        const errorArray: string[] =[]
-        if(!err.thuocId){
-            errorArray.push('chọn thuốc')
-        }
-        if(!err.hamLuong) {
-            errorArray.push('hàm lượng')
-        }
-        if(!err.lieuDung) {
-            errorArray.push('liều dùng')
-        }
-        if(!err.cachDung) {
-            errorArray.push('cách dùng')
-        }
-        if(!err.thoiGian) {
-            errorArray.push('thời gian')
-        }
-        const throwErrorArray = errorArray.map((err)=>err).join(',')
-        error.push(`Thuốc ${index+1} hãy điền đủ thông tin: ${throwErrorArray}`)
-    });  
+  if (!data.khoa) {
+    error.push('khoa')
+  }
+  if (!data.bacsi) {
+    error.push('bác sĩ')
+  }
+  if (!data.dieuduong) {
+    error.push('điều dưỡng')
+  }
+  if (!data.ngaynhapvien) {
+    error.push('ngày nhập viện')
+  }
+  if (!data.ngayLap) {
+    error.push('ngày lập')
+  }
+  if (!data.chuandoan) {
+    error.push('chuẩn đoán')
+  }
+  if (!data.hinhthucdieutri) {
+    error.push('hình thức điều trị')
+  }
+  if (data.hinhthucdieutri === 'benhnhannoitru' && !data.hosobenhan) {
+    error.push('hồ sơ bệnh án')
+  }
 
-    data?.xetNghiem.forEach((err,index) => {
-        const errorArray: string[] =[]
-        if(!err.loaiXetNghiem){
-            errorArray.push('loại xét nghiệm')
-        }
-        if(!err.ngayChiDinh) {
-            errorArray.push('ngày chỉ định')
-        }
-        if(!err.hinhAnh) {
-            errorArray.push('hình ảnh')
-        }
-        if(!err.fileDinhKem) {
-            errorArray.push('File kết quả')
-        }
-        const throwErrorArray = errorArray.map((err)=>err).join(',')
-        error.push(`Xét nghiệm ${index+1} hãy điền đủ thông tin: ${throwErrorArray}`)
-    });  
+  if (Array.isArray(data.thuoc)) {
+    data.thuoc.forEach((thuoc, index) => {
+      if (!thuoc || typeof thuoc !== 'object') return
+      const thuocErrors: string[] = []
 
+      if (!thuoc.hamLuong) thuocErrors.push('Hàm lượng')
+      if (!thuoc.lieuDung) thuocErrors.push('Liều dùng')
+      if (!thuoc.cachDung) thuocErrors.push('Cách dùng')
+      if (!thuoc.thoiGian) thuocErrors.push('Thời gian')
 
+      if (thuocErrors.length > 0) {
+        error.push(`Thuốc ${index + 1} hãy điền đủ thông tin: ${thuocErrors.join(', ')}`)
+      }
+    })
+  }
 
-    const throwError = error.map((err) => `• ${err}`).join('\n');
+  if (Array.isArray(data.xetNghiem)) {
+    data.xetNghiem.forEach((xetNghiem, index) => {
+      if (!xetNghiem || typeof xetNghiem !== 'object') return
+      const xnErrors: string[] = []
 
-    if (error.length > 0) {
-        throw new APIError(`Hãy điền đủ thông tin:\n${throwError}`, 400);
-    }
-    
-    
+      if (!xetNghiem.loaiXetNghiem) xnErrors.push('Loại xét nghiệm')
+      if (!xetNghiem.ngayChiDinh) xnErrors.push('Ngày chỉ định')
+      if (!xetNghiem.hinhAnh) xnErrors.push('Hình ảnh')
+      if (!xetNghiem.fileDinhKem) xnErrors.push('File kết quả')
 
+      if (xnErrors.length > 0) {
+        error.push(`Xét nghiệm ${index + 1} hãy điền đủ thông tin: ${xnErrors.join(', ')}`)
+      }
+    })
+  }
+
+  const throwError = error.map((err) => `• ${err}`).join('\n')
+
+  if (error.length > 0) {
+    throw new APIError(`Hãy điền đủ thông tin:\n${throwError}`, 400)
+  }
 }
-
-

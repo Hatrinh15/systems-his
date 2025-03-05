@@ -1,4 +1,4 @@
-import { APIError, CollectionBeforeValidateHook } from 'payload'
+import { APIError, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from 'payload'
 
 export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
   if (!data || !Array.isArray(data.hoso)) {
@@ -69,21 +69,28 @@ export const valueho_so: CollectionBeforeValidateHook = ({ data }) => {
   }
 }
 
-export const preventDuplicateMedicalRecord = async ({ data, req }) => {
-  if (!data.thongtinbenhnhan) return // Nếu không có thông tin bệnh nhân thì không cần kiểm tra
-
-  const existingRecord = await req.payload.find({
-    collection: 'MedicalRecods',
-    where: {
-      thongtinbenhnhan: {
-        equals: data.thongtinbenhnhan, // Kiểm tra nếu bệnh nhân đã có hồ sơ
+export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async ({
+  data,
+  req,
+  originalDoc,
+}) => {
+  if (!data.thongtinbenhnhan) return // Không có thông tin bệnh nhân thì bỏ qua
+  // Tìm kiếm các hồ sơ bệnh án trùng lặp (bỏ qua nếu là chính nó)
+  if (data.thongtinbenhnhan !== originalDoc.thongtinbenhnhan) {
+    const existingRecord = await req.payload.find({
+      collection: 'MedicalRecods', 
+      where: {
+        thongtinbenhnhan: { equals: data.thongtinbenhnhan },
+        ...(data.id ? { id: { not_equals: data.id } } : {}), // Bỏ qua chính nó khi cập nhật
       },
-    },
-  })
-  if (existingRecord.docs.length > 0) {
-    throw new APIError('Bệnh nhân này đã có hồ sơ bệnh án, không thể tạo thêm!', 400)
+    })
+
+    if (existingRecord.docs.length > 0) {
+      throw new APIError('Bệnh nhân này đã có hồ sơ bệnh án, không thể tạo thêm!', 400)
+    }
   }
 }
+
 export const namePatient = async ({ data, req }) => {
   if (data.thongtinbenhnhan) {
     // Lấy thông tin bệnh nhân từ database

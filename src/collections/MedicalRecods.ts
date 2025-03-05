@@ -1,15 +1,14 @@
 import { Hoso } from '@/fields/resume/ho_so'
 import { CollectionConfig } from 'payload'
-import { APIError } from 'payload';
-import { valueho_so,valuemedicalrecord,preventDuplicateMedicalRecord } from '@/hooks/Hookmedicalrecord';
-import { Medicalorders } from './Users/Medicalorders';
-import { lazy } from 'react';
-import { Label } from '@radix-ui/react-select';
-import { join } from 'path';
-
+import {
+  valueho_so,
+  valuemedicalrecord,
+  preventDuplicateMedicalRecord,
+  namePatient,
+} from '@/hooks/Hookmedicalrecord'
 
 const MedicalRecods: CollectionConfig = {
-  slug: 'MedicalRecods', 
+  slug: 'MedicalRecods',
   labels: {
     singular: 'HỒ SƠ BỆNH ÁN',
     plural: 'HỒ SƠ BỆNH ÁN',
@@ -32,23 +31,41 @@ const MedicalRecods: CollectionConfig = {
               name: 'thongtinbenhnhan',
               label: 'THÔNG TIN BỆNH NHÂN',
               type: 'relationship',
-              relationTo: 'patients', // Tham chiếu tới collection 'patients'
+              relationTo: 'patients',
               required: true,
               hasMany: false,
+              admin: {
+                condition: (data) => {
+                  return !data?.id // Nếu đang tạo mới thì hiển thị, nếu cập nhật thì ẩn
+                },
+              },
+              filterOptions: async ({ req }) => {
+                const existingRecords = await req.payload.find({
+                  collection: 'MedicalRecods',
+                  where: {},
+                })
+                // Lấy danh sách bệnh nhân đã có hồ sơ bệnh án
+                const usedPatientIDs = new Set(
+                  existingRecords.docs.map((record) => record.thongtinbenhnhan),
+                )
+                return {
+                  id: {
+                    not_in: Array.from(usedPatientIDs), // Chỉ lấy bệnh nhân chưa có hồ sơ bệnh án
+                  },
+                }
+              },
             },
             {
               name: 'hoso',
               label: 'Hồ sơ',
               type: 'array',
               fields: [
-
                 { name: 'khoa', label: 'KHoa', type: 'relationship', relationTo: 'departments' },
                 { name: 'bacsi', label: 'Bác sĩ phụ trách', type: 'text' },
                 {
                   name: 'dieuduong',
                   label: 'Điều dưỡng thực hiện',
-                  type: 'text', 
-
+                  type: 'text',
                 },
                 {
                   name: 'ngaynhapvien',
@@ -58,7 +75,7 @@ const MedicalRecods: CollectionConfig = {
                   admin: {
                     date: {
                       pickerAppearance: 'dayOnly',
-                      displayFormat: 'd MMM yyyy',  // Đảm bảo format đúng
+                      displayFormat: 'd MMM yyyy', // Đảm bảo format đúng
                     },
                   },
                 },
@@ -94,7 +111,7 @@ const MedicalRecods: CollectionConfig = {
                           name: 'ngay',
                           label: 'Ngày',
                           type: 'date',
-        
+
                           admin: {
                             date: {
                               pickerAppearance: 'dayOnly',
@@ -106,7 +123,6 @@ const MedicalRecods: CollectionConfig = {
                           name: 'dienBien',
                           label: 'Diễn biến bệnh',
                           type: 'textarea',
-        
                         },
                         {
                           name: 'ghiChu',
@@ -129,29 +145,28 @@ const MedicalRecods: CollectionConfig = {
                         },
                       ],
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
                     {
                       name: 'phuongphap',
                       label: 'Phương pháp điều trị',
-    
+
                       type: 'radio',
-                      options:[
-                        {label: 'Điều trị can thiệp', value: 'dieutricanthiep' },
-                       { label: 'Điều trị hỗ trợ', value: 'dieutrihotro' },
-                      ]
+                      options: [
+                        { label: 'Điều trị can thiệp', value: 'dieutricanthiep' },
+                        { label: 'Điều trị hỗ trợ', value: 'dieutrihotro' },
+                      ],
                     },
                     {
-                    name: 'text',
-                    label: 'Mô tả chi tiết',
-                    type: 'textarea',
+                      name: 'text',
+                      label: 'Mô tả chi tiết',
+                      type: 'textarea',
                     },
-                   
                   ],
                 },
                 {
                   name: 'tinhtrang',
                   label: 'Tình trạng',
                   type: 'radio',
+                  required: true,
                   options: [
                     { label: 'Đã xuất viện ', value: 'yes' },
                     { label: 'Nhập viện', value: 'no' },
@@ -161,13 +176,12 @@ const MedicalRecods: CollectionConfig = {
                   name: 'tinhtrangxuatvien',
                   label: 'Tình trạng xuất viện',
                   admin: {
-                    condition: (data) => {
+                    condition: (data, siblingData) => {
                       // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
-                      if (!data?.hoso || data.hoso.length === 0) return false
-
-                      // Lấy giá trị tinhtrang từ phần tử đầu tiên trong hoso
-                      const tinhtrang = data.hoso[0]?.tinhtrang
-                      return tinhtrang === 'yes'
+                      if(siblingData.tinhtrang === 'yes') {
+                        return true
+                      }
+                      return false
                     },
                   },
                   type: 'group',
@@ -176,7 +190,7 @@ const MedicalRecods: CollectionConfig = {
                       name: 'ngayRaVien',
                       label: 'Ngày ra viện',
                       type: 'date',
-    
+
                       admin: {
                         date: {
                           pickerAppearance: 'dayOnly',
@@ -185,10 +199,10 @@ const MedicalRecods: CollectionConfig = {
                       },
                     },
                     {
-                      name: 'xuatvien', 
+                      name: 'xuatvien',
                       label: 'Tình trạng',
-                      type :'select',
-                      options :[
+                      type: 'select',
+                      options: [
                         { value: 'khoi', label: 'Khỏi' },
                         { value: 'do', label: 'Đỡ' },
                         { value: 'khongthaydoi', label: 'Không thay đổi' },
@@ -201,8 +215,8 @@ const MedicalRecods: CollectionConfig = {
                     {
                       name: 'ghichu',
                       label: 'Ghi chú (nếu có)',
-                      type: 'textarea'
-                    }
+                      type: 'textarea',
+                    },
                   ],
                 },
               ],
@@ -216,36 +230,22 @@ const MedicalRecods: CollectionConfig = {
         {
           fields: [
             {
-            name: 'ylenh',
-            label: '',
-            type: 'join',
-            collection: 'medicalorders',
-            on: 'hosobenhan',
-            }
+              name: 'ylenh',
+              label: '',
+              type: 'join',
+              collection: 'medicalorders',
+              on: 'hosobenhan',
+            },
           ],
           label: 'Y Lệnh',
-        }
+        },
       ],
     },
   ],
   hooks: {
-    beforeChange: [
-      async ({ data, req }) => {
-        if (data.thongtinbenhnhan) {
-          // Lấy thông tin bệnh nhân từ database
-          const patient = await req.payload.findByID({
-            collection: 'patients',
-            id: data.thongtinbenhnhan,
-          })
-
-          if (patient) {
-            data.tenBenhNhan = patient.ten // Cập nhật tên bệnh nhân
-          }
-        }
-      },
-    ],
-  },valuemedicalrecord,valueho_so,preventDuplicateMedicalRecord
-
+    beforeChange: [namePatient, preventDuplicateMedicalRecord],
+    beforeValidate: [valueho_so, valuemedicalrecord],
+  },
 }
 
 export default MedicalRecods

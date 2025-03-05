@@ -1,10 +1,9 @@
-import type { CollectionConfig } from 'payload';
-import { authenticated } from '@/access/authenticated';
-import { Patient } from '@/payload-types';
-import { text } from 'stream/consumers';
-import { APIError } from 'payload';
-import { valuemedicalorder } from '@/hooks/Hookmedicalorder';
-
+import type { CollectionConfig } from 'payload'
+import { authenticated } from '@/access/authenticated'
+import { Patient } from '@/payload-types'
+import { text } from 'stream/consumers'
+import { APIError } from 'payload'
+import { valuemedicalorder } from '@/hooks/Hookmedicalorder'
 
 export const Medicalorders: CollectionConfig = {
   slug: 'medicalorders',
@@ -27,14 +26,14 @@ export const Medicalorders: CollectionConfig = {
     {
       name: 'hosobenhan',
       label: 'Hồ sơ bệnh án',
-    
+
       type: 'relationship',
       relationTo: 'MedicalRecods',
     },
     {
       name: 'khoa',
       label: 'Khoa',
-    
+
       type: 'select',
       options: [
         { label: 'Khoa Tai', value: 'khoatai' },
@@ -50,19 +49,17 @@ export const Medicalorders: CollectionConfig = {
       label: 'Bác sĩ phụ trách',
       type: 'relationship',
       relationTo: 'users',
-    
     },
     {
       name: 'dieuduong',
       label: 'Điều dưỡng thực hiện',
       type: 'text',
-    
     },
     {
       name: 'ngaynhapvien',
       label: 'Ngày nhập viện',
       type: 'date',
-    
+
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
@@ -74,7 +71,7 @@ export const Medicalorders: CollectionConfig = {
       name: 'ngayLap',
       label: 'Ngày lập y lệnh',
       type: 'date',
-    
+
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
@@ -85,23 +82,23 @@ export const Medicalorders: CollectionConfig = {
     {
       name: 'chuandoan',
       label: 'Chuẩn đoán',
-    
+
       type: 'textarea',
     },
-    { 
+    {
       name: 'hinhthucdieutri',
       label: 'Hình thức điều trị',
-    
+
       type: 'radio',
-      options:[
-        {label: 'Bệnh nhân nội trú',value: 'benhnhannoitru'},
-        {label: 'Bệnh nhân ngoại trú',value: 'benhnhanngoaitru'},
+      options: [
+        { label: 'Bệnh nhân nội trú', value: 'benhnhannoitru' },
+        { label: 'Bệnh nhân ngoại trú', value: 'benhnhanngoaitru' },
       ],
     },
     // {
     //   name: 'hosobenhan',
     //   label: 'Hồ sơ bệnh án',
-    
+
     //   type: 'relationship',
     //   relationTo: 'MedicalRecods',
     // },
@@ -119,14 +116,12 @@ export const Medicalorders: CollectionConfig = {
                 {
                   name: 'thuocId',
                   label: 'Chọn thuốc',
-                  type: 'relationship',
-                  relationTo: 'medications',
-                
+                  type: 'text',
                 },
                 { name: 'hamLuong', label: 'Hàm lượng', type: 'text' },
                 { name: 'lieuDung', label: 'Liều dùng', type: 'text' },
                 { name: 'cachDung', label: 'Cách dùng', type: 'text' },
-                { name: 'thoiGian', label: 'Thời gian', type: 'text'},
+                { name: 'thoiGian', label: 'Thời gian', type: 'text' },
                 {
                   name: 'trangThai',
                   label: 'Trạng thái',
@@ -135,7 +130,6 @@ export const Medicalorders: CollectionConfig = {
                     { label: 'Đang thực hiện', value: 'dangthuchien' },
                     { label: 'Đã cấp phát', value: 'dacapphat' },
                   ],
-                
                 },
               ],
             },
@@ -149,9 +143,9 @@ export const Medicalorders: CollectionConfig = {
               label: 'Danh sách xét nghiệm',
               type: 'array',
               fields: [
-                { name: 'loaiXetNghiem', label: 'Loại xét nghiệm', type: 'text'},
+                { name: 'loaiXetNghiem', label: 'Loại xét nghiệm', type: 'text' },
                 { name: 'moTa', label: 'Mô tả', type: 'text' },
-                { name: 'ngayChiDinh', label: 'Ngày chỉ định', type: 'date'},
+                { name: 'ngayChiDinh', label: 'Ngày chỉ định', type: 'date' },
                 {
                   name: 'hinhAnh',
                   label: 'Hình ảnh/X-ray/CT Scan',
@@ -179,6 +173,5 @@ export const Medicalorders: CollectionConfig = {
   timestamps: true,
   hooks: {
     beforeValidate: [valuemedicalorder],
-  
   },
-};
+}

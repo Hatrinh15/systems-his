@@ -96,7 +96,7 @@ const MedicalRecods: CollectionConfig = {
                       label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
                       type: 'text',
                     },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'text', required: true },
+                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
 
                     {
                       name: 'dienBienBenh',
@@ -224,7 +224,7 @@ const MedicalRecods: CollectionConfig = {
           ],
         },
         {
-          fields: [...Hoso],
+          fields: [Hoso],
           label: 'Kết quả nội soi',
         },
         {

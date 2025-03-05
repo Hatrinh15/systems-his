@@ -1,128 +1,102 @@
-import type { CollectionConfig } from 'payload';
-import { authenticated } from '@/access/authenticated';
+import { CollectionConfig } from "payload";
+import { hookMedicalSupplies} from "@/hooks/HookMedicalSupplies";
 
-export const Medicalsupplies: CollectionConfig = {
-  slug: 'medicalsupplies',
-  access: {
-    admin: authenticated,
-    create: authenticated,
-    delete: authenticated,
-    read: authenticated,
-    update: authenticated,
-  },
+export const medicalSupplies: CollectionConfig = {
+  slug: "medicalSupplies",
   labels: {
-    singular: 'VẬT TƯ Y TẾ',
-    plural: 'VẬT TƯ Y TẾ',
+    singular: "VẬT TƯ Y TẾ",
+    plural: "VẬT TƯ Y TẾ",
   },
   admin: {
-    defaultColumns: ['tenVatTu', 'loaiVatTu', 'soLuongTon', 'trangThai'],
-    useAsTitle: 'tenVatTu',
+    useAsTitle: "name",
+    defaultColumns: ["code", "name", "category", "unit", "expirydate"],
   },
   fields: [
     {
-      name: 'tenVatTu',
-      label: 'Tên vật tư',
-      type: 'text',
-      required: true,
+      name: "code",
+      label: "Mã vật tư",
+      type: "text",
+      unique: true,
     },
     {
-      name: 'loaiVatTu',
-      label: 'Loại vật tư',
-      type: 'select',
-      required: true,
+      name: "name",
+      label: "Tên vật tư y tế",
+      type: "text",
+    },
+    {
+      name: "category",
+      label: "Loại vật tư",
+      type: "select",
       options: [
-        { label: 'Tiêu hao', value: 'tieuhao' },
-        { label: 'Tái sử dụng', value: 'taisudung' },
-        { label: 'Dùng một lần', value: 'dungmotlan' },
-        { label: 'Vật tư cấp cứu', value: 'vattucapcuu' },
-        { label: 'Vật tư phẫu thuật', value: 'vattuphautuat' },
+        { label: "Dùng chung", value: "dungchung" },
+        { label: "Phẫu thuật", value: "phauthuat" },
+        { label: "Khử khuẩn & Tiệt trùng", value: "khukhuantiettrung" },
+        { label: "Chăm sóc vết thương", value: "chamsocvetthuong" },
+        { label: "Thiết bị chẩn đoán", value: "thietbichandoan" },
+        { label: "Dụng cụ tiêm & truyền dịch", value: "dungcutiemvatruyendich" },
+        { label: "Vật tư phòng mổ", value: "vattuphongmo" },
       ],
     },
     {
-      name: 'donViTinh',
-      label: 'Đơn vị tính',
-      type: 'select',
+      name: "description",
+      label: "Công dụng",
+      type: "textarea",
+    },
+    {
+      name: "unit",
+      label: "Đơn vị tính",
+      type: "select",
       options: [
-        { label: 'Hộp', value: 'hop' },
-        { label: 'Cái', value: 'cai' },
-        { label: 'Gói', value: 'goi' },
-        { label: 'Lọ', value: 'lo' },
-        { label: 'Bịch', value: 'bich' },
-        { label: 'Thùng', value: 'thung' },
+        { label: "Cái", value: "cai" },
+        { label: "Hộp", value: "hop" },
+        { label: "Túi", value: "tui" },
+        { label: "Vỉ", value: "vi" },
+        { label: "Ống", value: "ong" },
+        { label: "Chai", value: "chai" },
+        { label: "Lít (L)", value: "lit" },
+        { label: "Mililit (ml)", value: "ml" },
+        { label: "Kg", value: "kg" },
+        { label: "Gram", value: "gram" },
       ],
     },
     {
-      name: 'nhaCungCap',
-      label: 'Nhà cung cấp',
-      type: 'relationship',
-      relationTo: 'suppliers',
+      name: "packaging",
+      label: "Quy cách đóng gói",
+      type: "text",
     },
     {
-      name: 'soLuongTon',
-      label: 'Số lượng tồn kho',
-      type: 'number',
-      required: true,
-      min: 0,
+      name: "manufacturer",
+      label: "Hãng sản xuất",
+      type: "text",
     },
     {
-      name: 'ngayNhapKho',
-      label: 'Ngày nhập kho',
-      type: 'date',
-      required: true,
+      name: "supplier",
+      label: "Nhà cung cấp",
+      type: 'join',
+      collection: 'suppliers',
+      on:'medicalsupplies',
+    },
+    {
+      name: "expirydate",
+      label: "Hạn sử dụng",
+      type: "date",
+      required: false,
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
-          displayFormat: 'dd/MM/yyyy',
+          displayFormat: 'd MMM yyy',
         },
       },
     },
     {
-      name: 'hanSuDung',
-      label: 'Hạn sử dụng',
-      type: 'date',
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'dd/MM/yyyy',
-        },
-      },
+      name: "notes",
+      label: "Ghi chú đặc biệt",
+      type: "textarea",
     },
-    {
-      name: 'giaNhap',
-      label: 'Giá nhập',
-      type: 'number',
-    },
-    {
-      name: 'trangThai',
-      label: 'Trạng thái',
-      type: 'select',
-      options: [
-        { label: 'Còn hàng', value: 'conhang' },
-        { label: 'Sắp hết', value: 'saphet' },
-        { label: 'Hết hàng', value: 'hethang' },
-        { label: 'Hết hạn sử dụng', value: 'hethansudung' },
-      ],
-      required: true,
-    },
+
   ],
-  hooks: {
-    beforeChange: [async ({ data }) => {
-      // Kiểm tra ngày hết hạn
-      if (data.hanSuDung && new Date(data.hanSuDung) < new Date()) {
-        data.trangThai = 'hethansudung'; 
-      } 
-      // Cập nhật trạng thái tự động dựa trên số lượng tồn kho
-      else if (data.soLuongTon === 0) {
-        data.trangThai = 'hethang'; // Cập nhật trạng thái nếu số lượng tồn kho là 0
-      } else if (data.soLuongTon > 0 && data.trangThai === 'hethang') {
-        data.trangThai = 'conhang'; // Nếu có hàng, cập nhật lại trạng thái
-      }
-      // Cập nhật trạng thái "Sắp hết" khi số lượng tồn kho dưới 10
-      if (data.soLuongTon > 0 && data.soLuongTon < 10 && data.trangThai !== 'saphet') {
-        data.trangThai = 'saphet';
-      }
-      return data;
-    }],
-  },
   timestamps: true,
+  hooks: {
+      beforeValidate: [hookMedicalSupplies], // Áp dụng hook kiểm tra dữ liệu trước khi validate
+    },
 };

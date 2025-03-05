@@ -1,4 +1,5 @@
 import { CollectionConfig } from "payload";
+import { hookSupplier } from "@/hooks/HookSuppliers";
 
 export const Suppliers: CollectionConfig = {
   slug: 'suppliers',
@@ -26,13 +27,6 @@ export const Suppliers: CollectionConfig = {
       label: 'Số điện thoại',
       type: 'text',
       index: true,
-      validate: (value: unknown) => {
-        if (typeof value !== 'string') {
-          return 'Giá trị phải là chuỗi số'
-        }
-        const regex = /^0\d{9}$/
-        return regex.test(value) ? true : 'Số điện thoại không hợp lệ!'
-      },
     },
     {
       name: 'email',
@@ -41,7 +35,7 @@ export const Suppliers: CollectionConfig = {
       unique: true,
     },
     {
-        name: 'businessLicense',
+      name: 'businessLicense',
       label: 'Số giấy phép kinh doanh',
       type: 'text',
     },
@@ -60,13 +54,15 @@ export const Suppliers: CollectionConfig = {
       hasMany: true,
     },
     {
-      name: 'medical_supplies',
+      name: 'medicalsupplies',
       label: 'Danh sách vật tư cung cấp',
-      type: 'text',
-    //   type: 'relationship',
-    //   relationTo: 'medical_supplies',
-    //   hasMany: true,
+      type: 'relationship',
+      relationTo: 'medicalSupplies',
+      hasMany: true,
     },
   ],
   timestamps: true,
+  hooks: {
+      beforeValidate: [hookSupplier], // Áp dụng hook kiểm tra dữ liệu trước khi validate
+    },
 };

@@ -1,19 +1,20 @@
-import { CollectionConfig } from "payload";
-import { hookSupplier } from "@/hooks/HookSuppliers";
+import { CollectionConfig } from 'payload'
+import { hookSupplier } from '@/hooks/HookSuppliers'
 
 export const Suppliers: CollectionConfig = {
   slug: 'suppliers',
   labels: {
-    singular: 'NHÀ CUNG CẤP',
-    plural: 'NHÀ CUNG CẤP',
+    singular: 'Nhà Cung Cấp',
+    plural: 'Nhà Cung Cấp',
   },
   admin: {
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'phone', 'email'],
+    useAsTitle: 'nhacungcap',
+    defaultColumns: ['nhacungcap', 'phone', 'email'],
+    group: 'Dược Và Vật Tư Y Tế',
   },
   fields: [
     {
-      name: 'name',
+      name: 'nhacungcap',
       label: 'Tên nhà cung cấp',
       type: 'text',
     },
@@ -44,25 +45,25 @@ export const Suppliers: CollectionConfig = {
       label: 'File giấy phép kinh doanh',
       type: 'upload',
       relationTo: 'media',
-      required: false, 
+      required: false,
     },
     {
       name: 'medications',
       label: 'Danh sách thuốc cung cấp',
-      type: 'relationship',
-      relationTo: 'medications',
-      hasMany: true,
+      type:'join',
+      collection:'medications',
+      on:'supplier',
     },
     {
       name: 'medicalsupplies',
       label: 'Danh sách vật tư cung cấp',
-      type: 'relationship',
-      relationTo: 'medicalSupplies',
-      hasMany: true,
+      type:'join',
+      collection:'medicalSupplies',
+      on:'supplier',
     },
   ],
   timestamps: true,
   hooks: {
-      beforeValidate: [hookSupplier], // Áp dụng hook kiểm tra dữ liệu trước khi validate
-    },
-};
+    beforeValidate: [hookSupplier], // Áp dụng hook kiểm tra dữ liệu trước khi validate
+  },
+}

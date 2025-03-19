@@ -2,12 +2,13 @@ import { CollectionConfig } from "payload";
 export const Pharmacies: CollectionConfig = {
     slug: 'pharmacies',
     labels: {
-      singular: 'QUẦY THUỐC',
-      plural: 'QUẦY THUỐC',
+      singular: 'Quầy Thuốc',
+      plural: 'Quầy Thuốc',
     },
     admin: {
         useAsTitle: 'medicine',
         defaultColumns: ['medicine', 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
+        group:'Dược Và Vật Tư Y Tế'
       },
       fields: [
         {

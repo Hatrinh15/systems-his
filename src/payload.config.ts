@@ -14,6 +14,7 @@ import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
+import { baoGia } from './collections/Baogia'
 
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
@@ -25,7 +26,7 @@ import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { Medications } from './collections/Medications'
-import { medicalSupplies } from './collections/MedicalSupplies'
+import { medicalSupplies } from './collections/Medicalsupplies'
 import { Inventory } from './collections/Inventory'
 import { InventoryTransactions } from './collections/InventoryTransactions'
 import Class from './collections/phongban/class'
@@ -82,7 +83,7 @@ export default buildConfig({
     Pages, Posts, Categories, Medicalorders,Media,Users,medicalUsages,Orders,
     Patients, MedicalRecods,Suppliers,Medications,medicalSupplies,Inventory,InventoryTransactions,Pharmacies,
     Appointments, Rooms,
-    Departments, Class, 
+    Departments, Class, baoGia,
 
   ],
 

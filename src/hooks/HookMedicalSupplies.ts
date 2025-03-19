@@ -6,8 +6,8 @@ export const hookMedicalSupplies: CollectionBeforeValidateHook = async ({ data, 
 
   // Bản đồ key -> label
   const fieldLabels = {
-    code: "Mã vật tư",
-    name: "Tên vật tư y tế",
+    code: "Mã ",
+    name: "Tên ",
     category: "Loại vật tư",
     unit: "Đơn vị tính",
     expirydate: "Hạn sử dụng",

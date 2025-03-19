@@ -4,12 +4,13 @@ import { validateMedicationData} from "@/hooks/HookMedication";
 export const Medications: CollectionConfig = {
   slug: "medications",
   labels: {
-    singular: "THUỐC",
-    plural: "THUỐC",
+    singular: "Thuốc",
+    plural: "Thuốc",
   },
   admin: {
     useAsTitle: "name",
     defaultColumns: ["code","name", "category", "unit", "expiryDate"],
+    group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
     {
@@ -88,9 +89,9 @@ export const Medications: CollectionConfig = {
     {
       name: "supplier",
       label: "Nhà cung cấp",
-      type: 'join',
-      collection: 'suppliers',
-      on: 'medications'
+     type:'relationship',
+     relationTo:'suppliers',
+     hasMany:true,
     },
     {
       name: "expiryDate",
@@ -99,7 +100,7 @@ export const Medications: CollectionConfig = {
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
+          displayFormat: 'd-MM-yyy',
         },
       },
     },

@@ -4,10 +4,10 @@ import { CollectionConfig } from 'payload'
 const Rooms: CollectionConfig = {
   slug: 'Rooms',
   labels: {
-    singular: 'PHÒNG BỆNH',
-    plural: 'PHÒNG BỆNH',
+    singular: 'Phòng Bệnh',
+    plural: 'Phòng Bệnh',
   },
-  admin: { group: 'Quản lý nội dung', useAsTitle: 'khoa' },
+  admin: { group: 'Khoa & Nhân sự ', useAsTitle: 'khoa' },
   fields: [
     {
       name: 'khoa',

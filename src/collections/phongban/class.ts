@@ -3,10 +3,10 @@ import { CollectionConfig } from 'payload'
 const Class: CollectionConfig = {
   slug: 'class',
   labels: {
-    singular: 'PHÒNG ',
-    plural: 'PHÒNG ',
+    singular: 'Phòng ',
+    plural: 'Phòng ',
   },
-  admin: {group:'Khối'},
+  admin: {group: 'Khoa & Nhân sự ',},
   fields: [
     {
       type: 'tabs',
@@ -89,7 +89,7 @@ const Class: CollectionConfig = {
                         ],
                       },
                     ],
-                  };
+                  } as any
                 } catch (error) {
                   console.error(' Lỗi truy vấn danh sách nhân viên:', error);
                   return {};

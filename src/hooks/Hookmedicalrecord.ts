@@ -5,8 +5,6 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
     throw new APIError('Hãy nhập thông tin hồ sơ hợp lệ!', 400)
   }
 
-  console.log('Dữ liệu đầu vào:', data)
-
   const error: string[] = []
 
   data.hoso.forEach((record, index) => {
@@ -33,42 +31,38 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
   }
 }
 
-export const valueho_so: CollectionBeforeValidateHook = ({ data }) => {
-  console.log('Chạy hook validation cho hồ sơ y tế!') // Kiểm tra xem có chạy không
+export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
+
 
   if (!data) return
 
-  const error: string[] = []
-  data?.ketqua.forEach((err, index) => {
-    const errorArray: string[] = []
-    if (!err.ngay) {
-      errorArray.push('ngày thực hiện')
-    }
-    if (!err.bacsi) {
-      errorArray.push('bác sĩ')
-    }
-    if (!err.ketquanoisoi) {
-      errorArray.push('kết quả nội soi')
-    }
-    if (!err.hinhanh) {
-      errorArray.push('hình ảnh nội soi')
-    }
-    if (!err.chuandoan) {
-      errorArray.push('chuẩn đoán')
-    }
-    if (!err.huongdieutri) {
-      errorArray.push('hướng điều trị')
-    }
-    const throwErrorArray = errorArray.map((err) => err).join(',')
-    error.push(`Hồ sơ ${index + 1} hãy điền đủ thông tin: ${throwErrorArray}`)
-  })
+  // Kiểm tra nếu dữ liệu liên quan đến kết quả nội soi (ketqua) có thay đổi thì mới validate
+  if (!data.ketqua && originalDoc?.ketqua) {
+    data.ketqua = originalDoc.ketqua // Giữ nguyên dữ liệu cũ nếu không có thay đổi
+    return
+  }
 
-  const throwError = error.map((err) => `• ${err}`).join('\n') // Mỗi lỗi trên một dòng
+  const error: string[] = []
+  if (Array.isArray(data.ketqua)) {
+    data.ketqua.forEach((err, index) => {
+      const errorArray: string[] = []
+      // if (!err.ngay) errorArray.push('Ngày thực hiện')
+      // if (!err.bacsi) errorArray.push('Bác sĩ')
+      if (!err.ketquanoisoi) errorArray.push('Kết quả nội soi')
+      if (!err.hinhanh) errorArray.push('Hình ảnh nội soi')
+      // if (!err.chuandoan) errorArray.push('Chuẩn đoán')
+      if (!err.huongdieutri) errorArray.push('Hướng điều trị')
+
+      if (errorArray.length > 0) {
+        error.push(`Hồ sơ ${index + 1} hãy điền đủ thông tin: ${errorArray.join(', ')}`)
+      }
+    })
+  }
+
   if (error.length > 0) {
-    throw new APIError(throwError.trim(), 400)
+    throw new APIError(error.map((err) => `• ${err}`).join('\n'), 400)
   }
 }
-
 export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async ({
   data,
   req,
@@ -78,7 +72,7 @@ export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async (
   // Tìm kiếm các hồ sơ bệnh án trùng lặp (bỏ qua nếu là chính nó)
   if (data.thongtinbenhnhan !== originalDoc.thongtinbenhnhan) {
     const existingRecord = await req.payload.find({
-      collection: 'MedicalRecods', 
+      collection: 'MedicalRecods',
       where: {
         thongtinbenhnhan: { equals: data.thongtinbenhnhan },
         ...(data.id ? { id: { not_equals: data.id } } : {}), // Bỏ qua chính nó khi cập nhật

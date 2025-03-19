@@ -3,25 +3,40 @@ import { CollectionConfig } from 'payload';
 export const Inventory: CollectionConfig = {
   slug: 'inventory',
   labels: {
-    singular: 'KHO HÀNG',
-    plural: 'KHO HÀNG',
+    singular: 'Kho Hàng',
+    plural: 'Kho Hàng',
   },
   admin: {
     useAsTitle: 'item',
     defaultColumns: ['item', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
+    group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
+    {
+      name: 'category',
+      label: 'Danh mục',
+      type: 'radio',
+      options: [
+        { label: 'Thuốc', value: 'medications' },
+        { label: 'Vật tư y tế', value: 'medicalSupplies' },
+      ],
+      required: true,
+    },
     {
       name: 'item',
       label: 'Sản phẩm',
       type: 'relationship',
-      relationTo: ['medications', 'medicalSupplies'],
+      relationTo: 'medications',
+      admin:{ condition: (data)=> data?.category==='medications'},
     },
     {
-      name: 'batchnumber',
-      label: 'Số lô',
-      type: 'text',
+      name: 'items',
+      label: 'Sản phẩm',
+      type: 'relationship',
+      relationTo:  'medicalSupplies',
+      admin:{ condition: (data)=> data?.category==='medicalSupplies'},
     },
+    
     {
       name: 'quantity',
       label: 'Số lượng tồn kho',
@@ -52,12 +67,6 @@ export const Inventory: CollectionConfig = {
       name: 'expirydate',
       label: 'Hạn sử dụng',
       type: 'date',
-    },
-    {
-      name: 'importprice',
-      label: 'Giá nhập',
-      type: 'number',
-      min: 0,
     },
     {
       name: 'supplier',

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
 import { checkvalueuser } from '@/hooks/checkvalueusers'
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid'
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
@@ -12,13 +12,13 @@ export const Users: CollectionConfig = {
     update: authenticated,
   },
   labels: {
-    singular: 'NHÂN SỰ',
-    plural: 'NHÂN SỰ',
+    singular: 'Nhân Sự',
+    plural: 'Nhân Sự',
   },
   admin: {
     defaultColumns: ['name', 'email'],
     useAsTitle: 'name',
-    group: 'Quản lý nội dung',
+    group: 'Khoa & Nhân sự ',
   },
   auth: true,
   fields: [
@@ -53,11 +53,13 @@ export const Users: CollectionConfig = {
               name: 'cccd',
               label: 'Căn cước công dân',
               type: 'text',
-              index:true,
+              index: true,
               unique: true,
               validate: (value) => {
-                const regex = /^(\d{9}|\d{12})$/; // Chấp nhận 9 hoặc 12 chữ số (hàm biểu thức chính quy)
-                return regex.test(value) ? true: 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
+                const regex = /^(\d{9}|\d{12})$/ // Chấp nhận 9 hoặc 12 chữ số (hàm biểu thức chính quy)
+                return regex.test(value)
+                  ? true
+                  : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
               },
             },
             {
@@ -74,6 +76,12 @@ export const Users: CollectionConfig = {
               name: 'ngaysinh',
               label: 'Ngày sinh',
               type: 'date',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayOnly',
+                  displayFormat: 'd-MM-yyy',
+                },
+              },
               validate: (value: unknown) => {
                 if (!value) {
                   return 'Không được để trống'
@@ -89,7 +97,7 @@ export const Users: CollectionConfig = {
                 const dayDiff = today.getDate() - birthDate.getDate()
                 if (
                   age < 18 ||
-                  (age === 18 && monthDiff < 0)|| 
+                  (age === 18 && monthDiff < 0) ||
                   (age === 18 && monthDiff === 0 && dayDiff < 0)
                 ) {
                   return 'Bạn phải đủ 18 tuổi'
@@ -104,7 +112,7 @@ export const Users: CollectionConfig = {
               index: true,
               unique: true,
               validate: (value) => {
-                const regex = /^(0[2-9])[0-9]{8}$/;  //hàm biểu thức chính quy
+                const regex = /^(0[2-9])[0-9]{8}$/ //hàm biểu thức chính quy
                 return regex.test(value) ? true : 'Số điện thoại không hợp lệ!'
               },
             },
@@ -134,31 +142,42 @@ export const Users: CollectionConfig = {
                 { label: 'Lễ tân', value: 'letan' },
                 { label: 'Trưởng phòng', value: 'truongphong' },
                 { label: 'Trưởng khoa', value: 'truongkhoa' },
+                { label: 'Dược sĩ', value: 'duocsi' },
                 { label: 'Khác', value: 'khac' },
               ],
-            },{
+            },
+            {
               name: 'vitri',
               label: 'Vị trí',
               type: 'richText',
-              admin:{
-                condition: (data)=> data?.chucvu==='khac',
-              }
+              admin: {
+                condition: (data) => data?.chucvu === 'khac',
+              },
             },
             {
               name: 'khoa',
               label: ' Khoa',
               type: 'text',
-              admin: { readOnly: true,
-                condition: (data) => data?.chucvu === 'bacsi' || data?.chucvu === 'yta'|| data?.chucvu==='truongkhoa', // Chỉ hiển thị khi là bác sĩ hoặc y tá
+              admin: {
+                readOnly: true,
+                condition: (data) =>
+                  data?.chucvu === 'bacsi' ||
+                  data?.chucvu === 'yta' ||
+                  data?.chucvu === 'truongkhoa' ||
+                  data?.chucvu === 'duocsi', // Chỉ hiển thị khi là bác sĩ hoặc y tá
               },
             },
             {
               name: 'phong',
               label: 'Phòng',
-              type:'text',
-              admin: { readOnly: true,
-                condition: (data) => data?.chucvu === 'letan' || data?.chucvu === 'kythuatvien'|| data?.chucvu==='truongphong',
-               },
+              type: 'text',
+              admin: {
+                readOnly: true,
+                condition: (data) =>
+                  data?.chucvu === 'letan' ||
+                  data?.chucvu === 'kythuatvien' ||
+                  data?.chucvu === 'truongphong',
+              },
             },
             {
               name: 'ngayvaolam',
@@ -167,7 +186,7 @@ export const Users: CollectionConfig = {
               admin: {
                 date: {
                   pickerAppearance: 'dayOnly',
-                  displayFormat: 'd MMM yyy',
+                  displayFormat: 'd-MM-yyy',
                 },
               },
             },
@@ -229,7 +248,7 @@ export const Users: CollectionConfig = {
         if (!data) return
 
         if (!data.IDnhansu) {
-          data.IDnhansu = `NS-${uuidv4()}`;
+          data.IDnhansu = `NS-${uuidv4()}`
         }
       },
     ],

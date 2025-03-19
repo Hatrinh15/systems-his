@@ -3,11 +3,11 @@ import { beforeChange } from '@/hooks/HookDepartments'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
-    singular: 'KHOA',
-    plural: 'KHOA',
+    singular: 'Khoa',
+    plural: 'Khoa',
   },
   admin: {
-    group: 'Khối',
+    group: 'Khoa & Nhân sự ',
     useAsTitle: 'tenkhoa',
   },
   fields: [
@@ -32,6 +32,7 @@ const Departments: CollectionConfig = {
                 { label: 'Khoa gây mê hồi sức', value: 'gaymehoisuc' },
                 { label: 'Khoa chẩn đoán hình ảnh', value: 'chandoanhinhanh' },
                 { label: 'Khoa xét nghiệm', value: 'khoaxetnghiem' },
+                {label:'Khoa Dược',value:'khoaduoc'},
                 { label: 'Khoa khác', value: 'khoakhac' },
               ],
             },
@@ -78,9 +79,13 @@ const Departments: CollectionConfig = {
                       .filter(Boolean),
                   )
                   console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
+                  const baseCondition = data?.tenkhoa === 'khoaduoc'
+                    ? { chucvu: { equals: 'duocsi' } } // DUOCSI cho khoa duoc
+                    : { chucvu: { equals: 'bacsi' } }; // bác sĩ cho các khoa khác 
+            
                   return {
                     and: [
-                      { chucvu: { equals: 'bacsi' } }, // Chỉ lấy bác sĩ
+                      baseCondition,
                       { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Loại bác sĩ đã nghỉ việc
                       {
                         or: [
@@ -89,7 +94,7 @@ const Departments: CollectionConfig = {
                         ],
                       },
                     ],
-                  }
+                  }as any
                 } catch (error) {
                   console.error('Lỗi truy vấn danh sách bác sĩ:', error)
                   return {}

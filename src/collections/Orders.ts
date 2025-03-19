@@ -3,11 +3,12 @@ import { CollectionConfig } from 'payload';
 export const Orders: CollectionConfig = {
   slug: 'orders',
   labels: {
-    singular: 'TẠO ĐƠN THUỐC',
-    plural: 'TẠO ĐƠN THUỐC',
+    singular: 'Tạo Đơn Thuốc',
+    plural: 'Tạo Đơn Thuốc',
   },
   admin: {
     useAsTitle: 'customer',
+    group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
     {

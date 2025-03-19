@@ -3,12 +3,13 @@ import { CollectionConfig } from 'payload';
 export const Inventory: CollectionConfig = {
   slug: 'inventory',
   labels: {
-    singular: 'KHO HÀNG',
-    plural: 'KHO HÀNG',
+    singular: 'Kho Hàng',
+    plural: 'Kho Hàng',
   },
   admin: {
-    useAsTitle: 'category',
-    defaultColumns: ['category', 'item', 'quantity', 'expirydate', 'importprice'],
+    useAsTitle: 'item',
+    defaultColumns: ['item', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
+    group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
     {
@@ -26,7 +27,8 @@ export const Inventory: CollectionConfig = {
       name: 'item',
       label: 'Sản phẩm',
       type: 'relationship',
-      relationTo: ['medications', 'medicalSupplies'],
+      relationTo: 'medications',
+      admin:{ condition: (data)=> data?.category==='medications'},
     },
     {
       name: 'quantity',
@@ -53,17 +55,6 @@ export const Inventory: CollectionConfig = {
       type: 'number',
       min: 0,
       defaultValue: 10, // Số lượng tối thiểu để cảnh báo
-    },
-    {
-      name: 'expirydate',
-      label: 'Hạn sử dụng',
-      type: 'date',
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'dd-MM-yyy',
-        },
-      },
     },
     {
       name: 'supplier',

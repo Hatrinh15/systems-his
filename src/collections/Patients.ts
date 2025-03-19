@@ -5,12 +5,12 @@ import { v4 as uuidv4 } from 'uuid'
 export const Patients: CollectionConfig = {
   slug: 'patients',
   labels: {
-    singular: 'BỆNH NHÂN',
-    plural: 'BỆNH NHÂN',
+    singular: 'Bệnh Nhân',
+    plural: 'Bệnh Nhân',
   },
   admin: {
     useAsTitle: 'ten',
-    group: 'Quản lý nội dung',
+    group: 'Bệnh Nhân Và Điều Trị',
   },
   fields: [
     {

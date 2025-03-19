@@ -15,12 +15,13 @@ export const Medicalorders: CollectionConfig = {
     update: authenticated,
   },
   labels: {
-    singular: 'Y LỆNH',
-    plural: 'Y LỆNH',
+    singular: 'Y Lệnh',
+    plural: 'Y Lệnh',
   },
   admin: {
     defaultColumns: ['hosobenhan', 'bacsi', 'ngayLap'],
     useAsTitle: 'hosobenhan',
+    group:'Bệnh Nhân Và Điều Trị',
   },
   fields: [
     {

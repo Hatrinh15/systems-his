@@ -3,11 +3,12 @@ import { CollectionConfig } from 'payload';
 export const medicalUsages: CollectionConfig = {
   slug: 'medicalUsages',
   labels: {
-    singular: 'PHIẾU SỬ DỤNG VẬT TƯ Y TẾ',
-    plural: 'PHIẾU SỬ DỤNG VẬT TƯ Y TẾ',
+    singular: 'Phiếu Sử Dụng Vật Tư Y Tế',
+    plural: 'Phiếu Sử Dụng Vật Tư Y Tế',
   },
   admin: {
     useAsTitle:'department',
+     group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
     {

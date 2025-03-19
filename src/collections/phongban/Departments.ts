@@ -3,13 +3,12 @@ import { beforeChange,showTitle } from '@/hooks/HookDepartments'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
-    singular: 'KHOA',
-    plural: 'KHOA',
+    singular: 'Khoa',
+    plural: 'Khoa',
   },
   admin: {
-    group: 'Khối',
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'truongkhoa', 'doctors', 'nures'],
+    group: 'Khoa & Nhân sự ',
+    useAsTitle: 'tenkhoa',
   },
   fields: [
     {
@@ -88,9 +87,13 @@ const Departments: CollectionConfig = {
                       .filter(Boolean),
                   )
                   console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
+                  const baseCondition = data?.tenkhoa === 'khoaduoc'
+                    ? { chucvu: { equals: 'duocsi' } } // DUOCSI cho khoa duoc
+                    : { chucvu: { equals: 'bacsi' } }; // bác sĩ cho các khoa khác 
+            
                   return {
                     and: [
-                      { chucvu: { equals: 'bacsi' } }, // Chỉ lấy bác sĩ
+                      baseCondition,
                       { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Loại bác sĩ đã nghỉ việc
                       {
                         or: [
@@ -99,7 +102,7 @@ const Departments: CollectionConfig = {
                         ],
                       },
                     ],
-                  }
+                  }as any
                 } catch (error) {
                   console.error('Lỗi truy vấn danh sách bác sĩ:', error)
                   return {}

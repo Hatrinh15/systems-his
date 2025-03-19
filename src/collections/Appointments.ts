@@ -8,10 +8,10 @@ import { log } from "console";
 export const Appointments: CollectionConfig = {
 slug: 'appointments',
 labels: {
-    singular: 'ĐẶT LỊCH KHÁM',
-    plural: 'ĐẶT LỊCH KHÁM',
+    singular: 'Đặt Lịch Khám',
+    plural: 'Đặt Lịch Khám',
 },
-admin: { group: 'Quản lý nội dung' },
+admin: {  group: 'Bệnh Nhân Và Điều Trị' },
 fields:[
     {
       name: 'patients',

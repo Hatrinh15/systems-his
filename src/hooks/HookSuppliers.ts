@@ -6,7 +6,7 @@ export const hookSupplier: CollectionBeforeValidateHook = async ({ data, req, or
 
   // Danh sách các trường quan trọng và nhãn hiển thị
   const fieldLabels: Record<string, string> = {
-    name: "Tên nhà cung cấp",
+    nhacungcap: "Tên nhà cung cấp",
     address: "Địa chỉ",
     phone: "Số điện thoại",
     email: "Email",
@@ -35,10 +35,10 @@ export const hookSupplier: CollectionBeforeValidateHook = async ({ data, req, or
   }
 
   // Kiểm tra trùng tên nhà cung cấp
-  if (!originalDoc || originalDoc.name !== data.name) {
+  if (!originalDoc || originalDoc.nhacungcap !== data.nhacungcap) {
     const existingName = await payload.find({
       collection: "suppliers",
-      where: { name: { equals: data.name } },
+      where: { nhacungcap: { equals: data.nhacungcap} },
     });
 
     if (existingName.docs.length > 0) {

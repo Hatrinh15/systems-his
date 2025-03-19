@@ -10,10 +10,10 @@ import {
 const MedicalRecods: CollectionConfig = {
   slug: 'MedicalRecods',
   labels: {
-    singular: 'HỒ SƠ BỆNH ÁN',
-    plural: 'HỒ SƠ BỆNH ÁN',
+    singular: 'Hồ Sơ Bệnh Án',
+    plural: 'Hồ Sơ Bệnh Án',
   },
-  admin: { group: 'Quản lý nội dung', useAsTitle: 'tenBenhNhan' },
+  admin: { group: 'Bệnh Nhân Và Điều Trị', useAsTitle: 'tenBenhNhan' },
   fields: [
     {
       type: 'tabs',
@@ -111,14 +111,14 @@ const MedicalRecods: CollectionConfig = {
                           name: 'ngay',
                           label: 'Ngày',
                           type: 'date',
-
                           admin: {
                             date: {
                               pickerAppearance: 'dayOnly',
-                              displayFormat: 'dd/MM/yyyy',
+                              displayFormat: 'd-MM-yyy',
                             },
                           },
-                        },
+                        
+                          },
                         {
                           name: 'dienBien',
                           label: 'Diễn biến bệnh',
@@ -129,20 +129,20 @@ const MedicalRecods: CollectionConfig = {
                           label: 'Ghi chú',
                           type: 'text',
                         },
-                        {
-                          name: 'noikhoa',
-                          label: 'Nội khoa',
-                          admin: {
-                            condition: (data) => {
-                              // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
-                              if (!data?.hoso || data.hoso.length === 0) return false
-                              // Lấy giá trị 'phauthuat' từ nhóm 'phuongphap'
-                              const phauthuat = data.hoso[0]?.tomtat?.phuongphap?.phauthuat
-                              return phauthuat === 'khong'
-                            },
-                          },
-                          type: 'text',
-                        },
+                        // {
+                        //   name: 'noikhoa',
+                        //   label: 'Nội khoa',
+                        //   admin: {
+                        //     condition: (data) => {
+                        //       // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
+                        //       if (!data?.hoso || data.hoso.length === 0) return false
+                        //       // Lấy giá trị 'phauthuat' từ nhóm 'phuongphap'
+                        //       const phauthuat = data.hoso[0]?.tomtat?.phuongphap?.phauthuat
+                        //       return phauthuat === 'khong'
+                        //     },
+                        //   },
+                        //   type: 'text',
+                        // },
                       ],
                     },
                     {

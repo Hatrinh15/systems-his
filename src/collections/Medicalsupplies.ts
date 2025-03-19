@@ -14,9 +14,18 @@ export const medicalSupplies: CollectionConfig = {
   },
   fields: [
     {
-      name: 'code',
-      label: 'Mã ',
-      type: 'text',
+      name: 'loaivattu',
+      label: 'Loại vật tư',
+      type: 'radio',
+      options:[
+        {label: 'Vật tư tiêu hao',value: 'vattutieuhao'},
+        {label: 'Máy móc/Thiết bị',value: 'maymocthietbi'},
+      ]
+    },
+    {
+      name: "code",
+      label: "Mã vật tư",
+      type: "text",
       unique: true,
     },
     {name:'option',
@@ -87,21 +96,9 @@ export const medicalSupplies: CollectionConfig = {
      hasMany:true,
     },
     {
-      name: 'expirydate',
-      label: 'Hạn sử dụng',
-      type: 'date',
-      required: false,
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
-        },
-      },
-    },
-    {
-      name: 'notes',
-      label: 'Ghi chú đặc biệt',
-      type: 'textarea',
+      name: "notes",
+      label: "Ghi chú",
+      type: "textarea",
     },
   ],
   timestamps: true,

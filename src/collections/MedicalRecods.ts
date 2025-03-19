@@ -94,7 +94,7 @@ const MedicalRecods: CollectionConfig = {
                     {
                       name: 'tomtat',
                       label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
-                      type: 'text',
+                      type: 'textarea',
                     },
                     { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
 

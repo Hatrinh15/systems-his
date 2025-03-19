@@ -1,3 +1,4 @@
+
 import { CollectionAfterReadHook, CollectionBeforeChangeHook, APIError } from 'payload'
 
 export const updateProductName: CollectionBeforeChangeHook = async ({ data, req }) => {

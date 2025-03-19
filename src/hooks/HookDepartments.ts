@@ -56,3 +56,22 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
     )
   }
 }
+export const showTitle: CollectionBeforeChangeHook = async ({ data }) => {
+if(!data)return
+const titleKhoa =  [
+  { label: 'Khoa tai', value: 'tai' },
+  { label: 'Khoa mũi xoang', value: 'mui' },
+  { label: 'Khoa họng-thanh quản', value: 'hong' },
+  { label: 'Khoa cấp cứu', value: 'capcuu' },
+  { label: 'Khoa gây mê hồi sức', value: 'gaymehoisuc' },
+  { label: 'Khoa chẩn đoán hình ảnh', value: 'chandoanhinhanh' },
+  { label: 'Khoa xét nghiệm', value: 'khoaxetnghiem' },
+  { label: 'Khoa dược', value: 'khoaduoc'},
+  { label: 'Khoa khác', value: 'khoakhac' },
+]
+titleKhoa.map((item) => {
+  if (data.tenkhoa === item.value) {
+    data.title = item.label
+  }})
+  return data
+}

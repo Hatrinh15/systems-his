@@ -28,8 +28,10 @@ const Rooms: CollectionConfig = {
       name: 'Phong',
       type: 'array',
       label: 'Danh sách phòng',
-
       fields: [
+        {
+          type: 'row',
+          fields: [
         {
           name: 'tenphongbenh',
           label: 'Tên Phòng',
@@ -168,6 +170,8 @@ const Rooms: CollectionConfig = {
             }
           },
         },
+      ],
+    },
       ],
     },
   ],

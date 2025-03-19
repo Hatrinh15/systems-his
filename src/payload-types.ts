@@ -29,9 +29,10 @@ export interface Config {
     pharmacies: Pharmacy;
     appointments: Appointment;
     Rooms: Room;
+    phieuxuat: Phieuxuat;
     departments: Department;
     class: Class;
-    baoGia: BaoGia;
+    baogia: Baogia;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -73,9 +74,10 @@ export interface Config {
     pharmacies: PharmaciesSelect<false> | PharmaciesSelect<true>;
     appointments: AppointmentsSelect<false> | AppointmentsSelect<true>;
     Rooms: RoomsSelect<false> | RoomsSelect<true>;
+    phieuxuat: PhieuxuatSelect<false> | PhieuxuatSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     class: ClassSelect<false> | ClassSelect<true>;
-    baoGia: BaoGiaSelect<false> | BaoGiaSelect<true>;
+    baogia: BaogiaSelect<false> | BaogiaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -955,6 +957,7 @@ export interface Appointment {
  */
 export interface Department {
   id: string;
+  title?: string | null;
   tenkhoa?:
     | (
         | 'tai'
@@ -972,21 +975,7 @@ export interface Department {
   doctors?: (string | User)[] | null;
   nures?: (string | User)[] | null;
   thongtin?: {
-    mota?: {
-      root: {
-        type: string;
-        children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    mota?: string | null;
     ngaythanhlap?: string | null;
   };
   departmentInventory?:
@@ -1000,8 +989,7 @@ export interface Department {
               relationTo: 'medicalSupplies';
               value: string | MedicalSupply;
             };
-        batchnumber?: string | null;
-        currentquantity?: number | null;
+        quantity?: number | null;
         unit?: string | null;
         expirydate?: string | null;
         id?: string | null;
@@ -1034,14 +1022,14 @@ export interface Medication {
         | 'khac'
       )
     | null;
+  unit?: ('pill' | 'bottle' | 'ampoule' | 'flask' | 'sachet' | 'box') | null;
   description?: string | null;
   dosage?: string | null;
-  unit?: ('pill' | 'bottle' | 'ampoule' | 'flask' | 'sachet' | 'box') | null;
   activeIngredient?: string | null;
   sideEffects?: string | null;
   contraindications?: string | null;
   supplier?: (string | Supplier)[] | null;
-  expiryDate?: string | null;
+  note?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1074,6 +1062,7 @@ export interface Supplier {
  */
 export interface MedicalSupply {
   id: string;
+  loaivattu?: ('vattutieuhao' | 'maymocthietbi') | null;
   code?: string | null;
   option: 'vattutieuhao' | 'maymocthietbi';
   name?: string | null;
@@ -1093,7 +1082,6 @@ export interface MedicalSupply {
   packaging?: string | null;
   manufacturer?: string | null;
   supplier?: (string | Supplier)[] | null;
-  expirydate?: string | null;
   notes?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1146,13 +1134,11 @@ export interface Order {
  */
 export interface Inventory {
   id: string;
-  category: 'medications' | 'medicalSupplies';
+  category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
   item?: (string | null) | Medication;
-  items?: (string | null) | MedicalSupply;
   quantity?: number | null;
   stockstatus: 'conhang' | 'hethang' | 'saphet' | 'hethansudung';
   reorderlevel?: number | null;
-  expirydate?: string | null;
   supplier?: (string | null) | Supplier;
   importdate?: string | null;
   updatedAt: string;
@@ -1225,11 +1211,19 @@ export interface Inventorytransaction {
  */
 export interface Pharmacy {
   id: string;
-  medicine?: (string | null) | Medication;
+  medicine?:
+    | ({
+        relationTo: 'medications';
+        value: string | Medication;
+      } | null)
+    | ({
+        relationTo: 'medicalSupplies';
+        value: string | MedicalSupply;
+      } | null);
+  medicineName?: string | null;
   quantity?: number | null;
   price?: number | null;
   unit?: string | null;
-  batchnumber?: string | null;
   expirydate?: string | null;
   notes?: string | null;
   updatedAt: string;
@@ -1257,6 +1251,62 @@ export interface Room {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "phieuxuat".
+ */
+export interface Phieuxuat {
+  id: string;
+  transactiondate?: string | null;
+  receiverorsender?: (string | null) | User;
+  exports?:
+    | {
+        loai_xuat: 'khoa' | 'quaythuoc' | 'huy';
+        destination?: (string | null) | Department;
+        nguoinhan?: (string | null) | User;
+        reason_cancel?: string | null;
+        thuoc?:
+          | {
+              tenthuoc?: (string | null) | Medication;
+              quantity?: number | null;
+              donvi: 'hop' | 'thung';
+              unitprice?: string | null;
+              totalprice?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        vattutieuhao?:
+          | {
+              supply?: (string | null) | MedicalSupply;
+              quantity?: number | null;
+              donvi: 'hop' | 'thung';
+              unitprice?: string | null;
+              totalprice?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        maymocthietbi?:
+          | {
+              equipment?: (string | null) | MedicalSupply;
+              quantity?: number | null;
+              donvi: 'cai' | 'bo';
+              unitprice?: string | null;
+              totalprice?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        tongtien?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  tong_gia_tri_thuoc?: string | null;
+  tong_gia_tri_vtth?: string | null;
+  tong_gia_tri_mmtb?: string | null;
+  tong_gia_tri?: string | null;
+  report_notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "class".
  */
 export interface Class {
@@ -1265,21 +1315,7 @@ export interface Class {
   truongphong?: (string | User)[] | null;
   nhanvien?: (string | User)[] | null;
   thongtin?: {
-    mota?: {
-      root: {
-        type: string;
-        children: {
-          type: string;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    mota?: string | null;
     ngaythanhlap?: string | null;
   };
   updatedAt: string;
@@ -1287,9 +1323,9 @@ export interface Class {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "baoGia".
+ * via the `definition` "baogia".
  */
-export interface BaoGia {
+export interface Baogia {
   id: string;
   category: 'medications' | 'medicalSupplies';
   item?: (string | null) | Medication;
@@ -1305,7 +1341,7 @@ export interface BaoGia {
   gianhaptrungbinh?: string | null;
   thue?: number | null;
   loinhuan?: number | null;
-  giaban?: string | null;
+  giabanle?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1554,6 +1590,10 @@ export interface PayloadLockedDocument {
         value: string | Room;
       } | null)
     | ({
+        relationTo: 'phieuxuat';
+        value: string | Phieuxuat;
+      } | null)
+    | ({
         relationTo: 'departments';
         value: string | Department;
       } | null)
@@ -1562,8 +1602,8 @@ export interface PayloadLockedDocument {
         value: string | Class;
       } | null)
     | ({
-        relationTo: 'baoGia';
-        value: string | BaoGia;
+        relationTo: 'baogia';
+        value: string | Baogia;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2195,14 +2235,14 @@ export interface MedicationsSelect<T extends boolean = true> {
   code?: T;
   name?: T;
   category?: T;
+  unit?: T;
   description?: T;
   dosage?: T;
-  unit?: T;
   activeIngredient?: T;
   sideEffects?: T;
   contraindications?: T;
   supplier?: T;
-  expiryDate?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2211,6 +2251,7 @@ export interface MedicationsSelect<T extends boolean = true> {
  * via the `definition` "medicalSupplies_select".
  */
 export interface MedicalSuppliesSelect<T extends boolean = true> {
+  loaivattu?: T;
   code?: T;
   option?: T;
   name?: T;
@@ -2220,7 +2261,6 @@ export interface MedicalSuppliesSelect<T extends boolean = true> {
   packaging?: T;
   manufacturer?: T;
   supplier?: T;
-  expirydate?: T;
   notes?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2232,11 +2272,9 @@ export interface MedicalSuppliesSelect<T extends boolean = true> {
 export interface InventorySelect<T extends boolean = true> {
   category?: T;
   item?: T;
-  items?: T;
   quantity?: T;
   stockstatus?: T;
   reorderlevel?: T;
-  expirydate?: T;
   supplier?: T;
   importdate?: T;
   updatedAt?: T;
@@ -2310,10 +2348,10 @@ export interface InventorytransactionsSelect<T extends boolean = true> {
  */
 export interface PharmaciesSelect<T extends boolean = true> {
   medicine?: T;
+  medicineName?: T;
   quantity?: T;
   price?: T;
   unit?: T;
-  batchnumber?: T;
   expirydate?: T;
   notes?: T;
   updatedAt?: T;
@@ -2355,9 +2393,65 @@ export interface RoomsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "phieuxuat_select".
+ */
+export interface PhieuxuatSelect<T extends boolean = true> {
+  transactiondate?: T;
+  receiverorsender?: T;
+  exports?:
+    | T
+    | {
+        loai_xuat?: T;
+        destination?: T;
+        nguoinhan?: T;
+        reason_cancel?: T;
+        thuoc?:
+          | T
+          | {
+              tenthuoc?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              id?: T;
+            };
+        vattutieuhao?:
+          | T
+          | {
+              supply?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              id?: T;
+            };
+        maymocthietbi?:
+          | T
+          | {
+              equipment?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              id?: T;
+            };
+        tongtien?: T;
+        id?: T;
+      };
+  tong_gia_tri_thuoc?: T;
+  tong_gia_tri_vtth?: T;
+  tong_gia_tri_mmtb?: T;
+  tong_gia_tri?: T;
+  report_notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "departments_select".
  */
 export interface DepartmentsSelect<T extends boolean = true> {
+  title?: T;
   tenkhoa?: T;
   truongkhoa?: T;
   doctors?: T;
@@ -2372,8 +2466,7 @@ export interface DepartmentsSelect<T extends boolean = true> {
     | T
     | {
         item?: T;
-        batchnumber?: T;
-        currentquantity?: T;
+        quantity?: T;
         unit?: T;
         expirydate?: T;
         id?: T;
@@ -2400,9 +2493,9 @@ export interface ClassSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "baoGia_select".
+ * via the `definition` "baogia_select".
  */
-export interface BaoGiaSelect<T extends boolean = true> {
+export interface BaogiaSelect<T extends boolean = true> {
   category?: T;
   item?: T;
   items?: T;
@@ -2417,7 +2510,7 @@ export interface BaoGiaSelect<T extends boolean = true> {
   gianhaptrungbinh?: T;
   thue?: T;
   loinhuan?: T;
-  giaban?: T;
+  giabanle?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -18,7 +18,8 @@ export const Inventory: CollectionConfig = {
       type: 'radio',
       options: [
         { label: 'Thuốc', value: 'medications' },
-        { label: 'Vật tư y tế', value: 'medicalSupplies' },
+        { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
+        { label: 'Máy móc/Thiết bị', value: 'maymocthietbi' },
       ],
       required: true,
     },
@@ -29,14 +30,6 @@ export const Inventory: CollectionConfig = {
       relationTo: 'medications',
       admin:{ condition: (data)=> data?.category==='medications'},
     },
-    {
-      name: 'items',
-      label: 'Sản phẩm',
-      type: 'relationship',
-      relationTo:  'medicalSupplies',
-      admin:{ condition: (data)=> data?.category==='medicalSupplies'},
-    },
-    
     {
       name: 'quantity',
       label: 'Số lượng tồn kho',
@@ -64,11 +57,6 @@ export const Inventory: CollectionConfig = {
       defaultValue: 10, // Số lượng tối thiểu để cảnh báo
     },
     {
-      name: 'expirydate',
-      label: 'Hạn sử dụng',
-      type: 'date',
-    },
-    {
       name: 'supplier',
       label: 'Nhà cung cấp',
       type: 'relationship',
@@ -78,6 +66,12 @@ export const Inventory: CollectionConfig = {
       name: 'importdate',
       label: 'Ngày nhập',
       type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
+      },
     },
   ],
   timestamps: true,

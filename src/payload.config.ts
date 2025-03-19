@@ -14,8 +14,6 @@ import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
-import { baoGia } from './collections/Baogia'
-
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
 import { Medicalorders } from './collections/Users/Medicalorders'
@@ -28,11 +26,14 @@ import { getServerSideURL } from './utilities/getURL'
 import { Medications } from './collections/Medications'
 import { medicalSupplies } from './collections/Medicalsupplies'
 import { Inventory } from './collections/Inventory'
-import { InventoryTransactions } from './collections/InventoryTransactions'
 import Class from './collections/phongban/class'
-import { Pharmacies } from './collections/Pharmacies'
 import { medicalUsages } from './collections/MedicalUsages'
 import { Orders } from './collections/Orders'
+import { PhieuXuat } from './collections/ExportTransactions'
+import { baoGia } from './collections/BaoGia'
+import { test } from './collections/test'
+import { Pharmacies } from './collections/Pharmacies'
+import {InventoryTransactions} from './collections/InventoryTransactions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -82,7 +83,7 @@ export default buildConfig({
   collections: [
     Pages, Posts, Categories, Medicalorders,Media,Users,medicalUsages,Orders,
     Patients, MedicalRecods,Suppliers,Medications,medicalSupplies,Inventory,InventoryTransactions,Pharmacies,
-    Appointments, Rooms,
+    Appointments, Rooms,PhieuXuat,
     Departments, Class, baoGia,
 
   ],

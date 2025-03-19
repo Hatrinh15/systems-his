@@ -1,3 +1,4 @@
+
 import { CollectionConfig } from "payload";
 export const Pharmacies: CollectionConfig = {
     slug: 'pharmacies',
@@ -12,16 +13,23 @@ export const Pharmacies: CollectionConfig = {
       },
       fields: [
         {
-          name: 'medicine',
-          label: 'Tên thuốc',
-          type: 'relationship',
-          relationTo: 'medications',
+          name: "medicine",
+          label: "Tên sản phẩm",
+          type: "relationship",
+          relationTo: ['medications','medicalSupplies']
+        },
+        {
+          name: "medicineName", 
+          label: "Tên hiển thị",
+          type: "text",
+          admin: { readOnly: true }, 
         },
         {
           name: 'quantity',
           label: 'Số lượng tại quầy',
           type: 'number',
           min: 0,
+          admin: { readOnly: true }, // Chỉ hiển thị, không chỉnh sửa
         },
         {
             name: 'price',
@@ -35,14 +43,9 @@ export const Pharmacies: CollectionConfig = {
             type: 'text',
           },
         {
-          name: 'batchnumber',
-          label: 'Số lô thuốc',
-          type: 'text',
-        },
-        {
           name: 'expirydate',
           label: 'Hạn sử dụng',
-          type: 'date',
+          type: 'text'
         },
         {
           name: 'notes',
@@ -50,5 +53,4 @@ export const Pharmacies: CollectionConfig = {
           type: 'textarea',
         },
       ],
-      timestamps: true,
-}
+  };

@@ -7,20 +7,26 @@ export const Inventory: CollectionConfig = {
     plural: 'KHO HÀNG',
   },
   admin: {
-    useAsTitle: 'item',
-    defaultColumns: ['item', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
+    useAsTitle: 'category',
+    defaultColumns: ['category', 'item', 'quantity', 'expirydate', 'importprice'],
   },
   fields: [
+    {
+      name: 'category',
+      label: 'Danh mục',
+      type: 'radio',
+      options: [
+        { label: 'Thuốc', value: 'medications' },
+        { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
+        { label: 'Máy móc/Thiết bị', value: 'maymocthietbi' },
+      ],
+      required: true,
+    },
     {
       name: 'item',
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: ['medications', 'medicalSupplies'],
-    },
-    {
-      name: 'batchnumber',
-      label: 'Số lô',
-      type: 'text',
     },
     {
       name: 'quantity',
@@ -52,12 +58,12 @@ export const Inventory: CollectionConfig = {
       name: 'expirydate',
       label: 'Hạn sử dụng',
       type: 'date',
-    },
-    {
-      name: 'importprice',
-      label: 'Giá nhập',
-      type: 'number',
-      min: 0,
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
+      },
     },
     {
       name: 'supplier',
@@ -69,6 +75,12 @@ export const Inventory: CollectionConfig = {
       name: 'importdate',
       label: 'Ngày nhập',
       type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
+      },
     },
   ],
   timestamps: true,

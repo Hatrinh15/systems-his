@@ -15,7 +15,7 @@ admin: { group: 'Quản lý nội dung' },
 fields:[
     {
       name: 'patients',
-      label: 'BỆNH NHÂN',
+      label: 'Bệnh nhân',
       type: 'relationship',
       relationTo: 'patients',  // Tham chiếu tới collection 'patients'
     },

@@ -10,7 +10,6 @@ export const validateMedicationData: CollectionBeforeValidateHook = async ({ dat
     name: "Tên thuốc",
     category: "Loại thuốc",
     unit: "Đơn vị tính",
-    expiryDate: "Hạn sử dụng",
   };
 
   // Danh sách trường bắt buộc
@@ -26,12 +25,6 @@ export const validateMedicationData: CollectionBeforeValidateHook = async ({ dat
   const codePattern = /^(?=.*[A-Z])(?=.*\d)[A-Z\d]+$/;
   if (!codePattern.test(data.code)) {
     throw new APIError("Mã thuốc phải chứa cả chữ và số, và phải là chữ in hoa!", 400);
-  }
-
-  // Kiểm tra hạn sử dụng
-  const today = new Date().toISOString().split("T")[0];
-  if (data.expiryDate < today) {
-    throw new APIError("Hạn sử dụng phải lớn hơn hoặc bằng ngày hiện tại!", 400);
   }
 
  // Kiểm tra trùng mã thuốc (chỉ khi thay đổi mã)

@@ -10,7 +10,6 @@ export const hookMedicalSupplies: CollectionBeforeValidateHook = async ({ data, 
     name: "Tên vật tư y tế",
     category: "Loại vật tư",
     unit: "Đơn vị tính",
-    expirydate: "Hạn sử dụng",
   };
 
   // Kiểm tra các trường bắt buộc
@@ -25,16 +24,6 @@ export const hookMedicalSupplies: CollectionBeforeValidateHook = async ({ data, 
   // Kiểm tra hạn sử dụng không nhỏ hơn ngày hiện tại
   // Lấy giá trị hạn sử dụng từ dữ liệu đầu vào
 const expiryDate = data.expirydate ? new Date(data.expirydate) : null;
-
-// Kiểm tra hạn sử dụng nếu có giá trị
-if (expiryDate) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Đặt về đầu ngày
-
-  if (expiryDate.getTime() < today.getTime()) {
-    throw new APIError("Hạn sử dụng phải lớn hơn hoặc bằng ngày hiện tại!", 400);
-  }
-}
 
   // Kiểm tra định dạng mã vật tư (chỉ gồm chữ in hoa + số)
   const codeRegex = /^[A-Z0-9]+$/;

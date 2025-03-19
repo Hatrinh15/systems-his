@@ -13,6 +13,12 @@ export const Suppliers: CollectionConfig = {
   },
   fields: [
     {
+      name :'idnhacungcap',
+      label: 'Mã nhà cung cấp',
+      type: 'text',
+      admin: { readOnly: true },
+    },
+    {
       name: 'name',
       label: 'Tên nhà cung cấp',
       type: 'text',

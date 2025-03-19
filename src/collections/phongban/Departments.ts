@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload'
-import { beforeChange } from '@/hooks/HookDepartments'
+import { beforeChange,showTitle } from '@/hooks/HookDepartments'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
@@ -8,7 +8,8 @@ const Departments: CollectionConfig = {
   },
   admin: {
     group: 'Khối',
-    useAsTitle: 'tenkhoa',
+    useAsTitle: 'title',
+    defaultColumns: ['title', 'truongkhoa', 'doctors', 'nures'],
   },
   fields: [
     {
@@ -18,6 +19,14 @@ const Departments: CollectionConfig = {
           label: 'Thông Tin Khoa',
           fields: [
             {
+              name: "title",
+              label: "Tên khoa",
+              type: "text",
+              admin: {
+                hidden: true
+              }
+            },
+            {
               name: 'tenkhoa',
               label: 'TÊN KHOA',
               type: 'select',
@@ -26,12 +35,13 @@ const Departments: CollectionConfig = {
               },
               options: [
                 { label: 'Khoa tai', value: 'tai' },
-                { label: 'Khoa mũi', value: 'mui' },
-                { label: 'Khoa họng-Thanh quản', value: 'hong' },
+                { label: 'Khoa mũi xoang', value: 'mui' },
+                { label: 'Khoa họng-thanh quản', value: 'hong' },
                 { label: 'Khoa cấp cứu', value: 'capcuu' },
                 { label: 'Khoa gây mê hồi sức', value: 'gaymehoisuc' },
                 { label: 'Khoa chẩn đoán hình ảnh', value: 'chandoanhinhanh' },
                 { label: 'Khoa xét nghiệm', value: 'khoaxetnghiem' },
+                { label: 'Khoa dược', value: 'khoaduoc'},
                 { label: 'Khoa khác', value: 'khoakhac' },
               ],
             },
@@ -150,7 +160,7 @@ const Departments: CollectionConfig = {
               label: 'Thông tin hoạt động',
               type: 'group',
               fields: [
-                { name: 'mota', label: 'Mô tả', type: 'richText' },
+                { name: 'mota', label: 'Mô tả', type: 'textarea' },
                 { name: 'ngaythanhlap', label: 'Ngày thành lập', type: 'date' },
               ],
             },
@@ -163,7 +173,10 @@ const Departments: CollectionConfig = {
               label: 'Danh sách sản phẩm',
               type: 'array',
               fields:[
-                  {
+                {
+                  type:'row',
+                  fields:[  
+                   {
                       name: 'item',
                       label: 'Sản phẩm',
                       type: 'relationship',
@@ -171,15 +184,11 @@ const Departments: CollectionConfig = {
                       required: true,
                     },
                     {
-                      name: 'batchnumber',
-                      label: 'Số lô sản phẩm',
-                      type: 'text',
-                    },
-                    {
-                      name: 'currentquantity',
+                      name:'quantity',
                       label: 'Số lượng hiện tại',
                       type: 'number',
                       min: 0,
+                      admin: { readOnly: true },
                     },
                     {
                         name: 'unit',
@@ -189,17 +198,19 @@ const Departments: CollectionConfig = {
                     {
                       name: 'expirydate',
                       label: 'Hạn sử dụng',
-                      type: 'date',
+                      type: 'text'
                     },
-            ]
-           }
+                  ],
+                },
+              ], 
+            }
           ]
         },
       ],
     },
   ],
   hooks: {
-    beforeChange: [beforeChange],
+    beforeChange: [beforeChange,showTitle],
   },
 }
 export default Departments

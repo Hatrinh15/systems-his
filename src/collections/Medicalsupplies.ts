@@ -13,6 +13,15 @@ export const medicalSupplies: CollectionConfig = {
   },
   fields: [
     {
+      name: 'loaivattu',
+      label: 'Loại vật tư',
+      type: 'radio',
+      options:[
+        {label: 'Vật tư tiêu hao',value: 'vattutieuhao'},
+        {label: 'Máy móc/Thiết bị',value: 'maymocthietbi'},
+      ]
+    },
+    {
       name: "code",
       label: "Mã vật tư",
       type: "text",
@@ -25,7 +34,7 @@ export const medicalSupplies: CollectionConfig = {
     },
     {
       name: "category",
-      label: "Loại vật tư",
+      label: "Nhóm vật tư",
       type: "select",
       options: [
         { label: "Dùng chung", value: "dungchung" },
@@ -36,11 +45,6 @@ export const medicalSupplies: CollectionConfig = {
         { label: "Dụng cụ tiêm & truyền dịch", value: "dungcutiemvatruyendich" },
         { label: "Vật tư phòng mổ", value: "vattuphongmo" },
       ],
-    },
-    {
-      name: "description",
-      label: "Công dụng",
-      type: "textarea",
     },
     {
       name: "unit",
@@ -60,6 +64,11 @@ export const medicalSupplies: CollectionConfig = {
       ],
     },
     {
+      name: "description",
+      label: "Công dụng",
+      type: "textarea",
+    },
+    {
       name: "packaging",
       label: "Quy cách đóng gói",
       type: "text",
@@ -77,20 +86,8 @@ export const medicalSupplies: CollectionConfig = {
       on:'medicalsupplies',
     },
     {
-      name: "expirydate",
-      label: "Hạn sử dụng",
-      type: "date",
-      required: false,
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
-        },
-      },
-    },
-    {
       name: "notes",
-      label: "Ghi chú đặc biệt",
+      label: "Ghi chú",
       type: "textarea",
     },
 

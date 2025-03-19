@@ -48,16 +48,6 @@ export const Medications: CollectionConfig = {
       ],
     },
     {
-      name: "description",
-      label: "Mô tả thuốc",
-      type: "textarea",
-    },
-    {
-      name: "dosage",
-      label: "Liều lượng sử dụng",
-      type: "textarea",
-    },
-    {
       name: "unit",
       label: "Đơn vị tính",
       type: "select",
@@ -69,6 +59,16 @@ export const Medications: CollectionConfig = {
         { label: "Gói", value: "sachet" },
         { label: "Hộp", value: "box" },
       ],
+    },
+    {
+      name: "description",
+      label: "Mô tả thuốc",
+      type: "textarea",
+    },
+    {
+      name: "dosage",
+      label: "Liều lượng sử dụng",
+      type: "textarea",
     },
     {
       name: "activeIngredient",
@@ -93,16 +93,10 @@ export const Medications: CollectionConfig = {
       on: 'medications'
     },
     {
-      name: "expiryDate",
-      label: "Hạn sử dụng",
-      type: "date",
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
-        },
-      },
-    },
+      name: 'note',
+      label: 'Ghi chú',
+      type: 'textarea',
+    }
   ],
   timestamps: true,
   hooks: {

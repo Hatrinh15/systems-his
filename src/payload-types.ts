@@ -1136,6 +1136,7 @@ export interface Inventory {
   id: string;
   category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
   item?: (string | null) | Medication;
+  items?: (string | null) | MedicalSupply;
   quantity?: number | null;
   stockstatus: 'conhang' | 'hethang' | 'saphet' | 'hethansudung';
   reorderlevel?: number | null;
@@ -2272,6 +2273,7 @@ export interface MedicalSuppliesSelect<T extends boolean = true> {
 export interface InventorySelect<T extends boolean = true> {
   category?: T;
   item?: T;
+  items?: T;
   quantity?: T;
   stockstatus?: T;
   reorderlevel?: T;

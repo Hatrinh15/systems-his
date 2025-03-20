@@ -8,7 +8,7 @@ const Departments: CollectionConfig = {
   },
   admin: {
     group: 'Khoa & Nhân sự ',
-    useAsTitle: 'tenkhoa',
+    useAsTitle: 'title',
   },
   fields: [
     {

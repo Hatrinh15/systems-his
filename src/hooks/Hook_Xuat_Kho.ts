@@ -79,10 +79,13 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({ doc, req, operati
   
       findInventory.docs.forEach((dc) => {
         const thuocId =
-          typeof dc.item?.value === 'object' && dc.item?.value !== null
-            ? dc.item?.value.id
-            : dc.item?.value;
+          typeof dc.item === 'object' && dc.item !== null
+            ? dc.item.id
+            : dc.item;
+        const vattuId =
+        typeof dc.items === 'object'&& dc.items !== null?dc.items.id:dc.items
             inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 });
+            inventoryMap.set(`${vattuId}`,{...dc,totalQuantity: 0 })
       });
       const exportMap = new Map();
     
@@ -133,10 +136,13 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({ doc, req, operati
       });
       findInventory.docs.forEach((dc) => {
         const thuocId =
-          typeof dc.item?.value === 'object' && dc.item?.value !== null
-            ? dc.item?.value.id
-            : dc.item?.value;
-        inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 });
+          typeof dc.item === 'object' && dc.item !== null
+            ? dc.item.id
+            : dc.item;
+        const vattuId =
+        typeof dc.items === 'object'&& dc.items !== null?dc.items.id:dc.items
+            inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 });
+            inventoryMap.set(`${vattuId}`,{...dc,totalQuantity: 0 })
       });
       const exportMap = new Map();
     

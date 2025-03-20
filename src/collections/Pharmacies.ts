@@ -7,8 +7,8 @@ export const Pharmacies: CollectionConfig = {
       plural: 'Quầy Thuốc',
     },
     admin: {
-        useAsTitle: 'medicine',
-        defaultColumns: ['medicine', 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
+        useAsTitle: "medicineName",
+        defaultColumns: ["medicineName", 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
         group:'Dược Và Vật Tư Y Tế'
       },
       fields: [
@@ -16,7 +16,18 @@ export const Pharmacies: CollectionConfig = {
           name: "medicine",
           label: "Tên sản phẩm",
           type: "relationship",
-          relationTo: ['medications','medicalSupplies']
+          relationTo: ['medications','medicalSupplies'],
+          filterOptions: ({relationTo}) => {
+            if(relationTo === 'medications') {
+              return true
+            }
+            if(relationTo === 'medicalSupplies'){
+              return {
+                loaivattu: {equals: 'vattutieuhao'}
+              }
+            }
+            return true
+          }
         },
         {
           name: "medicineName", 

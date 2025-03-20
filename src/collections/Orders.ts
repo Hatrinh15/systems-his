@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload';
+import { CollectionConfig } from 'payload'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
@@ -8,7 +8,7 @@ export const Orders: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'customer',
-    group:'Dược Và Vật Tư Y Tế'
+    group: 'Quản Lý Phiếu & Bảng Giá',
   },
   fields: [
     {
@@ -77,6 +77,4 @@ export const Orders: CollectionConfig = {
       required: true,
     },
   ],
-};
-
-
+}

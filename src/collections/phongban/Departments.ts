@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload'
-import { beforeChange,showTitle } from '@/hooks/HookDepartments'
+import { beforeChange, showTitle } from '@/hooks/HookDepartments'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
@@ -8,7 +8,7 @@ const Departments: CollectionConfig = {
   },
   admin: {
     group: 'Khoa & Nhân sự ',
-    useAsTitle: 'tenkhoa',
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -18,12 +18,12 @@ const Departments: CollectionConfig = {
           label: 'Thông Tin Khoa',
           fields: [
             {
-              name: "title",
-              label: "Tên khoa",
-              type: "text",
+              name: 'title',
+              label: 'Tên khoa',
+              type: 'text',
               admin: {
-                hidden: true
-              }
+                hidden: true,
+              },
             },
             {
               name: 'tenkhoa',
@@ -40,7 +40,7 @@ const Departments: CollectionConfig = {
                 { label: 'Khoa gây mê hồi sức', value: 'gaymehoisuc' },
                 { label: 'Khoa chẩn đoán hình ảnh', value: 'chandoanhinhanh' },
                 { label: 'Khoa xét nghiệm', value: 'khoaxetnghiem' },
-                { label: 'Khoa dược', value: 'khoaduoc'},
+                { label: 'Khoa dược', value: 'khoaduoc' },
                 { label: 'Khoa khác', value: 'khoakhac' },
               ],
             },
@@ -87,10 +87,11 @@ const Departments: CollectionConfig = {
                       .filter(Boolean),
                   )
                   console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
-                  const baseCondition = data?.tenkhoa === 'khoaduoc'
-                    ? { chucvu: { equals: 'duocsi' } } // DUOCSI cho khoa duoc
-                    : { chucvu: { equals: 'bacsi' } }; // bác sĩ cho các khoa khác 
-            
+                  const baseCondition =
+                    data?.tenkhoa === 'khoaduoc'
+                      ? { chucvu: { equals: 'duocsi' } } // DUOCSI cho khoa duoc
+                      : { chucvu: { equals: 'bacsi' } } // bác sĩ cho các khoa khác
+
                   return {
                     and: [
                       baseCondition,
@@ -102,7 +103,7 @@ const Departments: CollectionConfig = {
                         ],
                       },
                     ],
-                  }as any
+                  } as any
                 } catch (error) {
                   console.error('Lỗi truy vấn danh sách bác sĩ:', error)
                   return {}
@@ -169,17 +170,18 @@ const Departments: CollectionConfig = {
             },
           ],
         },
-        { label: 'Kho Khoa',
+        {
+          label: 'Kho Khoa',
           fields: [
             {
               name: 'departmentInventory',
               label: 'Danh sách sản phẩm',
               type: 'array',
-              fields:[
+              fields: [
                 {
-                  type:'row',
-                  fields:[  
-                   {
+                  type: 'row',
+                  fields: [
+                    {
                       name: 'item',
                       label: 'Sản phẩm',
                       type: 'relationship',
@@ -187,33 +189,33 @@ const Departments: CollectionConfig = {
                       required: true,
                     },
                     {
-                      name:'quantity',
+                      name: 'quantity',
                       label: 'Số lượng hiện tại',
                       type: 'number',
                       min: 0,
                       admin: { readOnly: true },
                     },
                     {
-                        name: 'unit',
-                        label:'Đơn vị tính',
-                        type: 'text',
+                      name: 'unit',
+                      label: 'Đơn vị tính',
+                      type: 'text',
                     },
                     {
                       name: 'expirydate',
                       label: 'Hạn sử dụng',
-                      type: 'text'
+                      type: 'text',
                     },
                   ],
                 },
-              ], 
-            }
-          ]
+              ],
+            },
+          ],
         },
       ],
     },
   ],
   hooks: {
-    beforeChange: [beforeChange,showTitle],
+    beforeChange: [beforeChange, showTitle],
   },
 }
 export default Departments

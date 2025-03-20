@@ -804,7 +804,7 @@ export interface MedicalRecod {
   hoso?:
     | {
         khoa?: (string | null) | Department;
-        bacsi?: string | null;
+        bacsi?: (string | null) | User;
         dieuduong?: string | null;
         ngaynhapvien?: string | null;
         sophong?: string | null;
@@ -1136,6 +1136,7 @@ export interface Inventory {
   id: string;
   category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
   item?: (string | null) | Medication;
+  items?: (string | null) | MedicalSupply;
   quantity?: number | null;
   stockstatus: 'conhang' | 'hethang' | 'saphet' | 'hethansudung';
   reorderlevel?: number | null;
@@ -1341,7 +1342,7 @@ export interface Baogia {
   gianhaptrungbinh?: string | null;
   thue?: number | null;
   loinhuan?: number | null;
-  giabanle?: string | null;
+  giaban?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2272,6 +2273,7 @@ export interface MedicalSuppliesSelect<T extends boolean = true> {
 export interface InventorySelect<T extends boolean = true> {
   category?: T;
   item?: T;
+  items?: T;
   quantity?: T;
   stockstatus?: T;
   reorderlevel?: T;
@@ -2510,7 +2512,7 @@ export interface BaogiaSelect<T extends boolean = true> {
   gianhaptrungbinh?: T;
   thue?: T;
   loinhuan?: T;
-  giabanle?: T;
+  giaban?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,4 +1,4 @@
-import { CollectionConfig } from 'payload';
+import { CollectionConfig } from 'payload'
 
 export const Inventory: CollectionConfig = {
   slug: 'inventory',
@@ -8,8 +8,16 @@ export const Inventory: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'item',
-    defaultColumns: ['item', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
-    group:'Dược Và Vật Tư Y Tế'
+    defaultColumns: [
+      'item',
+      'batchnumber',
+      'quantity',
+      'stockstatus',
+      'reorderlevel',
+      'expirydate',
+      'importprice',
+    ],
+    group: 'Dược Và Vật Tư Y Tế',
   },
   fields: [
     {
@@ -28,7 +36,17 @@ export const Inventory: CollectionConfig = {
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: 'medications',
-      admin:{ condition: (data)=> data?.category==='medications'},
+      admin: { condition: (data) => data?.category === 'medications' },
+    },
+    {
+      name: 'items',
+      label: 'Sản phẩm',
+      type: 'relationship',
+      relationTo: 'medicalSupplies',
+      admin: {
+        condition: (data) =>
+          data?.category === 'vattutieuhao' || data?.category === 'maymocthietbi',
+      },
     },
     {
       name: 'quantity',
@@ -75,4 +93,4 @@ export const Inventory: CollectionConfig = {
     },
   ],
   timestamps: true,
-};
+}

@@ -1,4 +1,4 @@
-import { checkDate, showPrice } from '@/hooks/hookphieunhap'
+import { checkDate, hookNhapKho, showPrice } from '@/hooks/hookphieunhap'
 import { CollectionConfig } from 'payload'
 
 export const InventoryTransactions: CollectionConfig = {
@@ -10,7 +10,7 @@ export const InventoryTransactions: CollectionConfig = {
   admin: {
     useAsTitle: 'transactiondate',
     defaultColumns: ['receiverorsender', 'transactiondate', 'giaodich'],
-    group: 'Dược Và Vật Tư Y Tế',
+    group: 'Quản Lý Phiếu & Bảng Giá',
   },
   fields: [
     {

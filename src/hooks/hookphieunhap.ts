@@ -1,4 +1,6 @@
 import { CollectionBeforeValidateHook, APIError, CollectionBeforeChangeHook } from 'payload'
+
+//<> Thông báo ngày, và điều kiện của ngày
 export const checkDate: CollectionBeforeValidateHook = async ({ req, data, operation }) => {
   if (operation === 'create') {
     const existingTransaction = await req.payload.find({
@@ -35,6 +37,8 @@ export const checkDate: CollectionBeforeValidateHook = async ({ req, data, opera
     }
   }
 }
+
+//<> Định dạng giá tiền và tính tiền
 export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (!data) return data
 
@@ -129,7 +133,7 @@ export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
 
             try {
               const findthuoc = await req.payload.find({
-                collection: 'baoGia',
+                collection: 'baogia',
                 where: { item: { equals: tenthuocId } },
                 limit: 1,
               })
@@ -181,7 +185,7 @@ export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
 
             try {
               const findvattu = await req.payload.find({
-                collection: 'baoGia',
+                collection: 'baogia',
                 where: { items: { equals: tenvattuId } },
                 limit: 1,
               })
@@ -231,7 +235,7 @@ export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
 
             try {
               const findmaymoc = await req.payload.find({
-                collection: 'baoGia',
+                collection: 'baogia',
                 where: { items: { equals: tenmaymocId } },
                 limit: 1,
               })
@@ -311,3 +315,5 @@ export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
 
   return data
 }
+
+//<> Tự động điền số lượng vào bên kho

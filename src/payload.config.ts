@@ -33,7 +33,7 @@ import { PhieuXuat } from './collections/ExportTransactions'
 import { baoGia } from './collections/Baogia'
 import { test } from './collections/test'
 import { Pharmacies } from './collections/Pharmacies'
-import {InventoryTransactions} from './collections/InventoryTransactions'
+import { InventoryTransactions } from './collections/InventoryTransactions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -81,11 +81,28 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   collections: [
-    Pages, Posts, Categories, Medicalorders,Media,Users,medicalUsages,Orders,
-    Patients, MedicalRecods,Suppliers,Medications,medicalSupplies,Inventory,InventoryTransactions,Pharmacies,
-    Appointments, Rooms,PhieuXuat,
-    Departments, Class, baoGia,
-
+    Pages,
+    Posts,
+    Categories,
+    Medicalorders,
+    Media,
+    Users,
+    medicalUsages,
+    Orders,
+    Patients,
+    MedicalRecods,
+    Suppliers,
+    Medications,
+    medicalSupplies,
+    Inventory,
+    InventoryTransactions,
+    Pharmacies,
+    Appointments,
+    Rooms,
+    PhieuXuat,
+    Departments,
+    Class,
+    baoGia,
   ],
 
   cors: [getServerSideURL()].filter(Boolean),

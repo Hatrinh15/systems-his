@@ -61,7 +61,59 @@ const MedicalRecods: CollectionConfig = {
               type: 'array',
               fields: [
                 { name: 'khoa', label: 'KHoa', type: 'relationship', relationTo: 'departments' },
-                { name: 'bacsi', label: 'Bác sĩ phụ trách', type: 'text' },
+                {
+                  name: 'bacsi',
+                  label: 'Bác sĩ phụ trách',
+                  type: 'relationship',
+                  relationTo: 'users',
+                  filterOptions: async ({ req, siblingData }) => {
+                    try {
+                      // Kiểm tra nếu siblingData không tồn tại hoặc không có khoa thì trả về danh sách rỗng
+                      if (
+                        !siblingData ||
+                        typeof siblingData !== 'object' ||
+                        !('khoa' in siblingData)
+                      ) {
+                        return { id: { in: [] } }
+                      }
+
+                      const khoaID = siblingData.khoa as string // Ép kiểu để TypeScript hiểu
+
+                      if (!khoaID) {
+                        return { id: { in: [] } }
+                      }
+
+                      // Truy vấn thông tin khoa từ collection `departments`
+                      const department = await req.payload.findByID({
+                        collection: 'departments',
+                        id: khoaID,
+                      })
+
+                      // Nếu không tìm thấy khoa hoặc không có nhân sự, trả về danh sách rỗng
+                      if (!department || (!department.truongkhoa && !department.doctors)) {
+                        return { id: { in: [] } }
+                      }
+
+                      // Đảm bảo `truongkhoa` và `doctors` luôn là mảng trước khi map
+                      const staffList = [
+                        ...(Array.isArray(department.truongkhoa) ? department.truongkhoa : []),
+                        ...(Array.isArray(department.doctors) ? department.doctors : []),
+                      ]
+
+                      return {
+                        id: {
+                          in: staffList
+                            .filter((staff) => staff && typeof staff === 'object' && 'id' in staff) // Kiểm tra kỹ
+                            .map((staff) => (staff as { id: string }).id), // Ép kiểu để tránh lỗi TypeScript
+                        },
+                      }
+                    } catch (error) {
+                      console.error('Lỗi khi lọc nhân sự theo khoa:', error)
+                      return { id: { in: [] } }
+                    }
+                  },
+                },
+
                 {
                   name: 'dieuduong',
                   label: 'Điều dưỡng thực hiện',
@@ -75,7 +127,7 @@ const MedicalRecods: CollectionConfig = {
                   admin: {
                     date: {
                       pickerAppearance: 'dayOnly',
-                      displayFormat: 'd MMM yyyy', // Đảm bảo format đúng
+                      displayFormat: 'd-MM-yyyy', // Đảm bảo format đúng
                     },
                   },
                 },
@@ -117,8 +169,7 @@ const MedicalRecods: CollectionConfig = {
                               displayFormat: 'd-MM-yyy',
                             },
                           },
-                        
-                          },
+                        },
                         {
                           name: 'dienBien',
                           label: 'Diễn biến bệnh',
@@ -178,7 +229,7 @@ const MedicalRecods: CollectionConfig = {
                   admin: {
                     condition: (data, siblingData) => {
                       // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
-                      if(siblingData.tinhtrang === 'yes') {
+                      if (siblingData.tinhtrang === 'yes') {
                         return true
                       }
                       return false

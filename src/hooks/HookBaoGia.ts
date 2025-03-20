@@ -1,4 +1,3 @@
-
 import { CollectionAfterReadHook, CollectionBeforeChangeHook, APIError } from 'payload'
 
 export const updateProductName: CollectionBeforeChangeHook = async ({ data, req }) => {
@@ -41,7 +40,7 @@ export const priceAfterRead: CollectionAfterReadHook = ({ doc }) => {
     let count = 0
 
     doc.gianhapnhacungcap = doc.gianhapnhacungcap.map((item) => {
-      const numericPrice = Number(item.gianhap.toString().replace(/\D/g, '')) || 0
+      const numericPrice = Number(item.gianhap?.toString().replace(/\D/g, '')) || 0
 
       if (numericPrice > 0) {
         totalPrice += numericPrice

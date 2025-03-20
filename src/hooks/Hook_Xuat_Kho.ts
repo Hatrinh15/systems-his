@@ -93,7 +93,6 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({
         inventoryMap.set(`${vattuId}`, { ...dc, totalQuantity: 0 })
       })
       const exportMap = new Map()
-
       for (const item of doc.exports) {
         for (const thuoc of item.thuoc) {
           const key = `${thuoc.tenthuoc}`

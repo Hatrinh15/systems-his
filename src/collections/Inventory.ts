@@ -8,16 +8,8 @@ export const Inventory: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'item',
-    defaultColumns: [
-      'item',
-      'batchnumber',
-      'quantity',
-      'stockstatus',
-      'reorderlevel',
-      'expirydate',
-      'importprice',
-    ],
-    group: 'Dược Và Vật Tư Y Tế',
+    defaultColumns: ['item','items', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
+    group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
     {
@@ -44,8 +36,7 @@ export const Inventory: CollectionConfig = {
       type: 'relationship',
       relationTo: 'medicalSupplies',
       admin: {
-        condition: (data) =>
-          data?.category === 'vattutieuhao' || data?.category === 'maymocthietbi',
+        condition: (data) => data?.category === 'vattutieuhao' || data?.category === 'maymocthietbi',
       },
     },
     {

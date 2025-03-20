@@ -1,3 +1,4 @@
+
 import { CollectionConfig } from 'payload'
 import { priceAfterRead, updateProductName } from '@/hooks/HookBaoGia'
 export const baoGia: CollectionConfig = {
@@ -86,6 +87,7 @@ export const baoGia: CollectionConfig = {
   timestamps: true,
   hooks: {
     beforeChange: [updateProductName],
-    afterRead: [priceAfterRead],
-  },
-}
+    afterRead:[priceAfterRead]
+    }
+};
+

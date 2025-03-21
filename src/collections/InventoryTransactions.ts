@@ -196,7 +196,7 @@ export const InventoryTransactions: CollectionConfig = {
                         {
                           name: 'tongsohop',
                           label: ' Tổng số hộp',
-                          type: 'text',
+                          type: 'number',
                           admin: {
                             condition: (data, siblingData) => {
                               // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
@@ -249,7 +249,7 @@ export const InventoryTransactions: CollectionConfig = {
                             const findvattu = await req.payload.find({
                               collection: 'medicalSupplies',
                               where: {
-                                option: { equals: 'vattutieuhao' },
+                                loaivattu: { equals: 'vattutieuhao' },
                               },
                             })
 
@@ -374,7 +374,7 @@ export const InventoryTransactions: CollectionConfig = {
                             const findmaymoc = await req.payload.find({
                               collection: 'medicalSupplies',
                               where: {
-                                option: { equals: 'maymocthietbi' },
+                                loaivattu: { equals: 'maymocthietbi' },
                               },
                             })
 
@@ -491,6 +491,7 @@ export const InventoryTransactions: CollectionConfig = {
   hooks: {
     beforeChange: [showPrice],
     beforeValidate: [checkDate],
+    afterChange: [hookNhapKho],
   },
 }
 export default InventoryTransactions

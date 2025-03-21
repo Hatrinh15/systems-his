@@ -2,11 +2,11 @@
 import { CollectionConfig } from "payload";
 import { hookQuayThuoc } from "@/hooks/Hookpharmacies";
 export const Pharmacies: CollectionConfig = {
-    slug: 'pharmacies',
-    labels: {
-      singular: 'Quầy Thuốc',
-      plural: 'Quầy Thuốc',
-    },
+  slug: 'pharmacies',
+  labels: {
+    singular: 'Quầy Thuốc',
+    plural: 'Quầy Thuốc',
+  },
     admin: {
         useAsTitle: 'sanpham',
         defaultColumns: ['sanpham', 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],

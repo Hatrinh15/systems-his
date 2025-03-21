@@ -1058,7 +1058,6 @@ export interface MedicalSupply {
   id: string;
   loaivattu?: ('vattutieuhao' | 'maymocthietbi') | null;
   code?: string | null;
-  option: 'vattutieuhao' | 'maymocthietbi';
   name?: string | null;
   category?:
     | (
@@ -1135,7 +1134,7 @@ export interface Inventory {
   quantity?: number | null;
   stockstatus: 'conhang' | 'hethang' | 'saphet' | 'hethansudung';
   reorderlevel?: number | null;
-  supplier?: (string | null) | Supplier;
+  supplier?: (string | Supplier)[] | null;
   importdate?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1161,7 +1160,7 @@ export interface Inventorytransaction {
               quantity?: number | null;
               donvi?: ('thung' | 'hop') | null;
               quychuan?: string | null;
-              tongsohop?: string | null;
+              tongsohop?: number | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -2243,7 +2242,6 @@ export interface MedicationsSelect<T extends boolean = true> {
 export interface MedicalSuppliesSelect<T extends boolean = true> {
   loaivattu?: T;
   code?: T;
-  option?: T;
   name?: T;
   category?: T;
   description?: T;

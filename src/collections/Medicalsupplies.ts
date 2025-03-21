@@ -10,32 +10,23 @@ export const medicalSupplies: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['code', 'name', 'category', 'unit', 'expirydate'],
-    group:'Dược Và Vật Tư Y Tế'
+    group: 'Dược Và Vật Tư Y Tế',
   },
   fields: [
     {
       name: 'loaivattu',
       label: 'Loại vật tư',
       type: 'radio',
-      options:[
-        {label: 'Vật tư tiêu hao',value: 'vattutieuhao'},
-        {label: 'Máy móc/Thiết bị',value: 'maymocthietbi'},
-      ]
+      options: [
+        { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
+        { label: 'Máy móc/Thiết bị', value: 'maymocthietbi' },
+      ],
     },
     {
-      name: "code",
-      label: "Mã vật tư",
-      type: "text",
+      name: 'code',
+      label: 'Mã vật tư',
+      type: 'text',
       unique: true,
-    },
-    {name:'option',
-      label:'Tùy chọn',
-      type:'radio',
-      options:[
-        {label:'Vật tư tiêu hao',value:'vattutieuhao',},
-        {label:"Máy móc thiết bị",value:'maymocthietbi'},
-      ],
-      required:true,
     },
     {
       name: 'name',
@@ -91,14 +82,14 @@ export const medicalSupplies: CollectionConfig = {
     {
       name: 'supplier',
       label: 'Nhà cung cấp',
-     type: 'relationship',
-     relationTo: 'suppliers',
-     hasMany:true,
+      type: 'relationship',
+      relationTo: 'suppliers',
+      hasMany: true,
     },
     {
-      name: "notes",
-      label: "Ghi chú",
-      type: "textarea",
+      name: 'notes',
+      label: 'Ghi chú',
+      type: 'textarea',
     },
   ],
   timestamps: true,

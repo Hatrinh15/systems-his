@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload'
-import { hookBaoGia, hookxuatkho, showPrice } from '@/hooks/Hook_Xuat_Kho'
+import { hookBaoGia, hookQuayThuoc, hookxuatkho, showPrice } from '@/hooks/Hook_Xuat_Kho'
 
 export const PhieuXuat: CollectionConfig = {
   slug: 'phieuxuat',
@@ -305,6 +305,6 @@ export const PhieuXuat: CollectionConfig = {
   hooks: {
     beforeChange: [hookBaoGia],
     afterRead: [showPrice],
-    afterChange: [hookxuatkho],
+    afterChange: [hookxuatkho, hookQuayThuoc],
   },
 }

@@ -208,6 +208,147 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({
   }
 }
 
+//tự động cộng vào số lượng quầy
+export const hookQuayThuoc: CollectionAfterChangeHook = async ({
+  doc,
+  req,
+  operation,
+  previousDoc,
+}) => {
+  if (operation === 'create') {
+    try {
+      const inventoryMap = new Map()
+      const findInventory = await req.payload.find({
+        collection: 'pharmacies',
+        limit: 1000,
+      })
+
+      findInventory.docs.forEach((dc) => {
+        const thuocId =
+          typeof dc.medicine === 'object' && dc.medicine !== null ? dc.medicine.id : dc.medicine
+        const vattuId =
+          typeof dc.medicines === 'object' && dc.medicines !== null ? dc.medicines.id : dc.medicines
+        inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 })
+        inventoryMap.set(`${vattuId}`, { ...dc, totalQuantity: 0 })
+      })
+      const exportMap = new Map()
+      for (const item of doc.exports) {
+        for (const thuoc of item.thuoc) {
+          const key = `${thuoc.tenthuoc}`
+          const existingQuantity = exportMap.get(key) || 0
+          exportMap.set(key, existingQuantity + thuoc.quantity)
+        }
+      }
+      for (const item of doc.exports) {
+        for (const vattu of item.vattutieuhao) {
+          const key = `${vattu.supply}`
+          const existingQuantity = exportMap.get(key) || 0
+          exportMap.set(key, existingQuantity + vattu.quantity)
+        }
+      }
+      for (const item of doc.exports) {
+        for (const thietbi of item.maymocthietbi) {
+          const key = `${thietbi.equipment}`
+          const existingQuantity = exportMap.get(key) || 0
+          exportMap.set(key, existingQuantity + thietbi.quantity)
+        }
+      }
+      for (const [exportId, exportQuantity] of exportMap.entries()) {
+        const findthuoc = inventoryMap.get(exportId)
+        if (findthuoc) {
+          const soluong = (findthuoc.quantity || 0) + exportQuantity
+          await req.payload.update({
+            collection: 'pharmacies',
+            id: findthuoc.id,
+            data: { quantity: soluong >= 0 ? soluong : 0 },
+          })
+        } else {
+          console.warn(`Không tìm thấy thuốc trong kho: ${exportId}`)
+        }
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật kho:', error)
+    }
+  }
+  if (operation === 'update') {
+    try {
+      const inventoryMap = new Map()
+      const findInventory = await req.payload.find({
+        collection: 'pharmacies',
+        limit: 1000,
+      })
+      findInventory.docs.forEach((dc) => {
+        const thuocId =
+          typeof dc.medicine === 'object' && dc.medicine !== null ? dc.medicine.id : dc.medicine
+        const vattuId =
+          typeof dc.medicines === 'object' && dc.medicines !== null ? dc.medicines.id : dc.medicines
+        inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 })
+        inventoryMap.set(`${vattuId}`, { ...dc, totalQuantity: 0 })
+      })
+      const exportMap = new Map()
+
+      const previousSet = new Set()
+      for (const dc of previousDoc.exports) {
+        for (const pc of dc.thuoc) {
+          previousSet.add(pc.id)
+        }
+      }
+      for (const dc of previousDoc.exports) {
+        for (const pc of dc.vattutieuhao) {
+          previousSet.add(pc.id)
+        }
+      }
+      for (const dc of previousDoc.exports) {
+        for (const pc of dc.maymocthietbi) {
+          previousSet.add(pc.id)
+        }
+      }
+      for (const item of doc.exports) {
+        for (const thuoc of item.thuoc) {
+          if (!previousSet.has(thuoc.id)) {
+            const key = `${thuoc.tenthuoc}`
+            const existingQuantity = exportMap.get(key) || 0
+            exportMap.set(key, existingQuantity + thuoc.quantity)
+          }
+        }
+      }
+      for (const item of doc.exports) {
+        for (const vattu of item.vattutieuhao) {
+          if (!previousSet.has(vattu.id)) {
+            const key = `${vattu.supply}`
+            const existingQuantity = exportMap.get(key) || 0
+            exportMap.set(key, existingQuantity + vattu.quantity)
+          }
+        }
+      }
+      for (const item of doc.exports) {
+        for (const thietbi of item.maymocthietbi) {
+          if (!previousSet.has(thietbi.id)) {
+            const key = `${thietbi.equipment}`
+            const existingQuantity = exportMap.get(key) || 0
+            exportMap.set(key, existingQuantity + thietbi.quantity)
+          }
+        }
+      }
+      for (const [exportId, exportQuantity] of exportMap.entries()) {
+        const findthuoc = inventoryMap.get(exportId)
+        if (findthuoc) {
+          const soluong = (findthuoc.quantity || 0) + exportQuantity
+          await req.payload.update({
+            collection: 'pharmacies',
+            id: findthuoc.id,
+            data: { quantity: soluong >= 0 ? soluong : 0 },
+          })
+        } else {
+          console.warn(`Không tìm thấy thuốc trong kho: ${exportId}`)
+        }
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật kho:', error)
+    }
+  }
+}
+
 // Sau khi đọc: Hiển thị giá trị tổng
 export const showPrice: CollectionAfterReadHook = async ({ doc }) => {
   const formatNumber = (value: any) => {

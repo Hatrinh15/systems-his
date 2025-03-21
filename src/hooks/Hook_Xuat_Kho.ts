@@ -2,6 +2,7 @@ import {
   CollectionBeforeChangeHook,
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
+  PayloadRequest
 } from 'payload'
 import { APIError } from 'payload'
 
@@ -72,12 +73,7 @@ export const hookBaoGia: CollectionBeforeChangeHook = async ({ data, req, origin
 }
 
 // Sau khi lưu: Cập nhật kho hàng, quầy thuốc, kho khoa
-export const hookxuatkho: CollectionAfterChangeHook = async ({
-  doc,
-  req,
-  operation,
-  previousDoc,
-}) => {
+export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,previousDoc,}) => {
   if (operation === 'create') {
     try {
       const inventoryMap = new Map()
@@ -208,7 +204,11 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({
   }
 }
 
-// Sau khi đọc: Hiển thị giá trị tổng
+
+
+
+
+
 export const showPrice: CollectionAfterReadHook = async ({ doc }) => {
   const formatNumber = (value: any) => {
     if (value == null || value === '') return '0'

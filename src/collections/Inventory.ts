@@ -1,3 +1,4 @@
+import { inventoryHook } from '@/hooks/HookInventory'
 import { CollectionConfig } from 'payload'
 
 export const Inventory: CollectionConfig = {
@@ -7,8 +8,8 @@ export const Inventory: CollectionConfig = {
     plural: 'Kho Hàng',
   },
   admin: {
-    useAsTitle: 'item',
-    defaultColumns: ['item','items', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
+    useAsTitle: 'sanpham',
+    defaultColumns: ['sanpham', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
     group:'Dược Và Vật Tư Y Tế'
   },
   fields: [
@@ -38,6 +39,13 @@ export const Inventory: CollectionConfig = {
       admin: {
         condition: (data) => data?.category === 'vattutieuhao' || data?.category === 'maymocthietbi',
       },
+    },
+    {
+      name: 'sanpham',
+      label: 'Sản phẩm',
+      type: 'text',
+      admin: { readOnly: true,
+        hidden: true },
     },
     {
       name: 'quantity',
@@ -84,4 +92,7 @@ export const Inventory: CollectionConfig = {
     },
   ],
   timestamps: true,
+  hooks: {
+    beforeChange: [inventoryHook]
+  }
 }

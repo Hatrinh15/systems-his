@@ -40,7 +40,6 @@ export const Pharmacies: CollectionConfig = {
           label: 'Số lượng tại quầy',
           type: 'number',
           min: 0,
-          admin: { readOnly: true }, // Chỉ hiển thị, không chỉnh sửa
         },
         {
             name: 'price',

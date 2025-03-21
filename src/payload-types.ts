@@ -980,15 +980,9 @@ export interface Department {
   };
   departmentInventory?:
     | {
-        item:
-          | {
-              relationTo: 'medications';
-              value: string | Medication;
-            }
-          | {
-              relationTo: 'medicalSupplies';
-              value: string | MedicalSupply;
-            };
+        category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
+        item?: (string | null) | Medication;
+        items?: (string | null) | MedicalSupply;
         quantity?: number | null;
         unit?: string | null;
         expirydate?: string | null;
@@ -1136,6 +1130,7 @@ export interface Inventory {
   category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
   item?: (string | null) | Medication;
   items?: (string | null) | MedicalSupply;
+  sanpham?: string | null;
   quantity?: number | null;
   stockstatus: 'conhang' | 'hethang' | 'saphet' | 'hethansudung';
   reorderlevel?: number | null;
@@ -1212,8 +1207,9 @@ export interface Inventorytransaction {
 export interface Pharmacy {
   id: string;
   category: 'medications' | 'vattutieuhao';
-  medicine?: (string | null) | Medication;
-  medicines?: (string | null) | MedicalSupply;
+  item?: (string | null) | Medication;
+  items?: (string | null) | MedicalSupply;
+  sanpham?: string | null;
   quantity?: number | null;
   price?: number | null;
   unit?: string | null;
@@ -2265,6 +2261,7 @@ export interface InventorySelect<T extends boolean = true> {
   category?: T;
   item?: T;
   items?: T;
+  sanpham?: T;
   quantity?: T;
   stockstatus?: T;
   reorderlevel?: T;
@@ -2341,8 +2338,9 @@ export interface InventorytransactionsSelect<T extends boolean = true> {
  */
 export interface PharmaciesSelect<T extends boolean = true> {
   category?: T;
-  medicine?: T;
-  medicines?: T;
+  item?: T;
+  items?: T;
+  sanpham?: T;
   quantity?: T;
   price?: T;
   unit?: T;
@@ -2459,7 +2457,9 @@ export interface DepartmentsSelect<T extends boolean = true> {
   departmentInventory?:
     | T
     | {
+        category?: T;
         item?: T;
+        items?: T;
         quantity?: T;
         unit?: T;
         expirydate?: T;

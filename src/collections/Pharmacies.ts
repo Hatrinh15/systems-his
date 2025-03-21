@@ -1,5 +1,6 @@
 
 import { CollectionConfig } from "payload";
+import { hookQuayThuoc } from "@/hooks/Hookpharmacies";
 export const Pharmacies: CollectionConfig = {
     slug: 'pharmacies',
     labels: {
@@ -7,33 +8,43 @@ export const Pharmacies: CollectionConfig = {
       plural: 'Quầy Thuốc',
     },
     admin: {
-        useAsTitle: "medicineName",
-        defaultColumns: ["medicineName", 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
+        useAsTitle: 'sanpham',
+        defaultColumns: ['sanpham', 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
         group:'Dược Và Vật Tư Y Tế'
       },
       fields: [
         {
-          name: "medicine",
-          label: "Tên sản phẩm",
-          type: "relationship",
-          relationTo: ['medications','medicalSupplies'],
-          filterOptions: ({relationTo}) => {
-            if(relationTo === 'medications') {
-              return true
-            }
-            if(relationTo === 'medicalSupplies'){
-              return {
-                loaivattu: {equals: 'vattutieuhao'}
-              }
-            }
-            return true
-          }
+          name: 'category',
+          label: 'Danh mục',
+          type: 'radio',
+          options: [
+            { label: 'Thuốc', value: 'medications' },
+            { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
+          ],
+          required: true,
         },
         {
-          name: "medicineName", 
-          label: "Tên hiển thị",
-          type: "text",
-          admin: { readOnly: true }, 
+          name: 'item',
+          label: 'Sản phẩm',
+          type: 'relationship',
+          relationTo: 'medications',
+          admin: { condition: (data) => data?.category === 'medications' },
+        },
+        {
+          name: 'items',
+          label: 'Sản phẩm',
+          type: 'relationship',
+          relationTo: 'medicalSupplies',
+          admin: {
+            condition: (data) => data?.category === 'vattutieuhao',
+          },
+        },
+        {
+          name: 'sanpham',
+          label: 'Sản phẩm',
+          type: 'text',
+          admin: { readOnly: true,
+            hidden: true },
         },
         {
           name: 'quantity',
@@ -63,4 +74,7 @@ export const Pharmacies: CollectionConfig = {
           type: 'textarea',
         },
       ],
+      hooks:{
+        beforeChange:[hookQuayThuoc]
+      }
   };

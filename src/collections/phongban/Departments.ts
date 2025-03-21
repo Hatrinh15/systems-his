@@ -179,14 +179,37 @@ const Departments: CollectionConfig = {
               type: 'array',
               fields: [
                 {
+                  name: 'category',
+                  label: 'Danh mục',
+                  type: 'radio',
+                  options: [
+                    { label: 'Thuốc', value: 'medications' },
+                    { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
+                    { label: 'Máy móc/Thiết bị', value: 'maymocthietbi' },
+                  ],
+                  required: true,
+                },
+                {
                   type: 'row',
                   fields: [
                     {
                       name: 'item',
                       label: 'Sản phẩm',
                       type: 'relationship',
-                      relationTo: ['medications', 'medicalSupplies'],
-                      required: true,
+                      relationTo: 'medications',
+                      admin: { 
+                        condition: (_, siblingData) => siblingData?.category === 'medications'
+                      },
+                    },
+                    {
+                      name: 'items',
+                      label: 'Sản phẩm',
+                      type: 'relationship',
+                      relationTo: 'medicalSupplies',
+                      admin: {
+                        condition: (_, siblingData) =>
+                          siblingData?.category === 'vattutieuhao' || siblingData?.category === 'maymocthietbi',
+                      },
                     },
                     {
                       name: 'quantity',

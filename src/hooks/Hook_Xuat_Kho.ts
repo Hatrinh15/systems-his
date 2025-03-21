@@ -2,7 +2,6 @@ import {
   CollectionBeforeChangeHook,
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
-  PayloadRequest
 } from 'payload'
 import { APIError } from 'payload'
 
@@ -204,10 +203,152 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,
   }
 }
 
+export const hookNhapQuayThuoc: CollectionAfterChangeHook = async ({ doc, req, operation,previousDoc }) => {
+  if (operation === 'create') {
+    try {
+      const pharmacyMap = new Map();
+      // Lấy danh sách sản phẩm trong quầy thuốc
+      const findPharmacies = await req.payload.find({
+        collection: 'pharmacies',
+        limit: 1000,
+      });
+      findPharmacies.docs.forEach((pharmacy) => {
+        const itemId = typeof pharmacy.item === 'object' && pharmacy.item !== null ? pharmacy.item.id : pharmacy.item;
+        const supplyId = typeof pharmacy.items === 'object' && pharmacy.items !== null ? pharmacy.items.id : pharmacy.items;
+        pharmacyMap.set(`${itemId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
+        pharmacyMap.set(`${supplyId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
+      });
+      if (!Array.isArray(doc.exports)) {
+        console.error('Lỗi: doc.exports không phải là một mảng', doc.exports);
+        return;
+      }
+      const importMap = new Map();
+      for (const item of doc.exports) {
+        if (item.thuoc && Array.isArray(item.thuoc)) {
+          for (const thuoc of item.thuoc) {
+            const key = `${thuoc.tenthuoc}`;
+            const existingQuantity = importMap.get(key) || 0;
+            importMap.set(key, existingQuantity + thuoc.quantity);
+          }
+        }
+        if (item.vattutieuhao && Array.isArray(item.vattutieuhao)) {
+          for (const vattu of item.vattutieuhao) {
+            const key = `${vattu.supply}`;
+            const existingQuantity = importMap.get(key) || 0;
+            importMap.set(key, existingQuantity + vattu.quantity);
+          }
+        }
+      }
+      for (const [importId, importQuantity] of importMap.entries()) {
+        const findItem = pharmacyMap.get(importId);
+        if (findItem) {
+          // Nếu sản phẩm đã có trong quầy thuốc, cập nhật số lượng
+          const newQuantity = (findItem.totalQuantity || 0) + importQuantity;
+          await req.payload.update({
+            collection: 'pharmacies',
+            id: findItem.id,
+            data: { quantity: newQuantity },
+          });
+        } else {
+          // Nếu sản phẩm chưa có, thêm mới
+          const category = doc.exports.some(item => item.thuoc?.some(t => t.tenthuoc === importId)) 
+              ? 'medications' 
+              : 'vattutieuhao';
 
+              await req.payload.create({
+                collection: 'pharmacies',
+                data: {
+                  [category === 'medications' ? 'item' : 'items']: importId,
+                  category,
+                  quantity: importQuantity,
+                },
+              });
+        }
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật quầy thuốc:', error);
+    }
+  }
+  if (operation === 'update') {
+    try {
+      const pharmacyMap = new Map();
+      // Lấy danh sách sản phẩm trong quầy thuốc
+      const findPharmacies = await req.payload.find({
+        collection: 'pharmacies',
+        limit: 1000,
+      });
+      findPharmacies.docs.forEach((pharmacy) => {
+        const itemId = typeof pharmacy.item === 'object' && pharmacy.item !== null ? pharmacy.item.id : pharmacy.item;
+        const supplyId = typeof pharmacy.items === 'object' && pharmacy.items !== null ? pharmacy.items.id : pharmacy.items;
+        pharmacyMap.set(`${itemId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
+        pharmacyMap.set(`${supplyId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
+      });
+  
+      if (!Array.isArray(doc.exports) || !Array.isArray(previousDoc.exports)) {
+        console.error('Lỗi: doc.exports hoặc previousDoc.exports không hợp lệ', doc.exports, previousDoc.exports);
+        return;
+      }
+  
+      const importMap = new Map();
+      const previousImportMap = new Map();
+      
+      for (const item of doc.exports) {
+        if (item.thuoc && Array.isArray(item.thuoc)) {
+          for (const thuoc of item.thuoc) {
+            const key = `${thuoc.tenthuoc}`;
+            const existingQuantity = importMap.get(key) || 0;
+            importMap.set(key, existingQuantity + thuoc.quantity);
+          }
+        }
+        if (item.vattutieuhao && Array.isArray(item.vattutieuhao)) {
+          for (const vattu of item.vattutieuhao) {
+            const key = `${vattu.supply}`;
+            const existingQuantity = importMap.get(key) || 0;
+            importMap.set(key, existingQuantity + vattu.quantity);
+          }
+        }
+      }
+      
+      for (const item of previousDoc.exports) {
+        if (item.thuoc && Array.isArray(item.thuoc)) {
+          for (const thuoc of item.thuoc) {
+            const key = `${thuoc.tenthuoc}`;
+            const existingQuantity = previousImportMap.get(key) || 0;
+            previousImportMap.set(key, existingQuantity + thuoc.quantity);
+          }
+        }
+        if (item.vattutieuhao && Array.isArray(item.vattutieuhao)) {
+          for (const vattu of item.vattutieuhao) {
+            const key = `${vattu.supply}`;
+            const existingQuantity = previousImportMap.get(key) || 0;
+            previousImportMap.set(key, existingQuantity + vattu.quantity);
+          }
+        }
+      }
+  
+      for (const [importId, newQuantity] of importMap.entries()) {
+        const oldQuantity = previousImportMap.get(importId) || 0;
+        const difference = newQuantity - oldQuantity;
+        if (difference !== 0) {
+          const findItem = pharmacyMap.get(importId);
+          if (findItem) {
+            const updatedQuantity = (findItem.totalQuantity || 0) + difference;
+            await req.payload.update({
+              collection: 'pharmacies',
+              id: findItem.id,
+              data: { quantity: updatedQuantity },
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật quầy thuốc:', error);
+    }
+  }
 
+};
 
-
+// export const hookNhapKhoKhoa : CollectionAfterChangeHook 
 
 export const showPrice: CollectionAfterReadHook = async ({ doc }) => {
   const formatNumber = (value: any) => {

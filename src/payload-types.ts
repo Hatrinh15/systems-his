@@ -980,15 +980,9 @@ export interface Department {
   };
   departmentInventory?:
     | {
-        item:
-          | {
-              relationTo: 'medications';
-              value: string | Medication;
-            }
-          | {
-              relationTo: 'medicalSupplies';
-              value: string | MedicalSupply;
-            };
+        category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
+        item?: (string | null) | Medication;
+        items?: (string | null) | MedicalSupply;
         quantity?: number | null;
         unit?: string | null;
         expirydate?: string | null;
@@ -1213,16 +1207,10 @@ export interface Inventorytransaction {
  */
 export interface Pharmacy {
   id: string;
-  medicine?:
-    | ({
-        relationTo: 'medications';
-        value: string | Medication;
-      } | null)
-    | ({
-        relationTo: 'medicalSupplies';
-        value: string | MedicalSupply;
-      } | null);
-  medicineName?: string | null;
+  category: 'medications' | 'vattutieuhao';
+  item?: (string | null) | Medication;
+  items?: (string | null) | MedicalSupply;
+  sanpham?: string | null;
   quantity?: number | null;
   price?: number | null;
   unit?: string | null;
@@ -2351,8 +2339,10 @@ export interface InventorytransactionsSelect<T extends boolean = true> {
  * via the `definition` "pharmacies_select".
  */
 export interface PharmaciesSelect<T extends boolean = true> {
-  medicine?: T;
-  medicineName?: T;
+  category?: T;
+  item?: T;
+  items?: T;
+  sanpham?: T;
   quantity?: T;
   price?: T;
   unit?: T;
@@ -2469,7 +2459,9 @@ export interface DepartmentsSelect<T extends boolean = true> {
   departmentInventory?:
     | T
     | {
+        category?: T;
         item?: T;
+        items?: T;
         quantity?: T;
         unit?: T;
         expirydate?: T;

@@ -113,12 +113,6 @@ const MedicalRecods: CollectionConfig = {
                     }
                   },
                 },
-
-                {
-                  name: 'dieuduong',
-                  label: 'Điều dưỡng thực hiện',
-                  type: 'text',
-                },
                 {
                   name: 'ngaynhapvien',
                   label: 'Ngày nhập viện',
@@ -180,20 +174,6 @@ const MedicalRecods: CollectionConfig = {
                           label: 'Ghi chú',
                           type: 'text',
                         },
-                        // {
-                        //   name: 'noikhoa',
-                        //   label: 'Nội khoa',
-                        //   admin: {
-                        //     condition: (data) => {
-                        //       // Kiểm tra nếu 'hoso' tồn tại và có ít nhất một phần tử
-                        //       if (!data?.hoso || data.hoso.length === 0) return false
-                        //       // Lấy giá trị 'phauthuat' từ nhóm 'phuongphap'
-                        //       const phauthuat = data.hoso[0]?.tomtat?.phuongphap?.phauthuat
-                        //       return phauthuat === 'khong'
-                        //     },
-                        //   },
-                        //   type: 'text',
-                        // },
                       ],
                     },
                     {

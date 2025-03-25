@@ -1,5 +1,6 @@
 import { CollectionConfig } from 'payload'
 import { beforeChange, showTitle } from '@/hooks/HookDepartments'
+import { equal } from 'assert'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
@@ -50,9 +51,43 @@ const Departments: CollectionConfig = {
               type: 'relationship',
               relationTo: 'users', // Đúng collection
               hasMany: true, // Một bác sĩ phụ trách một phòng
-              filterOptions: ({ data }) => {
-                return {
-                  chucvu: { equals: 'truongkhoa' },
+              filterOptions: async ({ req, data }) => {
+                try {
+                  // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
+                  const selectedtruongkhoa = Array.isArray(data?.truongkhoa)
+                    ? data.truongkhoa
+                        .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
+                        .filter(Boolean)
+                    : []
+                  // Lấy danh sách bác sĩ đã có khoa
+                  // dùng req.payload.find để tìm những bác sĩ đã có khoa
+                  const checktruongkhoa = await req.payload.find({
+                    collection: 'departments',
+                    where: { truongkhoa: { exists: true } },
+                    limit: 999,
+                  })
+                  // Lấy danh sách ID bác sĩ đã có khoa
+                  const docChecktruongkhoa = checktruongkhoa?.docs ?? []
+                  const checkouttruongkhoa = docChecktruongkhoa.flatMap((doc) =>
+                    (doc?.truongkhoa ?? [])
+                      .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
+                      .filter(Boolean),
+                  )
+                  return {
+                    and: [
+                      { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Loại bác sĩ đã nghỉ việc
+                      { chucvu: { equals: 'truongkhoa' } },
+                      {
+                        or: [
+                          { id: { not_in: checkouttruongkhoa } }, // không chọn bác sĩ đã có khoa
+                          { id: { in: selectedtruongkhoa } }, //  Giữ lại bác sĩ đã chọn
+                        ],
+                      },
+                    ],
+                  } as any
+                } catch (error) {
+                  console.error('Lỗi truy vấn danh sách bác sĩ:', error)
+                  return {}
                 }
               },
             },
@@ -71,7 +106,6 @@ const Departments: CollectionConfig = {
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
-                  console.log('Bác sĩ đang được chọn (sau khi xử lý):', selectedDoctors)
                   // Lấy danh sách bác sĩ đã có khoa
                   // dùng req.payload.find để tìm những bác sĩ đã có khoa
                   const checkDoctors = await req.payload.find({
@@ -86,7 +120,6 @@ const Departments: CollectionConfig = {
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
-                  console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
                   const baseCondition =
                     data?.tenkhoa === 'khoaduoc'
                       ? { chucvu: { equals: 'duocsi' } } // DUOCSI cho khoa duoc
@@ -103,7 +136,7 @@ const Departments: CollectionConfig = {
                         ],
                       },
                     ],
-                  } as any
+                  }
                 } catch (error) {
                   console.error('Lỗi truy vấn danh sách bác sĩ:', error)
                   return {}
@@ -118,14 +151,12 @@ const Departments: CollectionConfig = {
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 try {
-                  console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
                   const selectedNures = Array.isArray(data?.nures)
                     ? data.nures
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
-                  console.log('Y Tá đang được chọn (sau khi xử lý):', selectedNures)
                   // Lấy danh sách bác sĩ đã có khoa
                   // dùng req.payload.find để tìm những y tá đã có khoa
                   const checkNures = await req.payload.find({
@@ -140,7 +171,7 @@ const Departments: CollectionConfig = {
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
-                  console.log(' Y tá đã có khoa:', checkoutNures)
+
                   return {
                     and: [
                       { chucvu: { equals: 'yta' } }, // Chỉ lấy y tá
@@ -197,8 +228,8 @@ const Departments: CollectionConfig = {
                       label: 'Sản phẩm',
                       type: 'relationship',
                       relationTo: 'medications',
-                      admin: { 
-                        condition: (_, siblingData) => siblingData?.category === 'medications'
+                      admin: {
+                        condition: (_, siblingData) => siblingData?.category === 'medications',
                       },
                     },
                     {
@@ -208,7 +239,8 @@ const Departments: CollectionConfig = {
                       relationTo: 'medicalSupplies',
                       admin: {
                         condition: (_, siblingData) =>
-                          siblingData?.category === 'vattutieuhao' || siblingData?.category === 'maymocthietbi',
+                          siblingData?.category === 'vattutieuhao' ||
+                          siblingData?.category === 'maymocthietbi',
                       },
                     },
                     {

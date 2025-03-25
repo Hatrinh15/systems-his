@@ -1,5 +1,6 @@
 import { CollectionConfig } from 'payload'
 import { priceAfterRead, thongBao, updateProductName } from '@/hooks/HookBaoGia'
+import { Label } from '@radix-ui/react-select'
 export const baoGia: CollectionConfig = {
   slug: 'baogia',
   labels: {
@@ -27,20 +28,23 @@ export const baoGia: CollectionConfig = {
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: 'medications',
-      admin: {
-        condition: (data) => data?.category === 'medications',
-      },
-      filterOptions: async ({ req }) => {
-        const existingBaoGia = await req.payload.find({
+      admin: { condition: (data) => data?.category === 'medications' },
+      filterOptions: async ({ req, data }) => {
+        const existingInventory = await req.payload.find({
           collection: 'baogia',
           where: {},
           limit: 1000,
         })
 
-        // Lọc ra danh sách ID các thuốc đã có trong báo giá
-        const usedMedications = existingBaoGia.docs
+        // Lấy danh sách thuốc đã có trong kho
+        const usedMedications = existingInventory.docs
           .map((doc) => (doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item))
-          .filter(Boolean) // Loại bỏ giá trị null/undefined
+          .filter(Boolean)
+
+        // 🛠 Giữ lại thuốc đã lưu trước đó để không bị lỗi khi cập nhật
+        if (data?.item) {
+          usedMedications.splice(usedMedications.indexOf(data.item), 1)
+        }
 
         return {
           id: { not_in: usedMedications },
@@ -54,17 +58,22 @@ export const baoGia: CollectionConfig = {
       type: 'relationship',
       relationTo: 'medicalSupplies',
       admin: { condition: (data) => data?.category === 'medicalSupplies' },
-      filterOptions: async ({ req }) => {
-        const existingBaoGia = await req.payload.find({
+      filterOptions: async ({ req, data }) => {
+        const existingInventory = await req.payload.find({
           collection: 'baogia',
           where: {},
           limit: 1000,
         })
 
-        // Lọc ra danh sách ID các thuốc đã có trong báo giá
-        const usedMedications = existingBaoGia.docs
+        // Lấy danh sách thuốc đã có trong kho
+        const usedMedications = existingInventory.docs
           .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
-          .filter(Boolean) // Loại bỏ giá trị null/undefined
+          .filter(Boolean)
+
+        // 🛠 Giữ lại thuốc đã lưu trước đó để không bị lỗi khi cập nhật
+        if (data?.items) {
+          usedMedications.splice(usedMedications.indexOf(data.items), 1)
+        }
 
         return {
           id: { not_in: usedMedications },
@@ -162,6 +171,46 @@ export const baoGia: CollectionConfig = {
       label: 'Giá bán lẻ (VNĐ)',
       type: 'text',
       admin: { readOnly: true },
+    },
+    {
+      type: 'row',
+      admin: { condition: (data) => data?.category === 'medications' },
+      fields: [
+        {
+          name: 'donvi',
+          label: 'Đơn vị',
+          type: 'select',
+          options: [
+            { label: 'Viên', value: 'vien' },
+            { label: 'Ống', value: 'ong' },
+            { label: 'Lọ', value: 'lo' },
+            { label: 'Gói', value: 'goi' },
+          ],
+        },
+        { name: 'quychuan', label: 'Quy chuẩn', type: 'number' },
+        { name: 'phantram', label: '%', type: 'number' },
+        { name: 'tien', label: 'Gía tiền', type: 'text' },
+      ],
+    },
+    {
+      type: 'row',
+      admin: { condition: (data) => data?.category === 'medicalSupplies' },
+      fields: [
+        {
+          name: 'donvis',
+          label: 'Đơn vị',
+          type: 'select',
+          options: [
+            { label: 'Chai', value: 'vien' },
+            { label: 'Cuộn', value: 'cuon' },
+            { label: 'Miếng', value: 'mieng' },
+            { label: 'Gói', value: 'goi' },
+          ],
+        },
+        { name: 'quychuans', label: 'Quy chuẩn', type: 'number' },
+        { name: 'phantrams', label: '%', type: 'number' },
+        { name: 'tiens', label: 'Gía tiền', type: 'text' },
+      ],
     },
   ],
   timestamps: true,

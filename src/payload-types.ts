@@ -805,7 +805,6 @@ export interface MedicalRecod {
     | {
         khoa?: (string | null) | Department;
         bacsi?: (string | null) | User;
-        dieuduong?: string | null;
         ngaynhapvien?: string | null;
         sophong?: string | null;
         chuandoan?: string | null;
@@ -1286,9 +1285,9 @@ export interface Phieuxuat {
         id?: string | null;
       }[]
     | null;
-  tong_gia_tri_thuoc?: string | null;
-  tong_gia_tri_vtth?: string | null;
-  tong_gia_tri_mmtb?: string | null;
+  tong_gia_tri_quaythuoc?: string | null;
+  tong_gia_tri_khoa?: string | null;
+  tong_gia_tri_huyhang?: string | null;
   tong_gia_tri?: string | null;
   report_notes?: string | null;
   updatedAt: string;
@@ -1331,6 +1330,14 @@ export interface Baogia {
   thue?: number | null;
   loinhuan?: number | null;
   giaban?: string | null;
+  donvi?: ('vien' | 'ong' | 'lo' | 'goi') | null;
+  quychuan?: number | null;
+  phantram?: number | null;
+  tien?: string | null;
+  donvis?: ('vien' | 'cuon' | 'mieng' | 'goi') | null;
+  quychuans?: number | null;
+  phantrams?: number | null;
+  tiens?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2086,7 +2093,6 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
     | {
         khoa?: T;
         bacsi?: T;
-        dieuduong?: T;
         ngaynhapvien?: T;
         sophong?: T;
         chuandoan?: T;
@@ -2430,9 +2436,9 @@ export interface PhieuxuatSelect<T extends boolean = true> {
         tongtien?: T;
         id?: T;
       };
-  tong_gia_tri_thuoc?: T;
-  tong_gia_tri_vtth?: T;
-  tong_gia_tri_mmtb?: T;
+  tong_gia_tri_quaythuoc?: T;
+  tong_gia_tri_khoa?: T;
+  tong_gia_tri_huyhang?: T;
   tong_gia_tri?: T;
   report_notes?: T;
   updatedAt?: T;
@@ -2505,6 +2511,14 @@ export interface BaogiaSelect<T extends boolean = true> {
   thue?: T;
   loinhuan?: T;
   giaban?: T;
+  donvi?: T;
+  quychuan?: T;
+  phantram?: T;
+  tien?: T;
+  donvis?: T;
+  quychuans?: T;
+  phantrams?: T;
+  tiens?: T;
   updatedAt?: T;
   createdAt?: T;
 }

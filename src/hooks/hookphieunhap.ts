@@ -369,16 +369,75 @@ export const hookNhapKho: CollectionAfterChangeHook = async ({
         }
       }
       for (const [exportId, exportQuantity] of exportMap.entries()) {
-        const findthuoc = inventoryMap.get(exportId)
-        if (findthuoc) {
-          const soluong = findthuoc.quantity + exportQuantity
+        console.log(` Xử lý sản phẩm ID: ${exportId}`)
+
+        const findItem = inventoryMap.get(exportId)
+
+        if (findItem) {
+          // Nếu sản phẩm đã có trong kho, cập nhật số lượng
+          const newQuantity = (findItem.quantity || 0) + exportQuantity
           await req.payload.update({
             collection: 'inventory',
-            id: findthuoc.id,
-            data: { quantity: soluong >= 0 ? soluong : 0 },
+            id: findItem.id,
+            data: { quantity: newQuantity >= 0 ? newQuantity : 0 },
           })
+          console.log(` Cập nhật số lượng sản phẩm: ${exportId}, Số lượng mới: ${newQuantity}`)
         } else {
-          console.warn(`Không tìm thấy thuốc trong kho: ${exportId}`)
+          // 🛠 Kiểm tra xem exportId có phải là thuốc không
+          const medicationResult = await req.payload.find({
+            collection: 'medications',
+            where: { id: { equals: exportId } },
+            limit: 1,
+          })
+
+          // 🛠 Kiểm tra xem exportId có phải là vật tư không
+          const medicalSupplyResult = await req.payload.find({
+            collection: 'medicalSupplies',
+            where: { id: { equals: exportId } },
+            limit: 1,
+          })
+
+          const medication = medicationResult.docs[0]
+          const medicalSupply =
+            typeof medicalSupplyResult.docs[0] === 'object' && medicalSupplyResult.docs[0] !== null
+              ? medicalSupplyResult.docs[0]
+              : []
+          const loaivattu = Array.isArray(medicalSupply) ? undefined : medicalSupply.loaivattu
+          if (medication) {
+            // Nếu là thuốc
+            await req.payload.create({
+              collection: 'inventory',
+              data: {
+                item: exportId,
+                category: 'medications',
+                quantity: exportQuantity,
+                stockstatus: 'conhang', // or any appropriate value
+              },
+            })
+            console.log(` Tạo mới thuốc ID: ${exportId}, Số lượng: ${exportQuantity}`)
+          } else if (medicalSupply) {
+            // Nếu là vật tư hoặc máy móc thiết bị
+            const category =
+              typeof loaivattu === 'string' && ['vattutieuhao', 'maymocthietbi'].includes(loaivattu)
+                ? loaivattu
+                : 'vattutieuhao' // Mặc định nếu category null
+            await req.payload.create({
+              collection: 'inventory',
+              data: {
+                items: exportId,
+                category: category || 'vattutieuhao',
+                quantity: exportQuantity,
+                stockstatus: 'conhang', // or any appropriate value
+              },
+            })
+            console.log(
+              `Tạo mới vật tư ID: ${exportId}, Loại: ${category}, Số lượng: ${exportQuantity}`,
+            )
+          } else {
+            console.error(
+              ` Không tìm thấy sản phẩm với ID: ${exportId} trong medications hoặc medicalSupplies.`,
+            )
+          }
         }
       }
     } catch (error) {
@@ -446,7 +505,7 @@ export const hookNhapKho: CollectionAfterChangeHook = async ({
         }
       }
       for (const [exportId, exportQuantity] of exportMap.entries()) {
-        console.log(`🟢 Xử lý sản phẩm ID: ${exportId}`)
+        console.log(` Xử lý sản phẩm ID: ${exportId}`)
 
         const findItem = inventoryMap.get(exportId)
 
@@ -458,7 +517,7 @@ export const hookNhapKho: CollectionAfterChangeHook = async ({
             id: findItem.id,
             data: { quantity: newQuantity >= 0 ? newQuantity : 0 },
           })
-          console.log(`✅ Cập nhật số lượng sản phẩm: ${exportId}, Số lượng mới: ${newQuantity}`)
+          console.log(` Cập nhật số lượng sản phẩm: ${exportId}, Số lượng mới: ${newQuantity}`)
         } else {
           // 🛠 Kiểm tra xem exportId có phải là thuốc không
           const medicationResult = await req.payload.find({
@@ -491,7 +550,7 @@ export const hookNhapKho: CollectionAfterChangeHook = async ({
                 stockstatus: 'conhang', // or any appropriate value
               },
             })
-            console.log(`✅ Tạo mới thuốc ID: ${exportId}, Số lượng: ${exportQuantity}`)
+            console.log(` Tạo mới thuốc ID: ${exportId}, Số lượng: ${exportQuantity}`)
           } else if (medicalSupply) {
             // Nếu là vật tư hoặc máy móc thiết bị
             const category =
@@ -508,11 +567,11 @@ export const hookNhapKho: CollectionAfterChangeHook = async ({
               },
             })
             console.log(
-              `✅ Tạo mới vật tư ID: ${exportId}, Loại: ${category}, Số lượng: ${exportQuantity}`,
+              `Tạo mới vật tư ID: ${exportId}, Loại: ${category}, Số lượng: ${exportQuantity}`,
             )
           } else {
             console.error(
-              `🚨 Không tìm thấy sản phẩm với ID: ${exportId} trong medications hoặc medicalSupplies.`,
+              ` Không tìm thấy sản phẩm với ID: ${exportId} trong medications hoặc medicalSupplies.`,
             )
           }
         }
@@ -520,5 +579,50 @@ export const hookNhapKho: CollectionAfterChangeHook = async ({
     } catch (error) {
       console.error('Lỗi khi cập nhật kho:', error)
     }
+  }
+}
+//hook thông báo
+export const thongBaotrong: CollectionBeforeChangeHook = async ({ data }) => {
+  const errors: string[] = []
+
+  if (!data.giaodich || data.giaodich.length === 0) {
+    errors.push(' Phiếu xuất phải có ít nhất một mặt hàng!')
+  }
+  // Kiểm tra từng mặt hàng trong phiếu xuất
+  data.giaodich?.forEach((giaodich, giaodichIndex) => {
+    if (!giaodich.nhacungcap) {
+      errors.push(` Giao dịch ${giaodichIndex + 1}: Vui lòng chọn nhà cung cấp!`)
+    }
+    if (!giaodich.receiverorsender) {
+      errors.push(` Giao dịch ${giaodichIndex + 1}: Vui lòng chọn người nhận hàng !`)
+    }
+    // Kiểm tra danh sách thuốc
+    giaodich.thuoc?.forEach((thuoc, index) => {
+      if (!thuoc.tenthuoc)
+        errors.push(` Thuốc giao dịch ${index + 1}: Tên thuốc không được để trống!`)
+      if (!thuoc.quantity || Number(thuoc.quantity) <= 0)
+        errors.push(` Thuốc giao dịch ${index + 1}: Số lượng phải lớn hơn 0!`)
+    })
+
+    // Kiểm tra danh sách vật tư tiêu hao
+    giaodich.vattu?.forEach((vt, index) => {
+      if (!vt.tenvattu)
+        errors.push(` Vật tư giao dịch ${index + 1}: Tên vật tư không được để trống!`)
+      if (!vt.quantity || Number(vt.quantity) <= 0)
+        errors.push(` Vật tư giao dịch ${index + 1}: Số lượng phải lớn hơn 0!`)
+    })
+
+    // Kiểm tra danh sách máy móc thiết bị
+    giaodich.maymoc?.forEach((mm, index) => {
+      if (!mm.tenmaymoc)
+        errors.push(`Máy móc giao dịch ${index + 1}: Tên máy móc không được để trống!`)
+      if (!mm.quantity || Number(mm.quantity) <= 0)
+        errors.push(` Máy móc giao dịch ${index + 1}: Số lượng phải lớn hơn 0!`)
+    })
+  })
+
+  //  Nếu có lỗi, ném lỗi chứa tất cả các lỗi cùng lúc
+  if (errors.length > 0) {
+    throw new APIError(`⚠️ Vui lòng kiểm tra lại các lỗi sau:\n${errors.join('\n')}`, 400)
   }
 }

@@ -67,6 +67,28 @@ export const priceAfterRead: CollectionAfterReadHook = ({ doc }) => {
     } else {
       doc.giaban = '0'
     }
+    // Chuyển giá bán về số trước khi sử dụng trong phép tính
+    const giaBanNumber = Number(doc.giaban?.toString().replace(/\D/g, '')) || 0
+    const quychuan = Number(doc.quychuan) || 1 // Tránh chia cho 0
+    const phantram = Number(doc.phantram) || 0
+
+    if (giaBanNumber > 0 && quychuan > 0) {
+      const giaTien = (giaBanNumber * (1 + phantram / 100)) / quychuan
+      doc.tien = formatNumber(Math.round(giaTien))
+    } else {
+      doc.tien = '0'
+    }
+    //cho vật tư
+    const giaBanNumbers = Number(doc.giaban?.toString().replace(/\D/g, '')) || 0
+    const quychuans = Number(doc.quychuans) || 1 // Tránh chia cho 0
+    const phantrams = Number(doc.phantrams) || 0
+
+    if (giaBanNumbers > 0 && quychuans > 0) {
+      const giaTien = (giaBanNumbers * (1 + phantrams / 100)) / quychuans
+      doc.tiens = formatNumber(Math.round(giaTien))
+    } else {
+      doc.tien = '0'
+    }
   }
 }
 export const thongBao: CollectionBeforeChangeHook = async ({ data }) => {

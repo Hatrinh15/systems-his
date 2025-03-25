@@ -1,4 +1,5 @@
 import { CollectionConfig } from 'payload'
+
 import { hookBaoGia, hookNhapQuayThuoc, hookxuatkho, showPrice ,hookNhapKhoKhoa, checkInventoryBeforeExport ,hookCheckinfo} from '@/hooks/Hook_Xuat_Kho'
 
 export const PhieuXuat: CollectionConfig = {
@@ -294,8 +295,8 @@ export const PhieuXuat: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeChange: [hookBaoGia,checkInventoryBeforeExport,hookCheckinfo],
-    afterRead: [showPrice],
+    beforeChange: [hookBaoGia,checkInventoryBeforeExport,hookCheckinfo,showPrice],
+    afterRead: [showTotalPrice],
     afterChange: [hookxuatkho,hookNhapQuayThuoc, hookNhapKhoKhoa],
   },
 }

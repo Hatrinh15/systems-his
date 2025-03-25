@@ -466,63 +466,241 @@ export const hookNhapKhoKhoa = async ({ doc, req, operation, previousDoc }) => {
         data: { departmentInventory }
       });
     } catch (error) {
-      console.error(`❌ Lỗi khi cập nhật kho khoa ${khoaId}:`, error);
+      console.error('Lỗi khi cập nhật quầy thuốc:', error)
     }
   }
-};
+}
 
 
-export const showPrice: CollectionAfterReadHook = async ({ doc }) => {
-  const formatNumber = (value) => {
-    if (value == null || value === '') return '0';
-    const numberValue = parseFloat(value.toString().replace(/\./g, ''));
-    return new Intl.NumberFormat('vi-VN').format(numberValue);
-  };
+export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
+  if (!data) return data
 
-  const convertToNumber = (str) => {
-    if (str == null || str === '') return 0;
-    return parseFloat(str.toString().replace(/\./g, '')) || 0;
-  };
+  const formatNumber = (value: any) => {
+    if (!value) return value
+    const numberValue = Number(value.toString().replace(/\D/g, '')) // Loại bỏ ký tự không phải số
+    return !isNaN(numberValue) ? new Intl.NumberFormat('vi-VN').format(numberValue) : value
+  }
+  // theo thuốc
+  await Promise.all(
+    data?.exports?.map(async (giaodich) => {
+      const loaiXuat = giaodich?.loai_xuat || '' // Lấy loại xuất (có thể là 'khoa' hoặc 'quay')
 
-  let tongGiaTriQuayThuoc = 0;
-  let tongGiaTriKhoa = 0;
-  let tongGiaTriHuy = 0; // Thêm giá trị hàng hủy
+      await Promise.all(
+        giaodich.thuoc?.map(async (thuoc) => {
+          if (thuoc.unitprice) {
+            thuoc.unitprice = formatNumber(thuoc.unitprice)
+          } else {
+            const tenthuocId =
+              typeof thuoc.tenthuoc === 'string' ? thuoc.tenthuoc : thuoc.tenthuoc?.id
+            if (!tenthuocId) return
+
+            try {
+              const findThuoc = await req.payload.find({
+                collection: 'baogia',
+                where: { item: { equals: tenthuocId } },
+                limit: 1,
+              })
+
+              if (findThuoc.docs.length > 0) {
+                const baogia = findThuoc.docs[0]
+
+                let giaXuat = thuoc.unitprice || '0' // Mặc định giữ nguyên giá nếu không chọn khoa/quầy
+
+                if (loaiXuat === 'khoa') {
+                  giaXuat = baogia.gianhaptrungbinh || '0' // Giá nhập trung bình cho Khoa
+                } else {
+                  if (loaiXuat === 'quaythuoc') {
+                    giaXuat = baogia.giaban || '0' // Giá bán lẻ cho Quầy
+                  } else if (loaiXuat === 'huy') {
+                    giaXuat = baogia.gianhaptrungbinh || '0'
+                  }
+                }
+                thuoc.unitprice = formatNumber(giaXuat) // Định dạng lại số
+              }
+            } catch (error) {
+              console.error('❌ Lỗi khi lấy giá thuốc từ Bảng Giá:', error)
+            }
+          }
+
+          // Tính totalprice nếu đã có unitprice
+          if (thuoc.unitprice) {
+            const unitPriceNumber = Number(thuoc.unitprice.toString().replace(/\D/g, ''))
+            let totalPrice = 0
+            if (thuoc.quantity) {
+              totalPrice = unitPriceNumber * Number(thuoc.quantity)
+            }
+            thuoc.totalprice = formatNumber(totalPrice)
+          }
+        }),
+      )
+    }),
+  )
+  // theo vật tư
+  await Promise.all(
+    data?.exports?.map(async (giaodich) => {
+      const loaiXuat = giaodich?.loai_xuat || '' // Lấy loại xuất (có thể là 'khoa' hoặc 'quay')
+
+      await Promise.all(
+        giaodich.vattutieuhao?.map(async (vattutieuhao) => {
+          if (!vattutieuhao.unitprice) {
+            const tenthuocId =
+              typeof vattutieuhao.supply === 'string'
+                ? vattutieuhao.supply
+                : vattutieuhao.supply?.id
+            if (!tenthuocId) return
+
+            try {
+              const findVattutieuhao = await req.payload.find({
+                collection: 'baogia',
+                where: { items: { equals: tenthuocId } },
+                limit: 1,
+              })
+
+              if (findVattutieuhao.docs.length > 0) {
+                const baogia = findVattutieuhao.docs[0]
+
+                let giaXuat = vattutieuhao.unitprice || '0' // Mặc định giữ nguyên giá nếu không chọn khoa/quầy
+
+                if (loaiXuat === 'khoa') {
+                  giaXuat = baogia.gianhaptrungbinh || '0' // Giá nhập trung bình cho Khoa
+                } else {
+                  if (loaiXuat === 'quaythuoc') {
+                    giaXuat = baogia.giaban || '0' // Giá bán lẻ cho Quầy
+                  } else if (loaiXuat === 'huy') {
+                    giaXuat = baogia.gianhaptrungbinh || '0'
+                  }
+                }
+
+                vattutieuhao.unitprice = formatNumber(giaXuat) // Định dạng lại số
+              }
+            } catch (error) {
+              console.error('❌ Lỗi khi lấy giá thuốc từ Bảng Giá:', error)
+            }
+          }
+
+          // Tính totalprice nếu đã có unitprice
+          if (vattutieuhao.unitprice) {
+            const unitPriceNumber = Number(vattutieuhao.unitprice.toString().replace(/\D/g, ''))
+            let totalPrice = 0
+            if (vattutieuhao.quantity) {
+              totalPrice = unitPriceNumber * Number(vattutieuhao.quantity)
+            }
+            vattutieuhao.totalprice = formatNumber(totalPrice)
+          }
+        }),
+      )
+    }),
+  )
+  //theo máy móc
+  await Promise.all(
+    data?.exports?.map(async (giaodich) => {
+      const loaiXuat = giaodich?.loai_xuat || '' // Lấy loại xuất (có thể là 'khoa' hoặc 'quay')
+
+      await Promise.all(
+        giaodich.maymocthietbi?.map(async (vattutieuhao) => {
+          if (!vattutieuhao.unitprice) {
+            const tenthuocId =
+              typeof vattutieuhao.equipment === 'string'
+                ? vattutieuhao.equipment
+                : vattutieuhao.equipment?.id
+            if (!tenthuocId) return
+
+            try {
+              const findVattutieuhao = await req.payload.find({
+                collection: 'baogia',
+                where: { items: { equals: tenthuocId } },
+                limit: 1,
+              })
+
+              if (findVattutieuhao.docs.length > 0) {
+                const baogia = findVattutieuhao.docs[0]
+
+                let giaXuat = vattutieuhao.unitprice || '0' // Mặc định giữ nguyên giá nếu không chọn khoa/quầy
+
+                if (loaiXuat === 'khoa') {
+                  giaXuat = baogia.gianhaptrungbinh || '0' // Giá nhập trung bình cho Khoa
+                } else {
+                  if (loaiXuat === 'quaythuoc') {
+                    giaXuat = baogia.giaban || '0' // Giá bán lẻ cho Quầy
+                  } else if (loaiXuat === 'huy') {
+                    giaXuat = baogia.gianhaptrungbinh || '0'
+                  }
+                }
+                vattutieuhao.unitprice = formatNumber(giaXuat) // Định dạng lại số
+              }
+            } catch (error) {
+              console.error('❌ Lỗi khi lấy giá thuốc từ Bảng Giá:', error)
+            }
+          }
+
+          // Tính totalprice nếu đã có unitprice
+          if (vattutieuhao.unitprice) {
+            const unitPriceNumber = Number(vattutieuhao.unitprice.toString().replace(/\D/g, ''))
+            let totalPrice = 0
+            if (vattutieuhao.quantity) {
+              totalPrice = unitPriceNumber * Number(vattutieuhao.quantity)
+            }
+            vattutieuhao.totalprice = formatNumber(totalPrice)
+          }
+        }),
+      )
+    }),
+  )
+
+  return data
+}
+export const showTotalPrice: CollectionAfterReadHook = async ({ doc }) => {
+  const formatNumber = (value: any) => {
+    if (value == null || value === '') return '0'
+    const numberValue = parseFloat(value.toString().replace(/\D/g, ''))
+    return new Intl.NumberFormat('vi-VN').format(numberValue)
+  }
+
+  const convertToNumber = (str: any) => {
+    if (str == null || str === '') return 0
+    return parseFloat(str.toString().replace(/\D/g, '')) || 0
+  }
+
+  let tongGiaTriQuayThuoc = 0
+  let tongGiaTriKhoa = 0
+  let tongGiaTriHuy = 0 // Thêm giá trị hàng hủy
 
   if (doc.exports && Array.isArray(doc.exports)) {
     doc.exports.forEach((item) => {
-      let tongTien = 0;
+      let tongTien = 0
 
       const sumTotal = (array) => {
         return array?.reduce((sum, item) => {
-          const unitPrice = convertToNumber(item.unitprice);
-          const quantity = convertToNumber(item.quantity);
-          item.totalprice = formatNumber(unitPrice * quantity);
-          item.unitprice = formatNumber(unitPrice); // Định dạng unitprice
-          return sum + unitPrice * quantity;
-        }, 0) || 0;
-      };
+          const unitPrice = convertToNumber(item.unitprice)
+          const quantity = convertToNumber(item.quantity)
+          item.totalprice = formatNumber(unitPrice * quantity)
+          item.unitprice = formatNumber(unitPrice) // Định dạng unitprice
+          return sum + unitPrice * quantity
+        }, 0)
+      }
 
-      tongTien += sumTotal(item.thuoc || []);
-      tongTien += sumTotal(item.vattutieuhao || []);
-      tongTien += sumTotal(item.maymocthietbi || []);
+      tongTien += sumTotal(item.thuoc || [])
+      tongTien += sumTotal(item.vattutieuhao || [])
+      tongTien += sumTotal(item.maymocthietbi || [])
 
-      item.tongtien = formatNumber(tongTien);
+      item.tongtien = formatNumber(tongTien)
 
       if (item.loai_xuat === 'quaythuoc') {
-        tongGiaTriQuayThuoc += tongTien;
+        tongGiaTriQuayThuoc += tongTien
       } else if (item.loai_xuat === 'khoa') {
-        tongGiaTriKhoa += tongTien;
-      } else if (item.loai_xuat === 'huy') { // Xử lý loại xuất "hủy"
-        tongGiaTriHuy += tongTien;
+        tongGiaTriKhoa += tongTien
+      } else if (item.loai_xuat === 'huy') {
+        // Xử lý loại xuất "hủy"
+        tongGiaTriHuy += tongTien
       }
-    });
+    })
   }
 
-  doc.tong_gia_tri_quaythuoc = formatNumber(tongGiaTriQuayThuoc);
-  doc.tong_gia_tri_khoa = formatNumber(tongGiaTriKhoa);
-  doc.tong_gia_tri_huyhang = formatNumber(tongGiaTriHuy); // Gán tổng giá trị hàng hủy vào doc
-  doc.tong_gia_tri = formatNumber(tongGiaTriQuayThuoc + tongGiaTriKhoa + tongGiaTriHuy);
-};
+  doc.tong_gia_tri_quaythuoc = formatNumber(tongGiaTriQuayThuoc)
+  doc.tong_gia_tri_khoa = formatNumber(tongGiaTriKhoa)
+  doc.tong_gia_tri_huyhang = formatNumber(tongGiaTriHuy) // Gán tổng giá trị hàng hủy vào doc
+  doc.tong_gia_tri = formatNumber(tongGiaTriQuayThuoc + tongGiaTriKhoa + tongGiaTriHuy)
+}
 
 export const checkInventoryBeforeExport = async ({ data, req, operation }: { data: any, req: PayloadRequest, operation: string }) => {
   if (operation !== 'create' && operation !== 'update') return data;

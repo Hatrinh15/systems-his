@@ -11,6 +11,26 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
       throw new APIError(`Phòng này đã có trong danh sách ! Vui lòng chọn phòng khác.`, 400)
     }
   }
+  ///cập nhật phòng cho truongphong
+  if (operation === 'create' || operation === 'update') {
+    if (!data?.truongphong || data.truongphong.length === 0) {
+      return
+    }
+
+    if (!data?.tenphong) {
+      return
+    }
+    await Promise.all(
+      data.truongphong.map(async (nhanvienId) => {
+        await req.payload.update({
+          collection: 'users',
+          id: nhanvienId,
+          data: { phong: data.tenphong }, // Lưu tên khoa vào users
+        })
+      }),
+    )
+  }
+  ///cập nhật phòng cho nhân viên
   if (operation === 'create' || operation === 'update') {
     if (!data?.nhanvien || data.nhanvien.length === 0) {
       console.log('Không có nhân viên nào trong danh sách , không cần cập nhật.')

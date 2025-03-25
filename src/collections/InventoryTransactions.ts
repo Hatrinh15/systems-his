@@ -1,4 +1,4 @@
-import { checkDate, hookNhapKho, showPrice } from '@/hooks/hookphieunhap'
+import { checkDate, hookNhapKho, showPrice, thongBaotrong } from '@/hooks/hookphieunhap'
 import { CollectionConfig } from 'payload'
 
 export const InventoryTransactions: CollectionConfig = {
@@ -489,7 +489,7 @@ export const InventoryTransactions: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [showPrice],
+    beforeChange: [showPrice, thongBaotrong],
     beforeValidate: [checkDate],
     afterChange: [hookNhapKho],
   },

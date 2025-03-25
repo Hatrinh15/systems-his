@@ -1,4 +1,4 @@
-import { beforeChangeclass } from '@/hooks/Hookclass';
+import { beforeChangeclass } from '@/hooks/Hookclass'
 import { CollectionConfig } from 'payload'
 const Class: CollectionConfig = {
   slug: 'class',
@@ -6,7 +6,7 @@ const Class: CollectionConfig = {
     singular: 'Phòng ',
     plural: 'Phòng ',
   },
-  admin: {group: 'Khoa & Nhân sự ',},
+  admin: { group: 'Khoa & Nhân sự ' },
   fields: [
     {
       type: 'tabs',
@@ -19,9 +19,9 @@ const Class: CollectionConfig = {
               label: 'TÊN PHÒNG',
               type: 'radio',
               options: [
-                {label:'Phòng hành chính-quản trị',value:'hanhchinhquantri'},
-                {label:'Phòng tài chính-kế toán',value:'taichinhketoan'},
-                {label:'Phòng an ninh',value:'anninh'},
+                { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
+                { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
+                { label: 'Phòng an ninh', value: 'anninh' },
               ],
             },
             {
@@ -30,10 +30,44 @@ const Class: CollectionConfig = {
               type: 'relationship',
               relationTo: 'users', // Đúng collection
               hasMany: true, // Một bác sĩ phụ trách một phòng
-              filterOptions: ({data}) => {
-                return {
-                  chucvu: { equals: 'truongphong' },
-                  
+              filterOptions: async ({ req, data }) => {
+                try {
+                  // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
+                  const selectedDoctors = Array.isArray(data?.doctors)
+                    ? data.doctors
+                        .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
+                        .filter(Boolean)
+                    : []
+                  // Lấy danh sách bác sĩ đã có khoa
+                  // dùng req.payload.find để tìm những bác sĩ đã có khoa
+                  const checkDoctors = await req.payload.find({
+                    collection: 'departments',
+                    where: { doctors: { exists: true } },
+                    limit: 999,
+                  })
+                  // Lấy danh sách ID bác sĩ đã có khoa
+                  const docCheckDoctors = checkDoctors?.docs ?? []
+                  const checkoutDoctors = docCheckDoctors.flatMap((doc) =>
+                    (doc?.doctors ?? [])
+                      .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
+                      .filter(Boolean),
+                  )
+
+                  return {
+                    and: [
+                      { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Loại bác sĩ đã nghỉ việc
+                      { chucvu: { equals: 'truongphong' } },
+                      {
+                        or: [
+                          { id: { not_in: checkoutDoctors } }, // không chọn bác sĩ đã có khoa
+                          { id: { in: selectedDoctors } }, //  Giữ lại bác sĩ đã chọn
+                        ],
+                      },
+                    ],
+                  }
+                } catch (error) {
+                  console.error('Lỗi truy vấn danh sách bác sĩ:', error)
+                  return {}
                 }
               },
             },
@@ -45,39 +79,37 @@ const Class: CollectionConfig = {
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 try {
-                  console.log('Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2));
-            
                   // Danh sách nhân viên đã chọn
                   const selectedNhanVien = Array.isArray(data?.nhanvien)
                     ? data.nhanvien
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean)
-                    : [];
-            
-                  console.log('Nhân viên đang được chọn:', selectedNhanVien);
-            
+                    : []
+
+                  console.log('Nhân viên đang được chọn:', selectedNhanVien)
+
                   // Lấy danh sách nhân viên đã có phòng trong hệ thống
                   //dùng req.payload.find để tìm tất cả các nhân viên đã có khoa
                   const existingNhanVienData = await req.payload.find({
                     collection: 'class',
                     where: { nhanvien: { exists: true } },
                     limit: 999, // Giới hạn kết quả
-                  });
-            
+                  })
+
                   // Lấy danh sách ID nhân viên đã có phòng (existingNhanvien)
-                  const existingNhanVien = existingNhanVienData?.docs?.flatMap((doc) =>
-                    (doc?.nhanvien ?? [])
-                      .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
-                      .filter(Boolean)
-                  ) ?? [];
-            
-                  console.log(' Nhân viên đã có phòng:', existingNhanVien);
-            
+                  const existingNhanVien =
+                    existingNhanVienData?.docs?.flatMap((doc) =>
+                      (doc?.nhanvien ?? [])
+                        .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
+                        .filter(Boolean),
+                    ) ?? []
+
                   // Điều kiện lọc nhân viên theo phòng ban
-                  const baseCondition = data?.tenphong === 'hanhchinhquantri'
-                    ? { chucvu: { equals: 'letan' } } // Lễ tân cho phòng hành chính quản trị
-                    : { chucvu: { equals: 'kythuatvien' } }; // Kỹ thuật viên cho phòng khác
-            
+                  const baseCondition =
+                    data?.tenphong === 'hanhchinhquantri'
+                      ? { chucvu: { equals: 'letan' } } // Lễ tân cho phòng hành chính quản trị
+                      : { chucvu: { equals: 'kythuatvien' } } // Kỹ thuật viên cho phòng khác
+
                   return {
                     and: [
                       baseCondition,
@@ -91,12 +123,12 @@ const Class: CollectionConfig = {
                     ],
                   } as any
                 } catch (error) {
-                  console.error(' Lỗi truy vấn danh sách nhân viên:', error);
-                  return {};
+                  console.error(' Lỗi truy vấn danh sách nhân viên:', error)
+                  return {}
                 }
               },
             },
-                      
+
             {
               name: 'thongtin',
               label: 'Thông tin hoạt động',
@@ -111,8 +143,8 @@ const Class: CollectionConfig = {
       ],
     },
   ],
-  hooks:{
-    beforeChange:[beforeChangeclass],
-  }
+  hooks: {
+    beforeChange: [beforeChangeclass],
+  },
 }
 export default Class

@@ -99,7 +99,7 @@ const Departments: CollectionConfig = {
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 try {
-                  console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
+                  // console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
                   const selectedDoctors = Array.isArray(data?.doctors)
                     ? data.doctors
@@ -171,7 +171,6 @@ const Departments: CollectionConfig = {
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
-
                   return {
                     and: [
                       { chucvu: { equals: 'yta' } }, // Chỉ lấy y tá

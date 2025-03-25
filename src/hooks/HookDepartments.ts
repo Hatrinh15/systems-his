@@ -49,15 +49,15 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
   }
   if (operation === 'create' || operation === 'update') {
     if (!data?.nures || data.nures.length === 0) {
-      console.log('Không có y tá nào trong danh sách , không cần cập nhật.')
+      // console.log('Không có y tá nào trong danh sách , không cần cập nhật.')
       return
     }
 
     if (!data?.tenkhoa) {
-      console.log(' Không có ID khoa, không thể cập nhật.')
+      // console.log(' Không có ID khoa, không thể cập nhật.')
       return
     }
-    console.log(` Cập nhật khoa cho y tá, ID Khoa: ${data.tenkhoa}`)
+    // console.log(` Cập nhật khoa cho y tá, ID Khoa: ${data.tenkhoa}`)
     await Promise.all(
       data.nures.map(async (nuresId) => {
         await req.payload.update({
@@ -65,7 +65,7 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
           id: nuresId,
           data: { khoa: data.tenkhoa }, // Lưu tên khoa vào users
         })
-        console.log(`Đã cập nhật khoa cho bác sĩ có ID: ${nuresId}`)
+        // console.log(`Đã cập nhật khoa cho bác sĩ có ID: ${nuresId}`)
       }),
     )
   }

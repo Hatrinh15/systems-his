@@ -1000,6 +1000,7 @@ export interface Medication {
   medicationpicture?: (string | null) | Media;
   code?: string | null;
   name?: string | null;
+  bhyt: 'co' | 'khong';
   category?:
     | (
         | 'khangsinh'
@@ -1087,9 +1088,10 @@ export interface MedicalUsage {
   usagedate?: string | null;
   department: string | Department;
   staff: string | User;
-  items?:
+  danhsachvattu?:
     | {
-        item?: (string | null) | MedicalSupply;
+        items?: (string | null) | MedicalSupply;
+        item?: (string | null) | Medication;
         quantity?: number | null;
         reason?: string | null;
         id?: string | null;
@@ -1255,7 +1257,7 @@ export interface Phieuxuat {
           | {
               tenthuoc?: (string | null) | Medication;
               quantity?: number | null;
-              donvi: 'hop' | 'thung';
+              donvi?: string | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -1265,7 +1267,7 @@ export interface Phieuxuat {
           | {
               supply?: (string | null) | MedicalSupply;
               quantity?: number | null;
-              donvi: 'hop' | 'thung';
+              donvi?: string | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -1275,7 +1277,7 @@ export interface Phieuxuat {
           | {
               equipment?: (string | null) | MedicalSupply;
               quantity?: number | null;
-              donvi: 'cai' | 'bo';
+              donvi?: ('cai' | 'bo') | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -2028,9 +2030,10 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
   usagedate?: T;
   department?: T;
   staff?: T;
-  items?:
+  danhsachvattu?:
     | T
     | {
+        items?: T;
         item?: T;
         quantity?: T;
         reason?: T;
@@ -2229,6 +2232,7 @@ export interface MedicationsSelect<T extends boolean = true> {
   medicationpicture?: T;
   code?: T;
   name?: T;
+  bhyt?: T;
   category?: T;
   unit?: T;
   description?: T;

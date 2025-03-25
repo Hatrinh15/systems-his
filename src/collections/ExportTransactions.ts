@@ -1,11 +1,6 @@
 import { CollectionConfig } from 'payload'
-import {
-  hookBaoGia,
-  hookNhapQuayThuoc,
-  hookxuatkho,
-  showPrice,
-  showTotalPrice,
-} from '@/hooks/Hook_Xuat_Kho'
+
+import { hookBaoGia, hookNhapQuayThuoc, hookxuatkho, showPrice ,hookNhapKhoKhoa, checkInventoryBeforeExport ,hookCheckinfo} from '@/hooks/Hook_Xuat_Kho'
 
 export const PhieuXuat: CollectionConfig = {
   slug: 'phieuxuat',
@@ -153,12 +148,8 @@ export const PhieuXuat: CollectionConfig = {
                         {
                           name: 'donvi',
                           label: 'Đơn vị',
-                          type: 'select',
-                          required: true,
-                          options: [
-                            { value: 'hop', label: 'Hộp' },
-                            { value: 'thung', label: 'Thùng' },
-                          ],
+                          type: 'text',
+                          defaultValue: 'Hộp'
                         },
                         { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
                         {
@@ -198,12 +189,8 @@ export const PhieuXuat: CollectionConfig = {
                         {
                           name: 'donvi',
                           label: 'Đơn vị',
-                          type: 'select',
-                          required: true,
-                          options: [
-                            { value: 'hop', label: 'Hộp' },
-                            { value: 'thung', label: 'Thùng' },
-                          ],
+                          type: 'text',
+                          defaultValue:'Hộp'
                         },
                         { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
                         {
@@ -242,11 +229,10 @@ export const PhieuXuat: CollectionConfig = {
                           name: 'donvi',
                           label: 'Đơn vị',
                           type: 'select',
-                          required: true,
-                          options: [
-                            { value: 'cai', label: 'Cái' },
-                            { value: 'bo', label: 'Bộ' },
-                          ],
+                          options:[
+                            {label: 'Cái',value: 'cai' },
+                            {label: 'Bộ',value: 'bo'}
+                          ]
                         },
                         { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
                         {
@@ -309,8 +295,8 @@ export const PhieuXuat: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeChange: [hookBaoGia, showPrice],
+    beforeChange: [hookBaoGia,checkInventoryBeforeExport,hookCheckinfo,showPrice],
     afterRead: [showTotalPrice],
-    afterChange: [hookxuatkho, hookNhapQuayThuoc],
+    afterChange: [hookxuatkho,hookNhapQuayThuoc, hookNhapKhoKhoa],
   },
 }

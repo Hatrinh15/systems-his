@@ -31,6 +31,17 @@ export const Medications: CollectionConfig = {
       type: "text",
     },
     {
+      name :'bhyt',
+      label: 'Bảo hiểm y tế',
+      type: 'select',
+      required:true,
+      options:[
+        {label: 'Có',value: 'co'},
+        {label: 'Không',value: 'khong'},
+      ],
+      defaultValue: 'co'
+    },
+    {
       name: "category",
       label: "Loại thuốc",
       type: "select",

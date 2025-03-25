@@ -3,8 +3,8 @@ import { CollectionConfig } from 'payload';
 export const medicalUsages: CollectionConfig = {
   slug: 'medicalUsages',
   labels: {
-    singular: 'Phiếu Sử Dụng Vật Tư Y Tế',
-    plural: 'Phiếu Sử Dụng Vật Tư Y Tế',
+    singular: 'Phiếu Sử Dụng Kho Khoa',
+    plural: 'Phiếu Sử Dụng Kho Khoa',
   },
   admin: {
     useAsTitle:'department',
@@ -31,15 +31,21 @@ export const medicalUsages: CollectionConfig = {
       required: true,
     },
     {
-      name: 'items',
+      name: 'danhsachvattu',
       label: 'Danh sách vật tư y tế',
       type: 'array',
       fields: [
         {
-          name: 'item',
+          name: 'items',
           label: 'Vật tư y tế',
           type: 'relationship',
           relationTo: 'medicalSupplies',
+        },
+        {
+          name: 'item',
+          label: 'Thuốc',
+          type: 'relationship',
+          relationTo: 'medications',
         },
         {
           name: 'quantity',

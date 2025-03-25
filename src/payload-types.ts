@@ -1001,6 +1001,7 @@ export interface Medication {
   medicationpicture?: (string | null) | Media;
   code?: string | null;
   name?: string | null;
+  bhyt: 'co' | 'khong';
   category?:
     | (
         | 'khangsinh'
@@ -1088,9 +1089,10 @@ export interface MedicalUsage {
   usagedate?: string | null;
   department: string | Department;
   staff: string | User;
-  items?:
+  danhsachvattu?:
     | {
-        item?: (string | null) | MedicalSupply;
+        items?: (string | null) | MedicalSupply;
+        item?: (string | null) | Medication;
         quantity?: number | null;
         reason?: string | null;
         id?: string | null;
@@ -1256,7 +1258,7 @@ export interface Phieuxuat {
           | {
               tenthuoc?: (string | null) | Medication;
               quantity?: number | null;
-              donvi: 'hop' | 'thung';
+              donvi?: string | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -1266,7 +1268,7 @@ export interface Phieuxuat {
           | {
               supply?: (string | null) | MedicalSupply;
               quantity?: number | null;
-              donvi: 'hop' | 'thung';
+              donvi?: string | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -1276,7 +1278,7 @@ export interface Phieuxuat {
           | {
               equipment?: (string | null) | MedicalSupply;
               quantity?: number | null;
-              donvi: 'cai' | 'bo';
+              donvi?: ('cai' | 'bo') | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -1286,9 +1288,9 @@ export interface Phieuxuat {
         id?: string | null;
       }[]
     | null;
-  tong_gia_tri_thuoc?: string | null;
-  tong_gia_tri_vtth?: string | null;
-  tong_gia_tri_mmtb?: string | null;
+  tong_gia_tri_quaythuoc?: string | null;
+  tong_gia_tri_khoa?: string | null;
+  tong_gia_tri_huyhang?: string | null;
   tong_gia_tri?: string | null;
   report_notes?: string | null;
   updatedAt: string;
@@ -2021,9 +2023,10 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
   usagedate?: T;
   department?: T;
   staff?: T;
-  items?:
+  danhsachvattu?:
     | T
     | {
+        items?: T;
         item?: T;
         quantity?: T;
         reason?: T;
@@ -2223,6 +2226,7 @@ export interface MedicationsSelect<T extends boolean = true> {
   medicationpicture?: T;
   code?: T;
   name?: T;
+  bhyt?: T;
   category?: T;
   unit?: T;
   description?: T;
@@ -2430,9 +2434,9 @@ export interface PhieuxuatSelect<T extends boolean = true> {
         tongtien?: T;
         id?: T;
       };
-  tong_gia_tri_thuoc?: T;
-  tong_gia_tri_vtth?: T;
-  tong_gia_tri_mmtb?: T;
+  tong_gia_tri_quaythuoc?: T;
+  tong_gia_tri_khoa?: T;
+  tong_gia_tri_huyhang?: T;
   tong_gia_tri?: T;
   report_notes?: T;
   updatedAt?: T;

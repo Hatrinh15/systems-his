@@ -1,11 +1,12 @@
+import Departments from '@/collections/phongban/Departments'
 import {
   CollectionBeforeChangeHook,
   CollectionAfterChangeHook,
   CollectionAfterReadHook,
 } from 'payload'
 import { APIError } from 'payload'
+import { PayloadRequest } from 'payload'
 
-// Trước khi lưu: Kiểm tra ngày, trùng khoa
 export const hookBaoGia: CollectionBeforeChangeHook = async ({ data, req, originalDoc }) => {
   const now = new Date()
 
@@ -71,7 +72,82 @@ export const hookBaoGia: CollectionBeforeChangeHook = async ({ data, req, origin
   return data
 }
 
-// Sau khi lưu: Cập nhật kho hàng, quầy thuốc, kho khoa
+export const hookCheckinfo: CollectionBeforeChangeHook = async ({ data, req }) => {
+  if (!data.transactiondate) {
+    throw new APIError('Ngày tạo phiếu không được để trống.', 400);
+  }
+  if (!data.receiverorsender) {
+    throw new APIError('Người lập phiếu không được để trống.', 400);
+  }
+
+  if (!data.nguoinhan) {
+    throw new APIError('Người nhận không được để trống.', 400);
+  }
+
+  if (!data.exports || data.exports.length === 0) {
+    throw new APIError('Danh sách xuất hàng không được để trống.', 400);
+  }
+
+  data.exports.forEach((exportItem, index) => {
+    if (!exportItem.loai_xuat) {
+      throw new APIError(`Mục xuất hàng thứ ${index + 1}: Loại xuất không được để trống.`, 400);
+    }
+
+    if (exportItem.loai_xuat === 'khoa' && !exportItem.destination) {
+      throw new APIError(`Mục xuất hàng thứ ${index + 1}: Nơi nhận không được để trống khi xuất cho khoa.`, 400);
+    }
+
+    if (exportItem.loai_xuat === 'huy' && !exportItem.reason_cancel) {
+      throw new APIError(`Mục xuất hàng thứ ${index + 1}: Lý do hủy không được để trống khi hủy hàng.`, 400);
+    }
+    
+
+    if (
+      (!exportItem.thuoc || exportItem.thuoc.length === 0) &&
+      (!exportItem.vattutieuhao || exportItem.vattutieuhao.length === 0) &&
+      (!exportItem.maymocthietbi || exportItem.maymocthietbi.length === 0)
+    ) {
+      throw new APIError(`Mục xuất hàng thứ ${index + 1}: Phải có ít nhất một sản phẩm để xuất.`, 400);
+    }
+
+    exportItem.thuoc?.forEach((thuoc, thuocIndex) => {
+      if (!thuoc.tenthuoc) {
+        throw new APIError(`Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Tên thuốc không được để trống.`, 400);
+      }
+      if (thuoc.quantity === undefined || thuoc.quantity === null) {
+        throw new APIError(`Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`, 400);
+      }
+      if (thuoc.quantity <= 0) {
+        throw new APIError(`Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`, 400);
+      }
+    });
+
+    exportItem.vattutieuhao?.forEach((vattu, vattuIndex) => {
+      if (!vattu.supply) {
+        throw new APIError(`Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Tên vật tư không được để trống.`, 400);
+      }
+      if (vattu.quantity === undefined || vattu.quantity === null) {
+        throw new APIError(`Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`, 400);
+      }
+      if (vattu.quantity <= 0) {
+        throw new APIError(`Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`, 400);
+      }
+    });
+
+    exportItem.maymocthietbi?.forEach((equipment, equipmentIndex) => {
+      if (!equipment.equipment) {
+        throw new APIError(`Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Tên thiết bị không được để trống.`, 400);
+      }
+      if (equipment.quantity === undefined || equipment.quantity === null) {
+        throw new APIError(`Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`, 400);
+      }
+      if (equipment.quantity <= 0) {
+        throw new APIError(`Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`, 400);
+      }
+    });
+  });
+};
+
 export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,previousDoc,}) => {
   if (operation === 'create') {
     try {
@@ -203,219 +279,317 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,
   }
 }
 
-export const hookNhapQuayThuoc: CollectionAfterChangeHook = async ({ doc, req, operation,previousDoc }) => {
-  if (operation === 'create') {
-    try {
-      const pharmacyMap = new Map();
-      // Lấy danh sách sản phẩm trong quầy thuốc
-      const findPharmacies = await req.payload.find({
-        collection: 'pharmacies',
-        limit: 1000,
-      });
-      findPharmacies.docs.forEach((pharmacy) => {
-        const itemId = typeof pharmacy.item === 'object' && pharmacy.item !== null ? pharmacy.item.id : pharmacy.item;
-        const supplyId = typeof pharmacy.items === 'object' && pharmacy.items !== null ? pharmacy.items.id : pharmacy.items;
-        pharmacyMap.set(`${itemId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
-        pharmacyMap.set(`${supplyId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
-      });
-      if (!Array.isArray(doc.exports)) {
-        console.error('Lỗi: doc.exports không phải là một mảng', doc.exports);
-        return;
-      }
-      const importMap = new Map();
-      for (const item of doc.exports) {
-        if (item.thuoc && Array.isArray(item.thuoc)) {
-          for (const thuoc of item.thuoc) {
-            const key = `${thuoc.tenthuoc}`;
-            const existingQuantity = importMap.get(key) || 0;
-            importMap.set(key, existingQuantity + thuoc.quantity);
-          }
-        }
-        if (item.vattutieuhao && Array.isArray(item.vattutieuhao)) {
-          for (const vattu of item.vattutieuhao) {
-            const key = `${vattu.supply}`;
-            const existingQuantity = importMap.get(key) || 0;
-            importMap.set(key, existingQuantity + vattu.quantity);
-          }
-        }
-      }
-      for (const [importId, importQuantity] of importMap.entries()) {
-        const findItem = pharmacyMap.get(importId);
-        if (findItem) {
-          // Nếu sản phẩm đã có trong quầy thuốc, cập nhật số lượng
-          const newQuantity = (findItem.totalQuantity || 0) + importQuantity;
-          await req.payload.update({
-            collection: 'pharmacies',
-            id: findItem.id,
-            data: { quantity: newQuantity },
-          });
-        } else {
-          // Nếu sản phẩm chưa có, thêm mới
-          const category = doc.exports.some(item => item.thuoc?.some(t => t.tenthuoc === importId)) 
-              ? 'medications' 
-              : 'vattutieuhao';
+export const hookNhapQuayThuoc: CollectionAfterChangeHook = async ({ doc, req, operation, previousDoc }) => {
 
-              await req.payload.create({
-                collection: 'pharmacies',
-                data: {
-                  [category === 'medications' ? 'item' : 'items']: importId,
-                  category,
-                  quantity: importQuantity,
-                },
-              });
-        }
-      }
-    } catch (error) {
-      console.error('Lỗi khi cập nhật quầy thuốc:', error);
-    }
-  }
-  if (operation === 'update') {
-    try {
-      const pharmacyMap = new Map();
-      // Lấy danh sách sản phẩm trong quầy thuốc
-      const findPharmacies = await req.payload.find({
-        collection: 'pharmacies',
-        limit: 1000,
-      });
-      findPharmacies.docs.forEach((pharmacy) => {
-        const itemId = typeof pharmacy.item === 'object' && pharmacy.item !== null ? pharmacy.item.id : pharmacy.item;
-        const supplyId = typeof pharmacy.items === 'object' && pharmacy.items !== null ? pharmacy.items.id : pharmacy.items;
-        pharmacyMap.set(`${itemId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
-        pharmacyMap.set(`${supplyId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
-      });
-  
-      if (!Array.isArray(doc.exports) || !Array.isArray(previousDoc.exports)) {
-        console.error('Lỗi: doc.exports hoặc previousDoc.exports không hợp lệ', doc.exports, previousDoc.exports);
-        return;
-      }
-  
-      const importMap = new Map();
-      const previousImportMap = new Map();
-      
-      for (const item of doc.exports) {
-        if (item.thuoc && Array.isArray(item.thuoc)) {
-          for (const thuoc of item.thuoc) {
-            const key = `${thuoc.tenthuoc}`;
-            const existingQuantity = importMap.get(key) || 0;
-            importMap.set(key, existingQuantity + thuoc.quantity);
-          }
-        }
-        if (item.vattutieuhao && Array.isArray(item.vattutieuhao)) {
-          for (const vattu of item.vattutieuhao) {
-            const key = `${vattu.supply}`;
-            const existingQuantity = importMap.get(key) || 0;
-            importMap.set(key, existingQuantity + vattu.quantity);
-          }
-        }
-      }
-      
-      for (const item of previousDoc.exports) {
-        if (item.thuoc && Array.isArray(item.thuoc)) {
-          for (const thuoc of item.thuoc) {
-            const key = `${thuoc.tenthuoc}`;
-            const existingQuantity = previousImportMap.get(key) || 0;
-            previousImportMap.set(key, existingQuantity + thuoc.quantity);
-          }
-        }
-        if (item.vattutieuhao && Array.isArray(item.vattutieuhao)) {
-          for (const vattu of item.vattutieuhao) {
-            const key = `${vattu.supply}`;
-            const existingQuantity = previousImportMap.get(key) || 0;
-            previousImportMap.set(key, existingQuantity + vattu.quantity);
-          }
-        }
-      }
-  
-      for (const [importId, newQuantity] of importMap.entries()) {
-        const oldQuantity = previousImportMap.get(importId) || 0;
-        const difference = newQuantity - oldQuantity;
-        if (difference !== 0) {
-          const findItem = pharmacyMap.get(importId);
-          if (findItem) {
-            const updatedQuantity = (findItem.totalQuantity || 0) + difference;
-            await req.payload.update({
-              collection: 'pharmacies',
-              id: findItem.id,
-              data: { quantity: updatedQuantity },
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Lỗi khi cập nhật quầy thuốc:', error);
-    }
-  }
+  const exportItems = doc.exports?.filter(item => item.loai_xuat === "quaythuoc") || [];
+  if (exportItems.length === 0) return;
 
+  try {
+    const pharmacyMap = new Map();
+
+    // Lấy danh sách sản phẩm trong quầy thuốc
+    const findPharmacies = await req.payload.find({
+      collection: 'pharmacies',
+      limit: 1000,
+    });
+
+    findPharmacies.docs.forEach((pharmacy) => {
+      const itemId = typeof pharmacy.item === 'object' && pharmacy.item !== null ? pharmacy.item.id : pharmacy.item;
+      const supplyId = typeof pharmacy.items === 'object' && pharmacy.items !== null ? pharmacy.items.id : pharmacy.items;
+      pharmacyMap.set(`${itemId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
+      pharmacyMap.set(`${supplyId}`, { ...pharmacy, totalQuantity: pharmacy.quantity || 0 });
+    });
+
+    const importMap = new Map();
+    const previousImportMap = new Map();
+
+    // Hàm xử lý dữ liệu nhập (hiện tại và trước khi cập nhật)
+    const processExports = (exportsArray, map) => {
+      if (!Array.isArray(exportsArray)) return;
+      for (const item of exportsArray) {
+        if (item.loai_xuat !== "quaythuoc") continue; // ✅ Chỉ xử lý quầy thuốc
+        if (Array.isArray(item.thuoc)) {
+          for (const thuoc of item.thuoc) {
+            const key = `${thuoc.tenthuoc}`;
+            map.set(key, (map.get(key) || 0) + thuoc.quantity);
+          }
+        }
+        if (Array.isArray(item.vattutieuhao)) {
+          for (const vattu of item.vattutieuhao) {
+            const key = `${vattu.supply}`;
+            map.set(key, (map.get(key) || 0) + vattu.quantity);
+          }
+        }
+      }
+    };
+
+    processExports(doc.exports, importMap);
+    if (operation === "update") {
+      processExports(previousDoc.exports, previousImportMap);
+    }
+
+    // Xử lý cập nhật số lượng
+    await Promise.all([...importMap.entries()].map(async ([importId, importQuantity]) => {
+      const previousQuantity = previousImportMap.get(importId) || 0;
+      const quantityChange = importQuantity - previousQuantity;
+      const findItem = pharmacyMap.get(importId);
+
+      if (findItem) {
+        const newQuantity = (findItem.totalQuantity || 0) + quantityChange;
+        await req.payload.update({
+          collection: 'pharmacies',
+          id: findItem.id,
+          data: { quantity: newQuantity },
+        });
+      } else if (importQuantity > 0) {
+        const category = exportItems.some(item => item.thuoc?.some(t => t.tenthuoc === importId)) 
+            ? 'medications' 
+            : 'vattutieuhao';
+
+        await req.payload.create({
+          collection: 'pharmacies',
+          data: {
+            [category === 'medications' ? 'item' : 'items']: importId,
+            category,
+            quantity: importQuantity,
+          },
+        });
+      }
+    }));
+  } catch (error) {
+    console.error('Lỗi khi cập nhật quầy thuốc:', error);
+  }
 };
 
-// export const hookNhapKhoKhoa : CollectionAfterChangeHook 
+
+export const hookNhapKhoKhoa = async ({ doc, req, operation, previousDoc }) => {
+
+  if (operation !== 'create' && operation !== 'update') {
+    return;
+  }
+  const departmentImportMap = new Map();
+  for (const item of doc.exports) {
+    if (item.loai_xuat !== 'khoa') continue;
+
+    const khoaId = item.destination;
+    if (!khoaId) {
+      console.error("❌ Không tìm thấy khoaId trong doc.exports! Dữ liệu:", item);
+      continue;
+    }
+    if (!departmentImportMap.has(khoaId)) {
+      departmentImportMap.set(khoaId, new Map());
+    }
+    const importMap = departmentImportMap.get(khoaId);
+    if (Array.isArray(item.thuoc)) {
+      for (const thuoc of item.thuoc) {
+        const key = thuoc.tenthuoc;
+        importMap.set(key, (importMap.get(key) || 0) + thuoc.quantity);
+      }
+    }
+    if (Array.isArray(item.vattutieuhao)) {
+      for (const vattu of item.vattutieuhao) {
+        const key = vattu.supply;
+        importMap.set(key, (importMap.get(key) || 0) + vattu.quantity);
+      }
+    }
+    if (Array.isArray(item.maymocthietbi)) {
+      for (const maymoc of item.maymocthietbi) {
+        const key = maymoc.equipment;
+        importMap.set(key, (importMap.get(key) || 0) + maymoc.quantity);
+      }
+    }
+  }
+  if (operation === 'update' && previousDoc) {
+    for (const prevItem of previousDoc.exports) {
+      const khoaId = prevItem.destination;
+      if (!khoaId || !departmentImportMap.has(khoaId)) {
+        continue;
+      }
+      const importMap = departmentImportMap.get(khoaId);
+      if (Array.isArray(prevItem.thuoc)) {
+        for (const thuoc of prevItem.thuoc) {
+          const key = thuoc.tenthuoc;
+          importMap.set(key, (importMap.get(key) || 0) - thuoc.quantity);
+        }
+      }
+      if (Array.isArray(prevItem.vattutieuhao)) {
+        for (const vattu of prevItem.vattutieuhao) {
+          const key = vattu.supply;
+          importMap.set(key, (importMap.get(key) || 0) - vattu.quantity);
+        }
+      }
+      if (Array.isArray(prevItem.maymocthietbi)) {
+        for (const maymoc of prevItem.maymocthietbi) {
+          const key = maymoc.equipment;
+          importMap.set(key, (importMap.get(key) || 0) - maymoc.quantity);
+        }
+      }
+    }
+  }
+  for (const [khoaId, importMap] of departmentImportMap.entries()) {
+    try {
+      const department = await req.payload.findByID({
+        collection: 'departments',
+        id: khoaId
+      });
+      if (!department) {
+        continue;
+      }
+      let departmentInventory = department.departmentInventory || [];
+      for (const [importId, importQuantity] of importMap.entries()) {
+        const category = doc.exports.find(exp =>
+          exp.thuoc?.some(t => String(t.tenthuoc) === String(importId))) ? 'medications'
+          : doc.exports.find(exp => exp.vattutieuhao?.some(v => String(v.supply) === String(importId))) ? 'vattutieuhao'
+            : doc.exports.find(exp => exp.maymocthietbi?.some(m => String(m.equipment) === String(importId))) ? 'maymocthietbi'
+              : null;
+        if (!category) {
+          console.error(`⚠️ Không xác định được danh mục cho sản phẩm ${importId}, bỏ qua.`);
+          continue;
+        }
+        const existingItem = departmentInventory.find(inv =>
+          (typeof inv.item === 'object' ? String(inv.item.id) : String(inv.item)) === String(importId) ||
+          (typeof inv.items === 'object' ? String(inv.items.id) : String(inv.items)) === String(importId)
+        );
+        if (existingItem) {
+          existingItem.quantity += importQuantity;
+        } else {
+          departmentInventory.push({
+            [category === 'medications' ? 'item' : 'items']: importId,
+            category,
+            quantity: importQuantity
+          });
+        }
+      }
+      await req.payload.update({
+        collection: 'departments',
+        id: khoaId,
+        data: { departmentInventory }
+      });
+    } catch (error) {
+      console.error(`❌ Lỗi khi cập nhật kho khoa ${khoaId}:`, error);
+    }
+  }
+};
+
 
 export const showPrice: CollectionAfterReadHook = async ({ doc }) => {
-  const formatNumber = (value: any) => {
-    if (value == null || value === '') return '0'
-    const numberValue = parseFloat(value.toString().replace(/\./g, ''))
-    return new Intl.NumberFormat('vi-VN').format(numberValue)
-  }
+  const formatNumber = (value) => {
+    if (value == null || value === '') return '0';
+    const numberValue = parseFloat(value.toString().replace(/\./g, ''));
+    return new Intl.NumberFormat('vi-VN').format(numberValue);
+  };
 
-  const convertToNumber = (str: any) => {
-    if (str == null || str === '') return 0
-    return parseFloat(str.toString().replace(/\./g, '')) || 0
-  }
+  const convertToNumber = (str) => {
+    if (str == null || str === '') return 0;
+    return parseFloat(str.toString().replace(/\./g, '')) || 0;
+  };
 
-  let tongGiaTriThuoc = 0
-  let tongGiaTriVTTH = 0
-  let tongGiaTriMMTB = 0
+  let tongGiaTriQuayThuoc = 0;
+  let tongGiaTriKhoa = 0;
+  let tongGiaTriHuy = 0; // Thêm giá trị hàng hủy
 
   if (doc.exports && Array.isArray(doc.exports)) {
     doc.exports.forEach((item) => {
-      let tongTien = 0
+      let tongTien = 0;
 
-      // Tính tổng giá trị thuốc
-      if (Array.isArray(item.thuoc)) {
-        item.thuoc.forEach((thuoc) => {
-          if (thuoc.unitprice && thuoc.quantity) {
-            const unitPriceNumber = convertToNumber(thuoc.unitprice)
-            const quantityNumber = convertToNumber(thuoc.quantity)
-            thuoc.totalprice = formatNumber(unitPriceNumber * quantityNumber)
-            tongTien += unitPriceNumber * quantityNumber
-            tongGiaTriThuoc += unitPriceNumber * quantityNumber
-          }
-          thuoc.unitprice = formatNumber(thuoc.unitprice)
-        })
-      }
+      const sumTotal = (array) => {
+        return array?.reduce((sum, item) => {
+          const unitPrice = convertToNumber(item.unitprice);
+          const quantity = convertToNumber(item.quantity);
+          item.totalprice = formatNumber(unitPrice * quantity);
+          item.unitprice = formatNumber(unitPrice); // Định dạng unitprice
+          return sum + unitPrice * quantity;
+        }, 0) || 0;
+      };
 
-      // Tính tổng giá trị vật tư tiêu hao
-      if (Array.isArray(item.vattutieuhao)) {
-        item.vattutieuhao.forEach((vattu) => {
-          if (vattu.unitprice && vattu.quantity) {
-            const unitPriceNumber = convertToNumber(vattu.unitprice)
-            const quantityNumber = convertToNumber(vattu.quantity)
-            vattu.totalprice = formatNumber(unitPriceNumber * quantityNumber)
-            tongTien += unitPriceNumber * quantityNumber
-            tongGiaTriVTTH += unitPriceNumber * quantityNumber
-          }
-          vattu.unitprice = formatNumber(vattu.unitprice)
-        })
+      tongTien += sumTotal(item.thuoc || []);
+      tongTien += sumTotal(item.vattutieuhao || []);
+      tongTien += sumTotal(item.maymocthietbi || []);
+
+      item.tongtien = formatNumber(tongTien);
+
+      if (item.loai_xuat === 'quaythuoc') {
+        tongGiaTriQuayThuoc += tongTien;
+      } else if (item.loai_xuat === 'khoa') {
+        tongGiaTriKhoa += tongTien;
+      } else if (item.loai_xuat === 'huy') { // Xử lý loại xuất "hủy"
+        tongGiaTriHuy += tongTien;
       }
-      // Tính tổng giá trị máy móc thiết bị
-      if (Array.isArray(item.maymocthietbi)) {
-        item.maymocthietbi.forEach((maymoc) => {
-          if (maymoc.unitprice && maymoc.quantity) {
-            const unitPriceNumber = convertToNumber(maymoc.unitprice)
-            const quantityNumber = convertToNumber(maymoc.quantity)
-            maymoc.totalprice = formatNumber(unitPriceNumber * quantityNumber)
-            tongTien += unitPriceNumber * quantityNumber
-            tongGiaTriMMTB += unitPriceNumber * quantityNumber
-          }
-          maymoc.unitprice = formatNumber(maymoc.unitprice)
-        })
-      }
-      item.tongtien = formatNumber(tongTien)
-    })
+    });
   }
 
-  doc.tong_gia_tri_thuoc = formatNumber(tongGiaTriThuoc)
-  doc.tong_gia_tri_vtth = formatNumber(tongGiaTriVTTH)
-  doc.tong_gia_tri_mmtb = formatNumber(tongGiaTriMMTB)
-  doc.tong_gia_tri = formatNumber(tongGiaTriThuoc + tongGiaTriVTTH + tongGiaTriMMTB)
-}
+  doc.tong_gia_tri_quaythuoc = formatNumber(tongGiaTriQuayThuoc);
+  doc.tong_gia_tri_khoa = formatNumber(tongGiaTriKhoa);
+  doc.tong_gia_tri_huyhang = formatNumber(tongGiaTriHuy); // Gán tổng giá trị hàng hủy vào doc
+  doc.tong_gia_tri = formatNumber(tongGiaTriQuayThuoc + tongGiaTriKhoa + tongGiaTriHuy);
+};
+
+export const checkInventoryBeforeExport = async ({ data, req, operation }: { data: any, req: PayloadRequest, operation: string }) => {
+  if (operation !== 'create' && operation !== 'update') return data;
+  if (!data.exports || !Array.isArray(data.exports)) return data;
+
+  let errorMessages: string[] = []; // Mảng chứa các thông báo lỗi
+
+  for (const exportItem of data.exports) {
+    if (exportItem.loai_xuat === 'huy') continue; // Nếu là hủy hàng, không cần kiểm tra tồn kho
+
+    // Gom tất cả sản phẩm từ các danh mục khác nhau
+    const allItems = [
+      ...(exportItem.thuoc || []), 
+      ...(exportItem.vattutieuhao || []), 
+      ...(exportItem.maymocthietbi || [])
+    ];
+
+    for (const item of allItems) {
+      // Xác định ID sản phẩm theo danh mục
+      const productId = item.tenthuoc || item.supply || item.equipment; 
+      const quantityToExport = item.quantity;
+
+      if (!productId) continue;
+
+      // Tìm sản phẩm trong kho theo đúng danh mục của nó
+      const inventoryItems = await req.payload.find({
+        collection: 'inventory',
+        where: {
+          or: [
+            { item: { equals: productId } },   // Kiểm tra thuốc
+            { items: { equals: productId } }   // Kiểm tra vật tư tiêu hao & máy móc thiết bị
+          ],
+        },
+      });
+
+      if (!inventoryItems.docs.length) {
+        errorMessages.push(` Sản phẩm có ID ${productId} không có trong kho.`);
+        continue;
+      }
+
+      // Tính tổng số lượng tồn kho của sản phẩm này
+      const totalStockQuantity = inventoryItems.docs.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      const productName = inventoryItems.docs[0].sanpham || `ID: ${productId}`; // Lấy tên sản phẩm
+
+      if (totalStockQuantity === undefined || totalStockQuantity === null) {
+        errorMessages.push(` Số lượng tồn kho của sản phẩm ${productName} không hợp lệ.`);
+        continue;
+      }
+
+      if (quantityToExport > totalStockQuantity) {
+        errorMessages.push(` Không đủ hàng: ${productName} (Kho: ${totalStockQuantity}, Xuất: ${quantityToExport}).`);
+      }
+    }
+  }
+
+  // Nếu có lỗi, ném lỗi một lần với tất cả thông báo
+  if (errorMessages.length > 0) {
+    console.error("❗ Lỗi kiểm tra tồn kho:", errorMessages);
+    throw new APIError(errorMessages.join("\n"), 400);
+  }
+
+  return data;
+};
+
+
+
+
+
+
+

@@ -64,14 +64,14 @@ const Departments: CollectionConfig = {
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 try {
-                  console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
+                  // console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
                   const selectedDoctors = Array.isArray(data?.doctors)
                     ? data.doctors
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
-                  console.log('Bác sĩ đang được chọn (sau khi xử lý):', selectedDoctors)
+                  // console.log('Bác sĩ đang được chọn (sau khi xử lý):', selectedDoctors)
                   // Lấy danh sách bác sĩ đã có khoa
                   // dùng req.payload.find để tìm những bác sĩ đã có khoa
                   const checkDoctors = await req.payload.find({
@@ -86,7 +86,7 @@ const Departments: CollectionConfig = {
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
-                  console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
+                  // console.log(' Bác sĩ đã có khoa:', checkoutDoctors)
                   const baseCondition =
                     data?.tenkhoa === 'khoaduoc'
                       ? { chucvu: { equals: 'duocsi' } } // DUOCSI cho khoa duoc
@@ -118,14 +118,14 @@ const Departments: CollectionConfig = {
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 try {
-                  console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
+                  // console.log(' Dữ liệu hiện tại của form:', JSON.stringify(data, null, 2))
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
                   const selectedNures = Array.isArray(data?.nures)
                     ? data.nures
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
-                  console.log('Y Tá đang được chọn (sau khi xử lý):', selectedNures)
+                  // console.log('Y Tá đang được chọn (sau khi xử lý):', selectedNures)
                   // Lấy danh sách bác sĩ đã có khoa
                   // dùng req.payload.find để tìm những y tá đã có khoa
                   const checkNures = await req.payload.find({
@@ -140,7 +140,7 @@ const Departments: CollectionConfig = {
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
-                  console.log(' Y tá đã có khoa:', checkoutNures)
+                  // console.log(' Y tá đã có khoa:', checkoutNures)
                   return {
                     and: [
                       { chucvu: { equals: 'yta' } }, // Chỉ lấy y tá

@@ -4,7 +4,7 @@ import {
   valueho_so,
   valuemedicalrecord,
   preventDuplicateMedicalRecord,
-  namePatient,
+  namePatient, generateMedicalRecordID
 } from '@/hooks/Hookmedicalrecord'
 
 const MedicalRecods: CollectionConfig = {
@@ -29,7 +29,7 @@ const MedicalRecods: CollectionConfig = {
             },
             {
               name: 'thongtinbenhnhan',
-              label: 'THÔNG TIN BỆNH NHÂN',
+              label: 'Thông tin bệnh nhân',
               type: 'relationship',
               relationTo: 'patients',
               required: true,
@@ -60,7 +60,10 @@ const MedicalRecods: CollectionConfig = {
               label: 'Hồ sơ',
               type: 'array',
               fields: [
-                { name: 'khoa', label: 'KHoa', type: 'relationship', relationTo: 'departments' },
+                {name: 'sohoso',label: 'Số hồ sơ bênh án', type: 'text',admin: {
+                  readOnly: true, 
+                },},
+                { name: 'khoa', label: 'Khoa', type: 'relationship', relationTo: 'departments' },
                 {
                   name: 'bacsi',
                   label: 'Bác sĩ phụ trách',
@@ -274,8 +277,8 @@ const MedicalRecods: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [namePatient, preventDuplicateMedicalRecord],
-    beforeValidate: [valueho_so, valuemedicalrecord],
+    beforeChange: [namePatient, preventDuplicateMedicalRecord,],
+    beforeValidate: [valueho_so, valuemedicalrecord,generateMedicalRecordID],
   },
 }
 

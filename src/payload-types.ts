@@ -803,6 +803,7 @@ export interface MedicalRecod {
   thongtinbenhnhan?: (string | null) | Patient;
   hoso?:
     | {
+        sohoso?: string | null;
         khoa?: (string | null) | Department;
         bacsi?: (string | null) | User;
         ngaynhapvien?: string | null;
@@ -983,7 +984,7 @@ export interface Department {
         item?: (string | null) | Medication;
         items?: (string | null) | MedicalSupply;
         quantity?: number | null;
-        unit?: string | null;
+        unit?: ('hop' | 'thung' | 'cai' | 'bo') | null;
         expirydate?: string | null;
         id?: string | null;
       }[]
@@ -1000,7 +1001,6 @@ export interface Medication {
   medicationpicture?: (string | null) | Media;
   code?: string | null;
   name?: string | null;
-  bhyt: 'co' | 'khong';
   category?:
     | (
         | 'khangsinh'
@@ -1085,15 +1085,50 @@ export interface MedicalSupply {
  */
 export interface MedicalUsage {
   id: string;
+  loaiphieu?: ('sudung' | 'huyhang') | null;
   usagedate?: string | null;
   department: string | Department;
   staff: string | User;
-  danhsachvattu?:
+  ghichu?: string | null;
+  danhsachsudung?:
     | {
-        items?: (string | null) | MedicalSupply;
-        item?: (string | null) | Medication;
-        quantity?: number | null;
-        reason?: string | null;
+        hosobenhan?: (string | null) | MedicalRecod;
+        sohoso?: string | null;
+        bacsi?: (string | null) | User;
+        nguoixacnhanhuy?: (string | null) | User;
+        thuoc?:
+          | {
+              tenthuoc?: (string | null) | Medication;
+              quantity?: number | null;
+              donvi?: ('hop' | 'vien' | 'lo' | 'chai' | 'ong') | null;
+              unitprice?: string | null;
+              totalprice?: string | null;
+              lido?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        vattutieuhao?:
+          | {
+              supply?: (string | null) | MedicalSupply;
+              quantity?: number | null;
+              donvi?: ('hop' | 'chai' | 'goi' | 'cuon' | 'mieng') | null;
+              unitprice?: string | null;
+              totalprice?: string | null;
+              lido?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        maymocthietbi?:
+          | {
+              equipment?: (string | null) | MedicalSupply;
+              quantity?: number | null;
+              donvi?: ('cai' | 'bo') | null;
+              unitprice?: string | null;
+              totalprice?: string | null;
+              lido?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1257,7 +1292,7 @@ export interface Phieuxuat {
           | {
               tenthuoc?: (string | null) | Medication;
               quantity?: number | null;
-              donvi?: string | null;
+              donvi?: 'hop' | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -1267,7 +1302,7 @@ export interface Phieuxuat {
           | {
               supply?: (string | null) | MedicalSupply;
               quantity?: number | null;
-              donvi?: string | null;
+              donvi?: 'hop' | null;
               unitprice?: string | null;
               totalprice?: string | null;
               id?: string | null;
@@ -2027,16 +2062,51 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "medicalUsages_select".
  */
 export interface MedicalUsagesSelect<T extends boolean = true> {
+  loaiphieu?: T;
   usagedate?: T;
   department?: T;
   staff?: T;
-  danhsachvattu?:
+  ghichu?: T;
+  danhsachsudung?:
     | T
     | {
-        items?: T;
-        item?: T;
-        quantity?: T;
-        reason?: T;
+        hosobenhan?: T;
+        sohoso?: T;
+        bacsi?: T;
+        nguoixacnhanhuy?: T;
+        thuoc?:
+          | T
+          | {
+              tenthuoc?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              lido?: T;
+              id?: T;
+            };
+        vattutieuhao?:
+          | T
+          | {
+              supply?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              lido?: T;
+              id?: T;
+            };
+        maymocthietbi?:
+          | T
+          | {
+              equipment?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              lido?: T;
+              id?: T;
+            };
         id?: T;
       };
   updatedAt?: T;
@@ -2094,6 +2164,7 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
   hoso?:
     | T
     | {
+        sohoso?: T;
         khoa?: T;
         bacsi?: T;
         ngaynhapvien?: T;
@@ -2232,7 +2303,6 @@ export interface MedicationsSelect<T extends boolean = true> {
   medicationpicture?: T;
   code?: T;
   name?: T;
-  bhyt?: T;
   category?: T;
   unit?: T;
   description?: T;

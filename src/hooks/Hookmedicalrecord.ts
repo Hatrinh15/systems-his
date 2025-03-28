@@ -17,7 +17,7 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
 
     if (!record.khoa) errorArray.push('Khoa')
     if (!record.bacsi) errorArray.push('Bác sĩ')
-    if (!record.dieuduong) errorArray.push('Điều dưỡng')
+    // if (!record.dieuduong) errorArray.push('Điều dưỡng')
     if (!record.ngaynhapvien) errorArray.push('Ngày nhập viện')
     if (!record.chuandoan) errorArray.push('Chuẩn đoán')
 
@@ -98,3 +98,42 @@ export const namePatient = async ({ data, req }) => {
     }
   }
 }
+
+export const generateMedicalRecordID: CollectionBeforeValidateHook = async ({ data, req }) => {
+  if (!data) return;
+
+  if (!data.hoso) {
+    data.hoso = [];
+  }
+
+  for (let i = 0; i < data.hoso.length; i++) {
+    if (!data.hoso[i].sohoso) {
+      let newID;
+      let isDuplicate = true;
+
+      // Lặp cho đến khi tìm được số hồ sơ không trùng
+      while (isDuplicate) {
+        // Tạo số ngẫu nhiên
+        const randomID = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+        newID = `HS-${randomID}`;
+
+        // Kiểm tra xem số này đã tồn tại trong database chưa
+        const existingRecord = await req.payload.find({
+          collection: 'MedicalRecods',
+          where: { "hoso.sohoso": { equals: newID } },
+          limit: 1
+        });
+
+        // Nếu không tìm thấy bản ghi nào trùng, thoát vòng lặp
+        if (existingRecord.docs.length === 0) {
+          isDuplicate = false;
+        }
+      }
+
+      data.hoso[i].sohoso = newID;
+    }
+  }
+
+  return data; 
+};
+

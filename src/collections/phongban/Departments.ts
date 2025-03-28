@@ -228,6 +228,7 @@ const Departments: CollectionConfig = {
                       type: 'relationship',
                       relationTo: 'medications',
                       admin: {
+                        allowCreate: false,
                         condition: (_, siblingData) => siblingData?.category === 'medications',
                       },
                     },
@@ -237,6 +238,7 @@ const Departments: CollectionConfig = {
                       type: 'relationship',
                       relationTo: 'medicalSupplies',
                       admin: {
+                        allowCreate: false,
                         condition: (_, siblingData) =>
                           siblingData?.category === 'vattutieuhao' ||
                           siblingData?.category === 'maymocthietbi',
@@ -248,11 +250,23 @@ const Departments: CollectionConfig = {
                       type: 'number',
                       min: 0,
                       admin: { readOnly: true },
+                      defaultValue: 0
                     },
                     {
                       name: 'unit',
                       label: 'Đơn vị tính',
-                      type: 'text',
+                      type: 'select',
+                      options: [
+                        {label:'Hộp',value:'hop'},
+                        {
+                          label:'Thùng',value:'thung'
+                        },
+                        {label:'Cái',value: 'cai'},
+                        {label:'Bộ',value:'bo'}
+                      ],
+                      admin: {
+                        readOnly :true
+                      }
                     },
                     {
                       name: 'expirydate',

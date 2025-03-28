@@ -13,44 +13,78 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
   }
   ///cập nhật phòng cho truongphong
   if (operation === 'create' || operation === 'update') {
-    if (!data?.truongphong || data.truongphong.length === 0) {
-      return
-    }
-
     if (!data?.tenphong) {
       return
     }
-    await Promise.all(
-      data.truongphong.map(async (nhanvienId) => {
-        await req.payload.update({
-          collection: 'users',
-          id: nhanvienId,
-          data: { phong: data.tenphong }, // Lưu tên khoa vào users
-        })
-      }),
-    )
-  }
-  ///cập nhật phòng cho nhân viên
-  if (operation === 'create' || operation === 'update') {
-    if (!data?.nhanvien || data.nhanvien.length === 0) {
-      console.log('Không có nhân viên nào trong danh sách , không cần cập nhật.')
-      return
-    }
 
-    if (!data?.tenphong) {
-      console.log(' Không có ID phòng, không thể cập nhật.')
-      return
+    // 🚀 Cập nhật trưởng khoa trước (nếu có)
+    if (data.truongphong && data.truongphong.length > 0) {
+      await Promise.all(
+        data.truongphong.map(async (truongphongId) => {
+          try {
+            const user = await req.payload.findByID({
+              collection: 'users',
+              id: truongphongId,
+            })
+
+            if (!user) return
+
+            if (user.phong === data.tenphong && user.chucvu === 'truongphong') {
+              console.log(
+                `Trưởng khoa ${truongphongId} đã thuộc khoa "${data.tenphong}", không cần cập nhật.`,
+              )
+              return
+            }
+
+            // ✅ Cập nhật trưởng khoa mới
+            await req.payload.update({
+              collection: 'users',
+              id: truongphongId,
+              data: { phong: data.tenphong, chucvu: 'truongphong' },
+            })
+
+            console.log(`✅ Đã cập nhật trưởng khoa ${truongphongId} sang "${data.tenphong}".`)
+          } catch (error) {
+            console.error(`❌ Lỗi khi cập nhật trưởng khoa ${truongphongId}:`, error)
+          }
+        }),
+      )
     }
-    console.log(`Cập nhật phòng cho nhân viên, ID Phòng: ${data.tenphong}`)
-    await Promise.all(
-      data.nhanvien.map(async (nhanvienId) => {
-        await req.payload.update({
-          collection: 'users',
-          id: nhanvienId,
-          data: { phong: data.tenphong }, // Lưu tên khoa vào users
-        })
-        console.log(`Đã cập nhật khoa cho nhân viên có ID: ${nhanvienId}`)
-      }),
-    )
+    ///cập nhật phòng cho nhân viên
+    if (data.nhanvien && data.nhanvien.length > 0) {
+      await Promise.all(
+        data.nhanvien.map(async (nhanvienId) => {
+          try {
+            const user = await req.payload.findByID({
+              collection: 'users',
+              id: nhanvienId,
+            })
+
+            if (!user) return
+
+            if (user.phong === data.tenphong) {
+              console.log(
+                `Bác sĩ ${nhanvienId} đã thuộc khoa "${data.tenphong}", không cần cập nhật.`,
+              )
+              return
+            }
+
+            // ✅ Nếu bác sĩ này là trưởng khoa cũ, hạ xuống bác sĩ
+            const newRole =
+              user.chucvu === 'letan' || user.chucvu === 'kythuatvien' ? 'truongphong' : user.chucvu
+
+            await req.payload.update({
+              collection: 'users',
+              id: nhanvienId,
+              data: { phong: data.tenphong, chucvu: newRole },
+            })
+
+            console.log(`✅ Đã cập nhật khoa của bác sĩ ${nhanvienId} sang "${data.tenkhoa}".`)
+          } catch (error) {
+            console.error(`❌ Lỗi khi cập nhật khoa cho bác sĩ ${nhanvienId}:`, error)
+          }
+        }),
+      )
+    }
   }
 }

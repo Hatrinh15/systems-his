@@ -1,3 +1,4 @@
+import { hookTinhGiaThuoc } from '@/hooks/HookOrders'
 import { CollectionConfig } from 'payload'
 
 export const Orders: CollectionConfig = {
@@ -24,31 +25,52 @@ export const Orders: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          name: 'medication',
-          label: 'Thuốc',
-          type: 'relationship',
-          relationTo: 'medications',
-          required: true,
-        },
-        {
-          name: 'quantity',
-          label: 'Số lượng',
-          type: 'number',
-          min: 1,
-        },
-        {
-          name: 'price',
-          label: 'Giá bán',
-          type: 'number',
-          min: 0,
+          type: 'row',
+          fields: [
+            {
+              name: 'medication',
+              label: 'Sản phẩm',
+              type: 'relationship',
+              relationTo: 'pharmacies',
+              required: true,
+            },
+            {
+              name: 'quantity',
+              label: 'Số lượng',
+              type: 'number',
+              min: 1,
+            },
+            {
+              name: 'donvi',
+              label: 'Đơn vị',
+              type: 'select',
+              options: [
+                { label: 'Hộp', value: 'hop' },
+                { label: 'Viên', value: 'vien' },
+                { label: 'Ống', value: 'ong' },
+                { label: 'Lọ', value: 'lo' },
+                { label: 'Gói', value: 'goi' },
+                { label: 'Chai', value: 'vien' },
+                { label: 'Cuộn', value: 'cuon' },
+                { label: 'Miếng', value: 'mieng' },
+                { label: 'Gói', value: 'goi' },
+              ],
+            },
+            {
+              name: 'price',
+              label: 'Giá bán',
+              type: 'text',
+            },
+            { name: 'tien', label: 'Tổng tiền', type: 'text' },
+          ],
         },
       ],
     },
     {
       name: 'totalprice',
-      label: 'Tổng tiền',
-      type: 'number',
-      min: 0,
+      label: 'Tổng giá trị đơn thuốc',
+      type: 'text',
+
       admin: {
         readOnly: true,
       },
@@ -63,7 +85,6 @@ export const Orders: CollectionConfig = {
       label: 'Nhân viên bán hàng',
       type: 'relationship',
       relationTo: 'users',
-      required: true,
     },
     {
       name: 'paymentmethod',
@@ -74,7 +95,9 @@ export const Orders: CollectionConfig = {
         { label: 'Thẻ', value: 'card' },
         { label: 'Bảo hiểm y tế', value: 'insurance' },
       ],
-      required: true,
     },
   ],
+  hooks: {
+    beforeChange: [hookTinhGiaThuoc],
+  },
 }

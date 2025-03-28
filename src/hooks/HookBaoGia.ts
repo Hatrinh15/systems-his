@@ -1,4 +1,9 @@
-import { CollectionAfterReadHook, CollectionBeforeChangeHook, APIError } from 'payload'
+import {
+  CollectionAfterReadHook,
+  CollectionBeforeChangeHook,
+  APIError,
+  CollectionAfterChangeHook,
+} from 'payload'
 
 export const updateProductName: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (data?.category === 'medications' && data?.item) {
@@ -115,5 +120,46 @@ export const thongBao: CollectionBeforeChangeHook = async ({ data }) => {
   // Nếu có lỗi, ném lỗi API
   if (errors.length > 0) {
     throw new APIError(`⚠️ Hãy kiểm tra lại:\n${errors.map((err) => `• ${err}`)}`, 400)
+  }
+}
+
+export const hookPriceQuayThuoc: CollectionAfterChangeHook = async ({ doc, req }) => {
+  try {
+    if (!doc.item && !doc.items) return // Nếu không có sản phẩm thì bỏ qua
+
+    const isMedication = doc.category === 'medications' // Kiểm tra loại sản phẩm
+    const productId = isMedication ? doc.item : doc.items // ID của thuốc hoặc vật tư
+    const pharmacyCollection = 'pharmacies'
+
+    // 🔄 Tìm sản phẩm trong quầy thuốc
+    const existingPharmacy = await req.payload.find({
+      collection: pharmacyCollection,
+      where: {
+        [isMedication ? 'item' : 'items']: { equals: productId },
+      },
+      limit: 1,
+    })
+
+    if (existingPharmacy.docs.length > 0) {
+      const pharmacyId = existingPharmacy.docs[0].id
+      const currentQuantity = existingPharmacy.docs[0].quantity || 0 // Số lượng hiện có trong quầy thuốc
+      const quyChuan = isMedication ? doc.quychuan : doc.quychuans // Quy chuẩn thuốc hoặc vật tư
+      const calculatedQuantity = quyChuan ? quyChuan * currentQuantity : 0 // ✅ Tính tổng số lượng tự động
+
+      // 🔄 Cập nhật thông tin vào quầy thuốc
+      await req.payload.update({
+        collection: pharmacyCollection,
+        id: pharmacyId,
+        data: {
+          price: doc.giaban,
+          donvi: doc.donvi,
+          units: doc.donvis,
+          quychuan: doc.quychuan,
+          tongtien:doc.tien,
+        },
+      })
+    }
+  } catch (error) {
+    console.error(' Lỗi khi cập nhật quầy thuốc từ bảng giá:', error)
   }
 }

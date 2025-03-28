@@ -1,6 +1,6 @@
 import { CollectionConfig } from 'payload'
-import { priceAfterRead, thongBao, updateProductName } from '@/hooks/HookBaoGia'
-import { Label } from '@radix-ui/react-select'
+import { hookPriceQuayThuoc, priceAfterRead, thongBao, updateProductName } from '@/hooks/HookBaoGia'
+
 export const baoGia: CollectionConfig = {
   slug: 'baogia',
   labels: {
@@ -172,13 +172,14 @@ export const baoGia: CollectionConfig = {
       type: 'text',
       admin: { readOnly: true },
     },
+    { name: 'giabhyt', label: 'Giá BHYT (VNĐ)', type: 'number', defaultValue: 0 },
     {
       type: 'row',
-      admin: { condition: (data) => data?.category === 'medications' },
       fields: [
         {
           name: 'donvi',
           label: 'Đơn vị',
+          admin: { condition: (data) => data?.category === 'medications' },
           type: 'select',
           options: [
             { label: 'Viên', value: 'vien' },
@@ -187,19 +188,11 @@ export const baoGia: CollectionConfig = {
             { label: 'Gói', value: 'goi' },
           ],
         },
-        { name: 'quychuan', label: 'Quy chuẩn', type: 'number' },
-        { name: 'phantram', label: '%', type: 'number' },
-        { name: 'tien', label: 'Gía tiền', type: 'text' },
-      ],
-    },
-    {
-      type: 'row',
-      admin: { condition: (data) => data?.category === 'medicalSupplies' },
-      fields: [
         {
           name: 'donvis',
           label: 'Đơn vị',
           type: 'select',
+          admin: { condition: (data) => data?.category === 'medicalSupplies' },
           options: [
             { label: 'Chai', value: 'vien' },
             { label: 'Cuộn', value: 'cuon' },
@@ -207,15 +200,15 @@ export const baoGia: CollectionConfig = {
             { label: 'Gói', value: 'goi' },
           ],
         },
-        { name: 'quychuans', label: 'Quy chuẩn', type: 'number' },
-        { name: 'phantrams', label: '%', type: 'number' },
-        { name: 'tiens', label: 'Gía tiền', type: 'text' },
+        { name: 'quychuan', label: 'Quy chuẩn', type: 'number' },
+        { name: 'phantram', label: '%', type: 'number' },
+        { name: 'tien', label: 'Gía tiền', type: 'text' },
       ],
     },
   ],
   timestamps: true,
   hooks: {
     beforeChange: [updateProductName, thongBao],
-    afterRead: [priceAfterRead],
+    afterRead: [priceAfterRead, hookPriceQuayThuoc],
   },
 }

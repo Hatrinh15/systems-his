@@ -33,22 +33,22 @@ const Class: CollectionConfig = {
               filterOptions: async ({ req, data }) => {
                 try {
                   // Kiểm tra nếu data không có doctors thì gán giá trị mặc định là []
-                  const selectedDoctors = Array.isArray(data?.doctors)
-                    ? data.doctors
+                  const selectedtruongphong = Array.isArray(data?.truongphong)
+                    ? data.truongphong
                         .map((doc) => (typeof doc === 'string' ? doc : doc?.id))
                         .filter(Boolean)
                     : []
                   // Lấy danh sách bác sĩ đã có khoa
                   // dùng req.payload.find để tìm những bác sĩ đã có khoa
-                  const checkDoctors = await req.payload.find({
-                    collection: 'departments',
-                    where: { doctors: { exists: true } },
+                  const checktruongphong = await req.payload.find({
+                    collection: 'class',
+                    where: { truongphong: { exists: true } },
                     limit: 999,
                   })
                   // Lấy danh sách ID bác sĩ đã có khoa
-                  const docCheckDoctors = checkDoctors?.docs ?? []
-                  const checkoutDoctors = docCheckDoctors.flatMap((doc) =>
-                    (doc?.doctors ?? [])
+                  const docChecktruongphong = checktruongphong?.docs ?? []
+                  const checkouttruongphong = docChecktruongphong.flatMap((doc) =>
+                    (doc?.truongphong ?? [])
                       .map((emp) => (typeof emp === 'string' ? emp : emp?.id))
                       .filter(Boolean),
                   )
@@ -59,8 +59,8 @@ const Class: CollectionConfig = {
                       { chucvu: { equals: 'truongphong' } },
                       {
                         or: [
-                          { id: { not_in: checkoutDoctors } }, // không chọn bác sĩ đã có khoa
-                          { id: { in: selectedDoctors } }, //  Giữ lại bác sĩ đã chọn
+                          { id: { not_in: checkouttruongphong } }, // không chọn bác sĩ đã có khoa
+                          { id: { in: selectedtruongphong } }, //  Giữ lại bác sĩ đã chọn
                         ],
                       },
                     ],

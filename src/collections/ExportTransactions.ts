@@ -1,5 +1,4 @@
 import { CollectionConfig, Where } from 'payload'
-
 import { hookBaoGia, hookNhapQuayThuoc, hookxuatkho, showPrice ,hookNhapKhoKhoa, checkInventoryBeforeExport ,hookCheckinfo,showTotalPrice} from '@/hooks/Hook_Xuat_Kho'
 
 export const PhieuXuat: CollectionConfig = {
@@ -554,10 +553,10 @@ export const PhieuXuat: CollectionConfig = {
                           name: 'donvi',
                           label: 'Đơn vị',
                           type: 'select',
-                          options:[
-                            {label: 'Cái',value: 'cai' },
-                            {label: 'Bộ',value: 'bo'}
-                          ]
+                          options: [
+                            { label: 'Cái', value: 'cai' },
+                            { label: 'Bộ', value: 'bo' },
+                          ],
                         },
                         { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
                         {
@@ -620,8 +619,8 @@ export const PhieuXuat: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeChange: [hookBaoGia,checkInventoryBeforeExport,hookCheckinfo,showPrice],
+    beforeChange: [hookBaoGia, checkInventoryBeforeExport, hookCheckinfo, showPrice],
     afterRead: [showTotalPrice],
-    afterChange: [hookxuatkho,hookNhapQuayThuoc, hookNhapKhoKhoa],
+    afterChange: [hookxuatkho, hookNhapQuayThuoc, hookNhapKhoKhoa],
   },
 }

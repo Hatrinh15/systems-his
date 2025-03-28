@@ -1,6 +1,6 @@
 import { CollectionConfig } from 'payload'
 import { beforeChange, showTitle } from '@/hooks/HookDepartments'
-import { equal } from 'assert'
+
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {

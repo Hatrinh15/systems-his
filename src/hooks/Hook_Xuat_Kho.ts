@@ -74,34 +74,32 @@ export const hookBaoGia: CollectionBeforeChangeHook = async ({ data, req, origin
 }
 
 export const hookCheckinfo: CollectionBeforeChangeHook = async ({ data, req }) => {
+  let errors: string[] = [];
+
   if (!data.transactiondate) {
-    throw new APIError('Ngày tạo phiếu không được để trống.', 400)
+    errors.push('Ngày tạo phiếu không được để trống.');
   }
   if (!data.receiverorsender) {
-    throw new APIError('Người lập phiếu không được để trống.', 400)
+    errors.push('Người lập phiếu không được để trống.');
   }
-
   if (!data.exports || data.exports.length === 0) {
-    throw new APIError('Danh sách xuất hàng không được để trống.', 400)
+    errors.push('Danh sách xuất hàng không được để trống.');
   }
 
-  data.exports.forEach((exportItem, index) => {
+  data.exports?.forEach((exportItem, index) => {
     if (!exportItem.loai_xuat) {
-      throw new APIError(`Mục xuất hàng thứ ${index + 1}: Loại xuất không được để trống.`, 400)
+      errors.push(`Mục xuất hàng thứ ${index + 1}: Loại xuất không được để trống.`);
     }
-
     if (exportItem.loai_xuat === 'khoa' && !exportItem.destination) {
-      throw new APIError(
-        `Mục xuất hàng thứ ${index + 1}: Nơi nhận không được để trống khi xuất cho khoa.`,
-        400,
-      )
+      errors.push(`Mục xuất hàng thứ ${index + 1}: Nơi nhận không được để trống khi xuất cho khoa.`);
     }
 
+    if (exportItem.loai_xuat === 'khoa' && !exportItem.nguoinhan) {
+      errors.push(`Mục xuất hàng thứ ${index + 1}: Người nhận không được để trống khi xuất cho khoa.`);
+    }
+    
     if (exportItem.loai_xuat === 'huy' && !exportItem.reason_cancel) {
-      throw new APIError(
-        `Mục xuất hàng thứ ${index + 1}: Lý do hủy không được để trống khi hủy hàng.`,
-        400,
-      )
+      errors.push(`Mục xuất hàng thứ ${index + 1}: Lý do hủy không được để trống khi hủy hàng.`);
     }
 
     if (
@@ -109,83 +107,55 @@ export const hookCheckinfo: CollectionBeforeChangeHook = async ({ data, req }) =
       (!exportItem.vattutieuhao || exportItem.vattutieuhao.length === 0) &&
       (!exportItem.maymocthietbi || exportItem.maymocthietbi.length === 0)
     ) {
-      throw new APIError(
-        `Mục xuất hàng thứ ${index + 1}: Phải có ít nhất một sản phẩm để xuất.`,
-        400,
-      )
+      errors.push(`Mục xuất hàng thứ ${index + 1}: Phải có ít nhất một sản phẩm để xuất.`);
     }
 
     exportItem.thuoc?.forEach((thuoc, thuocIndex) => {
       if (!thuoc.tenthuoc) {
-        throw new APIError(
-          `Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Tên thuốc không được để trống.`,
-          400,
-        )
+        errors.push(`Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Tên thuốc không được để trống.`);
       }
       if (thuoc.quantity === undefined || thuoc.quantity === null) {
-        throw new APIError(
-          `Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`,
-          400,
-        )
+        errors.push(`Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`);
       }
       if (thuoc.quantity <= 0) {
-        throw new APIError(
-          `Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`,
-          400,
-        )
+        errors.push(`Thuốc ${thuocIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`);
       }
     })
 
     exportItem.vattutieuhao?.forEach((vattu, vattuIndex) => {
       if (!vattu.supply) {
-        throw new APIError(
-          `Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Tên vật tư không được để trống.`,
-          400,
-        )
+        errors.push(`Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Tên vật tư không được để trống.`);
       }
       if (vattu.quantity === undefined || vattu.quantity === null) {
-        throw new APIError(
-          `Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`,
-          400,
-        )
+        errors.push(`Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`);
       }
       if (vattu.quantity <= 0) {
-        throw new APIError(
-          `Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`,
-          400,
-        )
+        errors.push(`Vật tư tiêu hao ${vattuIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`);
       }
     })
 
     exportItem.maymocthietbi?.forEach((equipment, equipmentIndex) => {
       if (!equipment.equipment) {
-        throw new APIError(
-          `Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Tên thiết bị không được để trống.`,
-          400,
-        )
+        errors.push(`Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Tên thiết bị không được để trống.`);
       }
       if (equipment.quantity === undefined || equipment.quantity === null) {
-        throw new APIError(
-          `Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`,
-          400,
-        )
+        errors.push(`Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải được nhập.`);
       }
       if (equipment.quantity <= 0) {
-        throw new APIError(
-          `Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`,
-          400,
-        )
+        errors.push(`Thiết bị ${equipmentIndex + 1} trong mục xuất thứ ${index + 1}: Số lượng phải lớn hơn 0.`);
       }
-    })
-  })
-}
+    });
+  });
 
-export const hookxuatkho: CollectionAfterChangeHook = async ({
-  doc,
-  req,
-  operation,
-  previousDoc,
-}) => {
+  // Nếu có lỗi, ném tất cả lỗi cùng một lúc
+  if (errors.length > 0) {
+    throw new APIError(errors.join("\n"), 400);
+  }
+};
+
+
+
+export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,previousDoc,}) => {
   if (operation === 'create') {
     try {
       const inventoryMap = new Map()
@@ -487,42 +457,65 @@ export const hookNhapKhoKhoa = async ({ doc, req, operation, previousDoc }) => {
       if (!department) {
         continue
       }
-      const departmentInventory = department.departmentInventory || []
+      const departmentInventory = department.departmentInventory || [];
       for (const [importId, importQuantity] of importMap.entries()) {
-        const category = doc.exports.find((exp) =>
-          exp.thuoc?.some((t) => String(t.tenthuoc) === String(importId)),
-        )
-          ? 'medications'
-          : doc.exports.find((exp) =>
-                exp.vattutieuhao?.some((v) => String(v.supply) === String(importId)),
-              )
-            ? 'vattutieuhao'
-            : doc.exports.find((exp) =>
-                  exp.maymocthietbi?.some((m) => String(m.equipment) === String(importId)),
-                )
-              ? 'maymocthietbi'
-              : null
+        const exportItem = doc.exports.find(exp =>
+          exp.thuoc?.some(t => String(t.tenthuoc) === String(importId)) ||
+          exp.vattutieuhao?.some(v => String(v.supply) === String(importId)) ||
+          exp.maymocthietbi?.some(m => String(m.equipment) === String(importId))
+        );
+      
+        if (!exportItem) {
+          console.error(`⚠️ Không tìm thấy sản phẩm ${importId} trong phiếu xuất, bỏ qua.`);
+          continue;
+        }
+      
+        // Xác định danh mục (category)
+        const category = exportItem.thuoc?.some(t => String(t.tenthuoc) === String(importId)) ? 'medications'
+          : exportItem.vattutieuhao?.some(v => String(v.supply) === String(importId)) ? 'vattutieuhao'
+            : exportItem.maymocthietbi?.some(m => String(m.equipment) === String(importId)) ? 'maymocthietbi'
+              : null;
+      
         if (!category) {
           console.error(`⚠️ Không xác định được danh mục cho sản phẩm ${importId}, bỏ qua.`)
           continue
         }
-        const existingItem = departmentInventory.find(
-          (inv) =>
-            (typeof inv.item === 'object' ? String(inv.item.id) : String(inv.item)) ===
-              String(importId) ||
-            (typeof inv.items === 'object' ? String(inv.items.id) : String(inv.items)) ===
-              String(importId),
-        )
+        // 🔹 Lấy đơn vị trực tiếp từ Phiếu Xuất thay vì gọi DB
+        let unit = 'N/A';
+        if (category === 'medications') {
+          const thuocItem = exportItem.thuoc.find(t => String(t.tenthuoc) === String(importId));
+          if (thuocItem) unit = thuocItem.donvi || 'N/A';
+        } else if (category === 'vattutieuhao') {
+          const vatTuItem = exportItem.vattutieuhao.find(v => String(v.supply) === String(importId));
+          if (vatTuItem) unit = vatTuItem.donvi || 'N/A';
+        } else if (category === 'maymocthietbi') {
+          const mayMocItem = exportItem.maymocthietbi.find(m => String(m.equipment) === String(importId));
+          if (mayMocItem) unit = mayMocItem.donvi || 'N/A';
+        }
+      
+        const existingItem = departmentInventory.find(inv =>
+          (typeof inv.item === 'object' ? String(inv.item.id) : String(inv.item)) === String(importId) ||
+          (typeof inv.items === 'object' ? String(inv.items.id) : String(inv.items)) === String(importId)
+        );
+      
         if (existingItem) {
-          existingItem.quantity += importQuantity
-        } else {
+          existingItem.quantity += importQuantity;
+          if (!existingItem.unit || existingItem.unit === 'N/A') {
+          existingItem.unit = unit;
+        }
+        }  
+        
+        else {
           departmentInventory.push({
             [category === 'medications' ? 'item' : 'items']: importId,
             category,
             quantity: importQuantity,
-          })
+            unit: unit, // Thêm đơn vị lấy từ phiếu xuất
+          });
         }
       }
+      
+      
       await req.payload.update({
         collection: 'departments',
         id: khoaId,

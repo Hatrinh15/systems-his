@@ -79,7 +79,7 @@ export const Users: CollectionConfig = {
               admin: {
                 date: {
                   pickerAppearance: 'dayOnly',
-                  displayFormat: 'd-MM-yyy',
+                  displayFormat: 'dd-MM-yyy',
                 },
               },
               validate: (value: unknown) => {
@@ -157,7 +157,18 @@ export const Users: CollectionConfig = {
             {
               name: 'khoa',
               label: ' Khoa',
-              type: 'text',
+              type: 'select',
+              options: [
+                { label: 'Khoa tai', value: 'tai' },
+                { label: 'Khoa mũi xoang', value: 'mui' },
+                { label: 'Khoa họng-thanh quản', value: 'hong' },
+                { label: 'Khoa cấp cứu', value: 'capcuu' },
+                { label: 'Khoa gây mê hồi sức', value: 'gaymehoisuc' },
+                { label: 'Khoa chẩn đoán hình ảnh', value: 'chandoanhinhanh' },
+                { label: 'Khoa xét nghiệm', value: 'khoaxetnghiem' },
+                { label: 'Khoa dược', value: 'khoaduoc' },
+                { label: 'Khoa khác', value: 'khoakhac' },
+              ],
               admin: {
                 readOnly: true,
                 condition: (data) =>

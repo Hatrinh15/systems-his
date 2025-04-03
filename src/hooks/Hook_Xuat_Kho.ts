@@ -153,10 +153,7 @@ export const hookCheckinfo: CollectionBeforeChangeHook = async ({ data, req }) =
   }
 };
 
-
-
 export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,previousDoc,}) => {
-  if (operation === 'create') {
     try {
       const inventoryMap = new Map()
       const findInventory = await req.payload.find({
@@ -170,6 +167,7 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,
         inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 })
         inventoryMap.set(`${vattuId}`, { ...dc, totalQuantity: 0 })
       })
+      const previousSet = new Map()
       const exportMap = new Map()
       for (const item of doc.exports) {
         for (const thuoc of item.thuoc) {
@@ -192,85 +190,38 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,
           exportMap.set(key, existingQuantity + thietbi.quantity)
         }
       }
-      for (const [exportId, exportQuantity] of exportMap.entries()) {
-        const findthuoc = inventoryMap.get(exportId)
-        if (findthuoc) {
-          const soluong = findthuoc.quantity - exportQuantity
-          await req.payload.update({
-            collection: 'inventory',
-            id: findthuoc.id,
-            data: { quantity: soluong >= 0 ? soluong : 0 },
-          })
-        } else {
-          console.warn(`Không tìm thấy thuốc trong kho: ${exportId}`)
-        }
-      }
-    } catch (error) {
-      console.error('Lỗi khi cập nhật kho:', error)
-    }
-  }
+   
+    
   if (operation === 'update') {
-    try {
-      const inventoryMap = new Map()
-      const findInventory = await req.payload.find({
-        collection: 'inventory',
-        limit: 1000,
-      })
-      findInventory.docs.forEach((dc) => {
-        const thuocId = typeof dc.item === 'object' && dc.item !== null ? dc.item.id : dc.item
-        const vattuId = typeof dc.items === 'object' && dc.items !== null ? dc.items.id : dc.items
-        inventoryMap.set(`${thuocId}`, { ...dc, totalQuantity: 0 })
-        inventoryMap.set(`${vattuId}`, { ...dc, totalQuantity: 0 })
-      })
-      const exportMap = new Map()
-
-      const previousSet = new Set()
+      
       for (const dc of previousDoc.exports) {
         for (const pc of dc.thuoc) {
-          previousSet.add(pc.id)
+          const key = `${pc.tenthuoc}`
+          const existingQuantity = previousSet.get(key) || 0
+          previousSet.set(key, existingQuantity + pc.quantity)
         }
       }
       for (const dc of previousDoc.exports) {
         for (const pc of dc.vattutieuhao) {
-          previousSet.add(pc.id)
+          const key = `${pc.supply}`
+          const existingQuantity = previousSet.get(key) || 0
+          previousSet.set(key, existingQuantity + pc.quantity)
         }
       }
       for (const dc of previousDoc.exports) {
         for (const pc of dc.maymocthietbi) {
-          previousSet.add(pc.id)
+          const key = `${pc.equipment}`
+          const existingQuantity = previousSet.get(key) || 0
+          previousSet.set(key, existingQuantity + pc.quantity)
         }
       }
-      for (const item of doc.exports) {
-        for (const thuoc of item.thuoc) {
-          if (!previousSet.has(thuoc.id)) {
-            const key = `${thuoc.tenthuoc}`
-            const existingQuantity = exportMap.get(key) || 0
-            exportMap.set(key, existingQuantity + thuoc.quantity)
-          }
-        }
-      }
-      for (const item of doc.exports) {
-        for (const vattu of item.vattutieuhao) {
-          if (!previousSet.has(vattu.id)) {
-            const key = `${vattu.supply}`
-            const existingQuantity = exportMap.get(key) || 0
-            exportMap.set(key, existingQuantity + vattu.quantity)
-          }
-        }
-      }
-      for (const item of doc.exports) {
-        for (const thietbi of item.maymocthietbi) {
-          if (!previousSet.has(thietbi.id)) {
-            const key = `${thietbi.equipment}`
-            const existingQuantity = exportMap.get(key) || 0
-            exportMap.set(key, existingQuantity + thietbi.quantity)
-          }
-        }
-      }
-      for (const [exportId, exportQuantity] of exportMap.entries()) {
+  }
+   for (const [exportId, exportQuantity] of exportMap.entries()) {
+        const old = previousSet.get(exportId) || 0
         const findthuoc = inventoryMap.get(exportId)
+        const delta = exportQuantity - old
         if (findthuoc) {
-          const soluong = findthuoc.quantity - exportQuantity
+          const soluong = findthuoc.quantity - delta
           await req.payload.update({
             collection: 'inventory',
             id: findthuoc.id,
@@ -280,10 +231,9 @@ export const hookxuatkho: CollectionAfterChangeHook = async ({doc,req,operation,
           console.warn(`Không tìm thấy thuốc trong kho: ${exportId}`)
         }
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Lỗi khi cập nhật kho:', error)
     }
-  }
 }
 
 export const hookNhapQuayThuoc: CollectionAfterChangeHook = async ({
@@ -704,6 +654,7 @@ export const showPrice: CollectionBeforeChangeHook = async ({ data, req }) => {
 
   return data
 }
+
 export const showTotalPrice: CollectionAfterReadHook = async ({ doc }) => {
   const formatNumber = (value: any) => {
     if (value == null || value === '') return '0'
@@ -757,78 +708,96 @@ export const showTotalPrice: CollectionAfterReadHook = async ({ doc }) => {
   doc.tong_gia_tri = formatNumber(tongGiaTriQuayThuoc + tongGiaTriKhoa + tongGiaTriHuy)
 }
 
-export const checkInventoryBeforeExport = async ({
+export const checkInventoryBeforeExport: CollectionBeforeChangeHook = async ({
   data,
   req,
   operation,
-}: {
-  data: any
-  req: PayloadRequest
-  operation: string
+  originalDoc,
 }) => {
   if (operation !== 'create' && operation !== 'update') return data
   if (!data.exports || !Array.isArray(data.exports)) return data
 
-  let errorMessages: string[] = [] // Mảng chứa các thông báo lỗi
+  let errorMessages = new Set<string>() // Set chứa các thông báo lỗi
+  const dataOld = originalDoc?.exports || []
 
-  for (const exportItem of data.exports) {
-    if (exportItem.loai_xuat === 'huy') continue // Nếu là hủy hàng, không cần kiểm tra tồn kho
+  for (let exportIndex = 0; exportIndex < data.exports.length; exportIndex++) {
+    const exportItem = data.exports[exportIndex]
+    const exportItemOld = dataOld[exportIndex] || {}
+
+    if (exportItem.loai_xuat === 'huy') continue // Nếu là hủy hàng, bỏ qua kiểm tra tồn kho 
 
     // Gom tất cả sản phẩm từ các danh mục khác nhau
     const allItems = [
-      ...(exportItem.thuoc || []),
-      ...(exportItem.vattutieuhao || []),
-      ...(exportItem.maymocthietbi || []),
+      ...(exportItem.thuoc || []).map((item) => ({ ...item, category: 'Thuốc' })),
+      ...(exportItem.vattutieuhao || []).map((item) => ({ ...item, category: 'Vật tư tiêu hao' })),
+      ...(exportItem.maymocthietbi || []).map((item) => ({ ...item, category: 'Máy móc thiết bị' })),
     ]
 
-    for (const item of allItems) {
-      // Xác định ID sản phẩm theo danh mục
-      const productId = item.tenthuoc || item.supply || item.equipment
-      const quantityToExport = item.quantity
+    const allItemsOld = [
+      ...(exportItemOld.thuoc || []),
+      ...(exportItemOld.vattutieuhao || []),
+      ...(exportItemOld.maymocthietbi || []),
+    ]
 
-      if (!productId) continue
+    for (let itemIndex = 0; itemIndex < allItems.length; itemIndex++) {
+      const item = allItems[itemIndex]
+      const old = allItemsOld.find((dt) => dt.id === item.id) || null
 
-      // Tìm sản phẩm trong kho theo đúng danh mục của nó
-      const inventoryItems = await req.payload.find({
-        collection: 'inventory',
-        where: {
-          or: [
-            { item: { equals: productId } }, // Kiểm tra thuốc
-            { items: { equals: productId } }, // Kiểm tra vật tư tiêu hao & máy móc thiết bị
-          ],
-        },
-      })
+      if (!old) {
+        // Xác định ID sản phẩm theo danh mục
+        const productId = item.tenthuoc || item.supply || item.equipment
+        const quantityToExport = item.quantity
+        const category = item.category // Lưu loại danh mục của sản phẩm
 
-      if (!inventoryItems.docs.length) {
-        errorMessages.push(` Sản phẩm có ID ${productId} không có trong kho.`)
-        continue
-      }
+        if (!productId) continue
 
-      // Tính tổng số lượng tồn kho của sản phẩm này
-      const totalStockQuantity = inventoryItems.docs.reduce(
-        (sum, item) => sum + (item.quantity || 0),
-        0,
-      )
-      const productName = inventoryItems.docs[0].sanpham || `ID: ${productId}` // Lấy tên sản phẩm
+        // Tìm sản phẩm trong kho theo đúng danh mục của nó
+        const inventoryItems = await req.payload.find({
+          collection: 'inventory',
+          where: {
+            or: [
+              { item: { equals: productId } }, // Kiểm tra thuốc
+              { items: { equals: productId } }, // Kiểm tra vật tư tiêu hao & máy móc thiết bị
+            ],
+          },
+        })
 
-      if (totalStockQuantity === undefined || totalStockQuantity === null) {
-        errorMessages.push(` Số lượng tồn kho của sản phẩm ${productName} không hợp lệ.`)
-        continue
-      }
+        if (!inventoryItems.docs.length) {
+          errorMessages.add(
+            `[Mục số ${exportIndex + 1}, sản phẩm số ${itemIndex + 1}] - Sản phẩm "${productId}" thuộc danh mục "${category}" không có trong kho.`
+          )
+          continue
+        }
 
-      if (quantityToExport > totalStockQuantity) {
-        errorMessages.push(
-          ` Không đủ hàng: ${productName} (Kho: ${totalStockQuantity}, Xuất: ${quantityToExport}).`,
+        // Tính tổng số lượng tồn kho của sản phẩm này
+        const totalStockQuantity = inventoryItems.docs.reduce(
+          (sum, item) => sum + (item.quantity || 0),
+          0
         )
+        const productName = inventoryItems.docs[0].sanpham || `ID: ${productId}` // Lấy tên sản phẩm
+
+        if (totalStockQuantity === undefined || totalStockQuantity === null) {
+          errorMessages.add(
+            `[Mục số ${exportIndex + 1}, sản phẩm số ${itemIndex + 1}] - Số lượng tồn kho của sản phẩm "${productName}" trong danh mục "${category}" không hợp lệ.`
+          )
+          continue
+        }
+
+        if (quantityToExport > totalStockQuantity) {
+          errorMessages.add(
+            `[Mục số ${exportIndex + 1}, sản phẩm số ${itemIndex + 1}] - Danh mục: ${category}  sản phẩm ${productName} ( Kho: ${totalStockQuantity} , Xuất: ${quantityToExport})`
+          )
+        }
       }
     }
   }
 
   // Nếu có lỗi, ném lỗi một lần với tất cả thông báo
-  if (errorMessages.length > 0) {
-    console.error('❗ Lỗi kiểm tra tồn kho:', errorMessages)
-    throw new APIError(errorMessages.join('\n'), 400)
+  if (errorMessages.size > 0) {
+    console.error('❗ Lỗi kiểm tra tồn kho:', Array.from(errorMessages))
+    throw new APIError(Array.from(errorMessages).join('\n'), 400)
   }
 
   return data
 }
+

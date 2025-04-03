@@ -135,54 +135,156 @@ const MedicalRecods: CollectionConfig = {
                 },
                 { name: 'chuandoan', label: 'Chuẩn đoán', type: 'textarea' },
                 {
-                  name: 'tomtat',
-                  label: 'Tóm tắt quá trình điều trị',
-                  type: 'group',
-                  fields: [
-                    { name: 'lydo', label: 'Lý do vào viện', type: 'textarea' },
+                  type: 'tabs',
+                  tabs: [
                     {
-                      name: 'tomtat',
-                      label: 'Tóm tắt quá trình bệnh lý( các triệu chứng bệnh, diễn biến bệnh)',
-                      type: 'textarea',
-                    },
-                    { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
-
-                    {
-                      name: 'dienBienBenh',
-                      label: 'Diễn biến bệnh',
-                      type: 'array',
-                      labels: {
-                        singular: 'Ghi nhận diễn biến',
-                        plural: 'Danh sách diễn biến',
-                      },
+                      label: 'Tóm tắt bệnh lý',
                       fields: [
+                        { name: 'lydo', label: 'Lý do vào viện', type: 'textarea' },
                         {
-                          name: 'ngay',
-                          label: 'Ngày',
-                          type: 'date',
-                          admin: {
-                            date: {
-                              pickerAppearance: 'dayOnly',
-                              displayFormat: 'd-MM-yyy',
-                            },
-                          },
-                        },
-                        {
-                          name: 'dienBien',
-                          label: 'Diễn biến bệnh',
+                          name: 'tomtat',
+                          label: 'Tóm tắt quá trình bệnh lý (các triệu chứng bệnh, diễn biến bệnh)',
                           type: 'textarea',
                         },
-                        {
-                          name: 'ghiChu',
-                          label: 'Ghi chú',
-                          type: 'text',
-                        },
+                        { name: 'tiensu', label: 'Tiền sử bệnh án', type: 'textarea' },
                       ],
                     },
                     {
+                      label:'Thuốc điều trị',
+                      fields:[
+                        {
+                          name: 'thuoc',
+                          label: 'Thuốc',
+                          type: 'array',
+                          fields: [
+                            {
+                              type: 'row',
+                              fields: [
+                                {
+                                  name: 'tenthuoc',
+                                  label: 'Tên thuốc',
+                                  type: 'relationship',
+                                  relationTo: 'medications',
+                                  admin:{
+                                    allowCreate: false
+                                  }
+                                },
+                                { name: 'quantity', label: 'Số lượng sử dụng', type: 'number', min: 1 },
+                                {
+                                  name: 'donvi',
+                                  label: 'Đơn vị',
+                                  type: 'select',
+                                  options:[
+                                    {label: 'Hộp',value:'hop'},
+                                    {label: 'Viên',value:'vien' },
+                                    {label: 'Lọ', value: 'lo'},
+                                    {label: 'Chai',value: 'chai'},
+                                    {label:'Ống',value: 'ong'}
+                                  ],
+                                  defaultValue :'hop'
+                                },
+                                { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
+                                {
+                                  name: 'totalprice',
+                                  label: 'Tổng giá trị',
+                                  type: 'text',
+                                  admin: { readOnly: true },
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                        {
+                          name: 'vattutieuhao',
+                          label: 'Vật tư tiêu hao',
+                          type: 'array',
+                          fields: [
+                            {
+                              type: 'row',
+                              fields: [
+                                {
+                                  name: 'supply',
+                                  label: 'Tên vật tư y tế',
+                                  type: 'relationship',
+                                  relationTo: 'medicalSupplies',
+                                  admin:{
+                                    allowCreate: false
+                                  }
+                                },
+                                { name: 'quantity', label: 'Số lượng sử dụng', type: 'number', min: 1 },
+                                {
+                                  name: 'donvi',
+                                  label: 'Đơn vị',
+                                  type: 'select',
+                                  options:[
+                                    {label: 'Hộp',value:'hop'},
+                                    {label: 'Chai',value:'chai'},
+                                    {label: 'Gói', value: 'goi'},
+                                    {label: 'Cuộn', value: 'cuon'},
+                                    {label: 'Miếng',value: 'mieng'}
+                                  ],
+                                  defaultValue: 'hop',
+                                },
+                                { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
+                                {
+                                  name: 'totalprice',
+                                  label: 'Tổng giá trị',
+                                  type: 'text',
+                                  admin: { readOnly: true },
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ]
+                    },
+                    {
+                      label: 'Diễn biến bệnh',
+                      fields: [
+                        {
+                          name: 'dienBienBenh',
+                          label: 'Diễn biến bệnh',
+                          type: 'array',
+                          labels: {
+                            singular: 'Ghi nhận diễn biến',
+                            plural: 'Danh sách diễn biến',
+                          },
+                          fields: [
+                            {
+                              name: 'ngay',
+                              label: 'Ngày',
+                              type: 'date',
+                              admin: {
+                                date: {
+                                  pickerAppearance: 'dayOnly',
+                                  displayFormat: 'd-MM-yyy',
+                                },
+                              },
+                            },
+                            {
+                              name: 'dienBien',
+                              label: 'Diễn biến bệnh',
+                              type: 'textarea',
+                            },
+                            {
+                              name: 'ghiChu',
+                              label: 'Ghi chú',
+                              type: 'text',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  name: 'ppdt',
+                  label:'',
+                  type: 'group',
+                  fields:[
+                    {
                       name: 'phuongphap',
                       label: 'Phương pháp điều trị',
-
                       type: 'radio',
                       options: [
                         { label: 'Điều trị can thiệp', value: 'dieutricanthiep' },
@@ -194,7 +296,7 @@ const MedicalRecods: CollectionConfig = {
                       label: 'Mô tả chi tiết',
                       type: 'textarea',
                     },
-                  ],
+                  ]
                 },
                 {
                   name: 'tinhtrang',

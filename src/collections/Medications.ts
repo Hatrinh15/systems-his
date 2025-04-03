@@ -1,16 +1,16 @@
-import { CollectionConfig } from "payload";
-import { validateMedicationData} from "@/hooks/HookMedication";
+import { CollectionConfig } from 'payload'
+import { validateMedicationData } from '@/hooks/HookMedication'
 
 export const Medications: CollectionConfig = {
-  slug: "medications",
+  slug: 'medications',
   labels: {
-    singular: "Thuốc",
-    plural: "Thuốc",
+    singular: 'Thuốc',
+    plural: 'Thuốc',
   },
   admin: {
-    useAsTitle: "name",
-    defaultColumns: ["code","name", "category", "unit", "expiryDate"],
-    group:'Dược Và Vật Tư Y Tế'
+    useAsTitle: 'name',
+    defaultColumns: ['code', 'name', 'category', 'unit', 'expiryDate'],
+    group: 'Dược Và Vật Tư Y Tế',
   },
   fields: [
     {
@@ -20,87 +20,101 @@ export const Medications: CollectionConfig = {
       relationTo: 'media',
     },
     {
-      name: "code",
-      label: "Mã thuốc",
-      type: "text",
-      unique: true,
-    },
-    {
-      name: "name",
-      label: "Tên thuốc",
-      type: "text",
-    },
-    {
-      name: "category",
-      label: "Loại thuốc",
-      type: "select",
-      options: [
-        { label: "Kháng sinh", value: "khangsinh" },
-        { label: "Giảm đau", value: "giamdau" },
-        { label: "Huyết áp", value: "huyetap" },
-        { label: "Tiêu hóa", value: "tieuhoa" },
-        { label: "Tai mũi họng", value: "taimuihong" },
-        { label: "Kháng viêm", value: "khangviem" },
-        { label: "Dị ứng", value: "diung" },
-        { label: "Sát khuẩn", value: "satkhuan" },
-        { label: "Xịt mũi", value: "xitmui" },
-        { label: "Siro ho", value: "siroho" },
-        { label: "Khác", value: "khac" },
+      type: 'row',
+      fields: [
+        {
+          name: 'code',
+          label: 'Mã thuốc',
+          type: 'text',
+          unique: true,
+        },
+        {
+          name: 'bhyt',
+          label: 'BHYT',
+          type: 'select',
+          options: [
+            { value: 'co', label: 'Có' },
+            { value: 'khong', label: 'Không' },
+          ],
+        },
       ],
     },
     {
-      name: "unit",
-      label: "Đơn vị tính",
-      type: "select",
+      name: 'name',
+      label: 'Tên thuốc',
+      type: 'text',
+    },
+    {
+      name: 'category',
+      label: 'Loại thuốc',
+      type: 'select',
       options: [
-        { label: "Viên", value: "pill" },
-        { label: "Lọ", value: "bottle" },
-        { label: "Ống", value: "ampoule" },
-        { label: "Chai", value: "flask" },
-        { label: "Gói", value: "sachet" },
-        { label: "Hộp", value: "box" },
+        { label: 'Kháng sinh', value: 'khangsinh' },
+        { label: 'Giảm đau', value: 'giamdau' },
+        { label: 'Huyết áp', value: 'huyetap' },
+        { label: 'Tiêu hóa', value: 'tieuhoa' },
+        { label: 'Tai mũi họng', value: 'taimuihong' },
+        { label: 'Kháng viêm', value: 'khangviem' },
+        { label: 'Dị ứng', value: 'diung' },
+        { label: 'Sát khuẩn', value: 'satkhuan' },
+        { label: 'Xịt mũi', value: 'xitmui' },
+        { label: 'Siro ho', value: 'siroho' },
+        { label: 'Khác', value: 'khac' },
       ],
     },
     {
-      name: "description",
-      label: "Mô tả thuốc",
-      type: "textarea",
+      name: 'unit',
+      label: 'Đơn vị tính',
+      type: 'select',
+      options: [
+        { label: 'Viên', value: 'pill' },
+        { label: 'Lọ', value: 'bottle' },
+        { label: 'Ống', value: 'ampoule' },
+        { label: 'Chai', value: 'flask' },
+        { label: 'Gói', value: 'sachet' },
+        { label: 'Hộp', value: 'box' },
+      ],
     },
     {
-      name: "dosage",
-      label: "Liều lượng sử dụng",
-      type: "textarea",
+      name: 'description',
+      label: 'Mô tả thuốc',
+      type: 'textarea',
     },
     {
-      name: "activeIngredient",
-      label: "Hoạt chất chính",
-      type: "text",
+      name: 'dosage',
+      label: 'Liều lượng sử dụng',
+      type: 'textarea',
     },
     {
-      name: "sideEffects",
-      label: "Tác dụng phụ",
-      type: "textarea",
+      name: 'activeIngredient',
+      label: 'Hoạt chất chính',
+      type: 'text',
     },
     {
-      name: "contraindications",
-      label: "Chống chỉ định",
-      type: "textarea",
+      name: 'sideEffects',
+      label: 'Tác dụng phụ',
+      type: 'textarea',
     },
     {
-      name: "supplier",
-      label: "Nhà cung cấp",
-     type:'relationship',
-     relationTo:'suppliers',
-     hasMany:true,
+      name: 'contraindications',
+      label: 'Chống chỉ định',
+      type: 'textarea',
+    },
+    {
+      name: 'supplier',
+      label: 'Nhà cung cấp',
+      type: 'relationship',
+      relationTo: 'suppliers',
+      hasMany: true,
     },
     {
       name: 'note',
       label: 'Ghi chú',
       type: 'textarea',
-    }
+    },
   ],
   timestamps: true,
   hooks: {
     beforeValidate: [validateMedicationData], // Áp dụng hook kiểm tra dữ liệu trước khi validate
   },
-};
+}

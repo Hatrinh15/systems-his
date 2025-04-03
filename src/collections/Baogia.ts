@@ -57,26 +57,55 @@ export const baoGia: CollectionConfig = {
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: 'medicalSupplies',
-      admin: { condition: (data) => data?.category === 'medicalSupplies' },
+      admin: {
+        condition: (data) => data?.category === 'medicalSupplies',
+      },
       filterOptions: async ({ req, data }) => {
+        //  Lấy danh sách vật tư tiêu hao trong kho
         const existingInventory = await req.payload.find({
+          collection: 'inventory',
+          where: { category: { equals: 'vattutieuhao' } },
+          limit: 1000,
+        })
+
+        const medicationIdsInInventory = existingInventory.docs
+          .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
+          .filter(Boolean) // Xóa undefined/null
+
+        //  Lấy danh sách vật tư đã có trong quầy thuốc
+        const existingPharmacies = await req.payload.find({
           collection: 'baogia',
           where: {},
           limit: 1000,
         })
 
-        // Lấy danh sách thuốc đã có trong kho
-        const usedMedications = existingInventory.docs
+        const medicationIdsInPharmacies = existingPharmacies.docs
           .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
           .filter(Boolean)
 
-        // 🛠 Giữ lại thuốc đã lưu trước đó để không bị lỗi khi cập nhật
-        if (data?.items) {
-          usedMedications.splice(usedMedications.indexOf(data.items), 1)
+        //  Giữ lại sản phẩm đã chọn nếu có
+        if (data?.items && !medicationIdsInInventory.includes(data.items)) {
+          medicationIdsInInventory.push(data.items)
         }
 
+        //  Lọc danh sách vật tư chưa có trong quầy thuốc
+        const availableMedicationIds = medicationIdsInInventory.filter(
+          (id) => !medicationIdsInPharmacies.includes(id),
+        )
+
+        //  Giữ lại sản phẩm đang chọn (nếu có)
+        if (data?.items && !availableMedicationIds.includes(data.items)) {
+          availableMedicationIds.push(data.items)
+        }
+
+        //  Kiểm tra nếu danh sách trống, trả về điều kiện không có thuốc
+        if (!availableMedicationIds.length) {
+          return false // Hoàn toàn không có lựa chọn nào
+        }
+
+        //  Trả về danh sách vật tư có thể chọn
         return {
-          id: { not_in: usedMedications },
+          id: { in: availableMedicationIds },
         }
       },
     },
@@ -167,12 +196,35 @@ export const baoGia: CollectionConfig = {
       defaultValue: 10,
     },
     {
-      name: 'giaban',
-      label: 'Giá bán lẻ (VNĐ)',
-      type: 'text',
+      type: 'row',
       admin: { readOnly: true },
+      fields: [
+        { name: 'don', label: 'Đơn vị', type: 'text', defaultValue: 'Hộp' },
+        {
+          name: 'giaban',
+          label: 'Giá bán lẻ (VNĐ)',
+          type: 'text',
+        },
+        {
+          name: 'tam',
+          label: '80%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'chin',
+          label: '95%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'mot',
+          label: '100%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+      ],
     },
-    { name: 'giabhyt', label: 'Giá BHYT (VNĐ)', type: 'number', defaultValue: 0 },
     {
       type: 'row',
       fields: [
@@ -203,6 +255,33 @@ export const baoGia: CollectionConfig = {
         { name: 'quychuan', label: 'Quy chuẩn', type: 'number' },
         { name: 'phantram', label: '%', type: 'number' },
         { name: 'tien', label: 'Gía tiền', type: 'text' },
+        {
+          name: 'tammuoi',
+          label: '80%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'chinlam',
+          label: '95%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'mottram',
+          label: '100%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+      ],
+    },
+    {
+      name: 'bhyt',
+      label: 'BHYT',
+      type: 'radio',
+      options: [
+        { value: 'co', label: 'Có' },
+        { value: 'khong', label: 'Không' },
       ],
     },
   ],

@@ -1000,6 +1000,7 @@ export interface Medication {
   id: string;
   medicationpicture?: (string | null) | Media;
   code?: string | null;
+  bhyt?: ('co' | 'khong') | null;
   name?: string | null;
   category?:
     | (
@@ -1142,16 +1143,33 @@ export interface MedicalUsage {
 export interface Order {
   id: string;
   customer: string | Patient;
-  items?:
-    | {
-        medication: string | Pharmacy;
-        quantity?: number | null;
-        donvi?: ('hop' | 'vien' | 'ong' | 'lo' | 'goi' | 'cuon' | 'mieng') | null;
-        price?: string | null;
-        tien?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  baohiemyte?: ('yes' | 'no') | null;
+  bhyt?: {
+    loai?: ('tamtram' | 'chinlam' | 'mottram') | null;
+    items?:
+      | {
+          medication: string | Pharmacy;
+          quantity?: number | null;
+          donvi?: ('hop' | 'vien' | 'ong' | 'lo' | 'goi' | 'cuon' | 'mieng') | null;
+          price?: string | null;
+          tien?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  dichvu?: {
+    item?:
+      | {
+          medications?: (string | null) | Pharmacy;
+          sanpham?: (string | null) | Pharmacy;
+          quantitys?: number | null;
+          donvis?: ('hop' | 'vien' | 'ong' | 'lo' | 'goi' | 'cuon' | 'mieng') | null;
+          prices?: string | null;
+          tiens?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   totalprice?: string | null;
   orderdate?: string | null;
   staff?: (string | null) | User;
@@ -1169,14 +1187,21 @@ export interface Pharmacy {
   item?: (string | null) | Medication;
   items?: (string | null) | MedicalSupply;
   sanpham?: string | null;
-  quantity?: number | null;
   unit?: string | null;
+  quantity?: number | null;
   price?: string | null;
+  tam?: string | null;
+  chin?: string | null;
+  mot?: string | null;
   donvi?: ('vien' | 'ong' | 'lo' | 'goi' | 'hop') | null;
   units?: ('vien' | 'cuon' | 'mieng' | 'goi') | null;
   quychuan?: number | null;
   soluong?: number | null;
   tongtien?: string | null;
+  tammuoi?: string | null;
+  chinlam?: string | null;
+  mottram?: string | null;
+  bhyt?: ('co' | 'khong') | null;
   expirydate?: string | null;
   notes?: string | null;
   updatedAt: string;
@@ -1373,13 +1398,20 @@ export interface Baogia {
   gianhaptrungbinh?: string | null;
   thue?: number | null;
   loinhuan?: number | null;
+  don?: string | null;
   giaban?: string | null;
-  giabhyt?: number | null;
+  tam?: string | null;
+  chin?: string | null;
+  mot?: string | null;
   donvi?: ('vien' | 'ong' | 'lo' | 'goi') | null;
   donvis?: ('vien' | 'cuon' | 'mieng' | 'goi') | null;
   quychuan?: number | null;
   phantram?: number | null;
   tien?: string | null;
+  tammuoi?: string | null;
+  chinlam?: string | null;
+  mottram?: string | null;
+  bhyt?: ('co' | 'khong') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2123,15 +2155,36 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
-  items?:
+  baohiemyte?: T;
+  bhyt?:
     | T
     | {
-        medication?: T;
-        quantity?: T;
-        donvi?: T;
-        price?: T;
-        tien?: T;
-        id?: T;
+        loai?: T;
+        items?:
+          | T
+          | {
+              medication?: T;
+              quantity?: T;
+              donvi?: T;
+              price?: T;
+              tien?: T;
+              id?: T;
+            };
+      };
+  dichvu?:
+    | T
+    | {
+        item?:
+          | T
+          | {
+              medications?: T;
+              sanpham?: T;
+              quantitys?: T;
+              donvis?: T;
+              prices?: T;
+              tiens?: T;
+              id?: T;
+            };
       };
   totalprice?: T;
   orderdate?: T;
@@ -2309,6 +2362,7 @@ export interface SuppliersSelect<T extends boolean = true> {
 export interface MedicationsSelect<T extends boolean = true> {
   medicationpicture?: T;
   code?: T;
+  bhyt?: T;
   name?: T;
   category?: T;
   unit?: T;
@@ -2428,14 +2482,21 @@ export interface PharmaciesSelect<T extends boolean = true> {
   item?: T;
   items?: T;
   sanpham?: T;
-  quantity?: T;
   unit?: T;
+  quantity?: T;
   price?: T;
+  tam?: T;
+  chin?: T;
+  mot?: T;
   donvi?: T;
   units?: T;
   quychuan?: T;
   soluong?: T;
   tongtien?: T;
+  tammuoi?: T;
+  chinlam?: T;
+  mottram?: T;
+  bhyt?: T;
   expirydate?: T;
   notes?: T;
   updatedAt?: T;
@@ -2596,13 +2657,20 @@ export interface BaogiaSelect<T extends boolean = true> {
   gianhaptrungbinh?: T;
   thue?: T;
   loinhuan?: T;
+  don?: T;
   giaban?: T;
-  giabhyt?: T;
+  tam?: T;
+  chin?: T;
+  mot?: T;
   donvi?: T;
   donvis?: T;
   quychuan?: T;
   phantram?: T;
   tien?: T;
+  tammuoi?: T;
+  chinlam?: T;
+  mottram?: T;
+  bhyt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

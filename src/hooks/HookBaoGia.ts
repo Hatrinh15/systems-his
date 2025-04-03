@@ -83,16 +83,21 @@ export const priceAfterRead: CollectionAfterReadHook = ({ doc }) => {
     } else {
       doc.tien = '0'
     }
-    //cho vật tư
-    const giaBanNumbers = Number(doc.giaban?.toString().replace(/\D/g, '')) || 0
-    const quychuans = Number(doc.quychuans) || 1 // Tránh chia cho 0
-    const phantrams = Number(doc.phantrams) || 0
+    if (doc.bhyt === 'co' && giaBanNumber > 0) {
+      const formatNumberSafe = (value: number) => {
+        return value === 0 ? '0' : formatNumber(value)
+      }
 
-    if (giaBanNumbers > 0 && quychuans > 0) {
-      const giaTien = (giaBanNumbers * (1 + phantrams / 100)) / quychuans
-      doc.tiens = formatNumber(Math.round(giaTien))
-    } else {
-      doc.tien = '0'
+      // Nhóm 1: Tính theo giá bán
+      doc.tam = formatNumber(Math.round(giaBanNumber - giaBanNumber * 0.8)) // 80%
+      doc.chin = formatNumber(Math.round(giaBanNumber - giaBanNumber * 0.95)) // 95%
+      doc.mot = formatNumberSafe(Math.round(giaBanNumber - giaBanNumber * 1)) // 100%
+
+      // Nhóm 2: Tính theo tổng tiền
+      const tienNumber = Number(doc.tien?.toString().replace(/\D/g, '')) || 0
+      doc.tammuoi = formatNumber(Math.round(tienNumber - tienNumber * 0.8))
+      doc.chinlam = formatNumber(Math.round(tienNumber - tienNumber * 0.95))
+      doc.mottram = formatNumberSafe(Math.round(tienNumber - tienNumber * 1))
     }
   }
 }
@@ -142,24 +147,40 @@ export const hookPriceQuayThuoc: CollectionAfterChangeHook = async ({ doc, req }
 
     if (existingPharmacy.docs.length > 0) {
       const pharmacyId = existingPharmacy.docs[0].id
-      const currentQuantity = existingPharmacy.docs[0].quantity || 0 // Số lượng hiện có trong quầy thuốc
-      const quyChuan = isMedication ? doc.quychuan : doc.quychuans // Quy chuẩn thuốc hoặc vật tư
-      const calculatedQuantity = quyChuan ? quyChuan * currentQuantity : 0 // ✅ Tính tổng số lượng tự động
 
-      // 🔄 Cập nhật thông tin vào quầy thuốc
+      // 🔄 Dữ liệu cập nhật
+      const updateData: Record<string, any> = {
+        price: doc.giaban,
+        donvi: doc.donvi,
+        units: doc.donvis,
+        quychuan: doc.quychuan,
+        tongtien: doc.tien,
+        bhyt: doc.bhyt, // Tự động chọn BHYT khi có
+      }
+
+      // Nếu BHYT === 'co', thêm các mục 80%, 95%, 100%
+      if (doc.bhyt === 'co') {
+        updateData.tammuoi = doc.tammuoi
+        updateData.chinlam = doc.chinlam
+        updateData.mottram = doc.mottram
+
+        updateData.tam = doc.tam
+        updateData.chin = doc.chin
+        updateData.mot = doc.mot
+      }
+      if (isMedication) {
+        updateData['item'] = productId
+      } else {
+        updateData['items'] = productId
+      }
+      // 🔄 Cập nhật vào quầy thuốc
       await req.payload.update({
         collection: pharmacyCollection,
         id: pharmacyId,
-        data: {
-          price: doc.giaban,
-          donvi: doc.donvi,
-          units: doc.donvis,
-          quychuan: doc.quychuan,
-          tongtien:doc.tien,
-        },
+        data: updateData,
       })
     }
   } catch (error) {
-    console.error(' Lỗi khi cập nhật quầy thuốc từ bảng giá:', error)
+    console.error('🚨 Lỗi khi cập nhật quầy thuốc từ bảng giá:', error)
   }
 }

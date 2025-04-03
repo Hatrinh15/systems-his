@@ -26,10 +26,12 @@ export const Pharmacies: CollectionConfig = {
       name: 'item',
       label: 'Sản phẩm',
       type: 'relationship',
-      relationTo: 'medications', // Chỉ liên kết với bảng thuốc
-      admin: { condition: (data) => data?.category === 'medications' },
+      relationTo: 'medications',
+      admin: {
+        condition: (data) => data?.category === 'medications',
+      },
       filterOptions: async ({ req, data }) => {
-        // 1️⃣ Lấy danh sách thuốc trong kho
+        // 🏥 Lấy danh sách vật tư tiêu hao trong kho
         const existingInventory = await req.payload.find({
           collection: 'inventory',
           where: { category: { equals: 'medications' } },
@@ -38,9 +40,9 @@ export const Pharmacies: CollectionConfig = {
 
         const medicationIdsInInventory = existingInventory.docs
           .map((doc) => (doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item))
-          .filter(Boolean)
+          .filter(Boolean) // Xóa undefined/null
 
-        // 2️⃣ Lấy danh sách thuốc đã có trong quầy thuốc
+        // 🏪 Lấy danh sách vật tư đã có trong quầy thuốc
         const existingPharmacies = await req.payload.find({
           collection: 'pharmacies',
           where: {},
@@ -51,27 +53,32 @@ export const Pharmacies: CollectionConfig = {
           .map((doc) => (doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item))
           .filter(Boolean)
 
-        // 3️⃣ Giữ lại thuốc đã chọn nếu có
+        // ✅ Giữ lại sản phẩm đã chọn nếu có
         if (data?.item && !medicationIdsInInventory.includes(data.item)) {
-          medicationIdsInInventory.push(data.item) // Thêm item cũ để tránh lỗi khi cập nhật
+          medicationIdsInInventory.push(data.item)
         }
 
-        // 4️⃣ Lọc thuốc chưa có trong quầy thuốc
+        // 🔍 Lọc danh sách vật tư chưa có trong quầy thuốc
         const availableMedicationIds = medicationIdsInInventory.filter(
           (id) => !medicationIdsInPharmacies.includes(id),
         )
 
-        // 5️⃣ Giữ lại thuốc đã chọn nếu có
+        // ✅ Giữ lại sản phẩm đang chọn (nếu có)
         if (data?.item && !availableMedicationIds.includes(data.item)) {
           availableMedicationIds.push(data.item)
         }
 
+        // 🚨 Kiểm tra nếu danh sách trống, trả về điều kiện không có thuốc
+        if (!availableMedicationIds.length) {
+          return false // Hoàn toàn không có lựa chọn nào
+        }
+
+        // ✅ Trả về danh sách vật tư có thể chọn
         return {
-          id: { in: availableMedicationIds }, // Giữ lại item đang chọn để tránh lỗi
+          id: { in: availableMedicationIds },
         }
       },
     },
-
     {
       name: 'items',
       label: 'Sản phẩm',
@@ -81,7 +88,7 @@ export const Pharmacies: CollectionConfig = {
         condition: (data) => data?.category === 'vattutieuhao',
       },
       filterOptions: async ({ req, data }) => {
-        //  Lấy danh sách thuốc trong kho
+        //  Lấy danh sách vật tư tiêu hao trong kho
         const existingInventory = await req.payload.find({
           collection: 'inventory',
           where: { category: { equals: 'vattutieuhao' } },
@@ -90,30 +97,42 @@ export const Pharmacies: CollectionConfig = {
 
         const medicationIdsInInventory = existingInventory.docs
           .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
-          .filter(Boolean)
-        //  Lấy danh sách thuốc đã có trong quầy thuốc
+          .filter(Boolean) // Xóa undefined/null
+
+        //  Lấy danh sách vật tư đã có trong quầy thuốc
         const existingPharmacies = await req.payload.find({
           collection: 'pharmacies',
           where: {},
           limit: 1000,
         })
+
         const medicationIdsInPharmacies = existingPharmacies.docs
           .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
           .filter(Boolean)
-        //  Giữ lại thuốc đã chọn nếu có
-        if (data?.item && !medicationIdsInInventory.includes(data.items)) {
-          medicationIdsInInventory.push(data.items) // Thêm item cũ để tránh lỗi khi cập nhật
+
+        //  Giữ lại sản phẩm đã chọn nếu có
+        if (data?.items && !medicationIdsInInventory.includes(data.items)) {
+          medicationIdsInInventory.push(data.items)
         }
-        // Lọc thuốc chưa có trong quầy thuốc
+
+        //  Lọc danh sách vật tư chưa có trong quầy thuốc
         const availableMedicationIds = medicationIdsInInventory.filter(
           (id) => !medicationIdsInPharmacies.includes(id),
         )
-        // 5 Giữ lại thuốc đã chọn nếu có
+
+        //  Giữ lại sản phẩm đang chọn (nếu có)
         if (data?.items && !availableMedicationIds.includes(data.items)) {
           availableMedicationIds.push(data.items)
         }
+
+        //  Kiểm tra nếu danh sách trống, trả về điều kiện không có thuốc
+        if (!availableMedicationIds.length) {
+          return false // Hoàn toàn không có lựa chọn nào
+        }
+
+        //  Trả về danh sách vật tư có thể chọn
         return {
-          id: { in: availableMedicationIds }, // Giữ lại item đang chọn để tránh lỗi
+          id: { in: availableMedicationIds },
         }
       },
     },
@@ -127,21 +146,39 @@ export const Pharmacies: CollectionConfig = {
       type: 'row',
       fields: [
         {
+          name: 'unit',
+          label: 'Đơn vị ',
+          type: 'text',
+          defaultValue: 'Hộp',
+        },
+        {
           name: 'quantity',
           label: 'Số lượng ',
           type: 'number',
           min: 0,
         },
         {
-          name: 'unit',
-          label: 'Đơn vị tính',
-          type: 'text',
-          defaultValue: 'Hộp',
-        },
-        {
           name: 'price',
           label: 'Giá niêm yết',
           type: 'text',
+        },
+        {
+          name: 'tam',
+          label: '80%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'chin',
+          label: '95%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'mot',
+          label: '100%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
         },
       ],
     },
@@ -178,6 +215,33 @@ export const Pharmacies: CollectionConfig = {
         { name: 'quychuan', label: 'Quy chuẩn', type: 'number', admin: { readOnly: true } },
         { name: 'soluong', label: 'Tổng số lượng theo đơn vị', type: 'number' },
         { name: 'tongtien', label: 'Tiền theo đơn vị tính bán lẻ', type: 'text' },
+        {
+          name: 'tammuoi',
+          label: '80%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'chinlam',
+          label: '95%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+        {
+          name: 'mottram',
+          label: '100%',
+          type: 'text',
+          admin: { condition: (data) => data?.bhyt === 'co' },
+        },
+      ],
+    },
+    {
+      name: 'bhyt',
+      label: 'BHYT',
+      type: 'radio',
+      options: [
+        { value: 'co', label: 'Có' },
+        { value: 'khong', label: 'Không' },
       ],
     },
     {

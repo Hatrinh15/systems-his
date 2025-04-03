@@ -1,4 +1,9 @@
-import { hookTinhGiaThuoc } from '@/hooks/HookOrders'
+import {
+  hookTinhGiaThuoc,
+  hookTinhGiaThuocSanpham,
+  hookTinhTongDonThuoc,
+  hookTruThuocQuay,
+} from '@/hooks/HookOrders'
 import { CollectionConfig } from 'payload'
 
 export const Orders: CollectionConfig = {
@@ -20,52 +25,204 @@ export const Orders: CollectionConfig = {
       required: true,
     },
     {
-      name: 'items',
-      label: 'Danh sách thuốc mua',
-      type: 'array',
+      name: 'baohiemyte',
+      label: 'BHYT',
+      type: 'radio',
+      options: [
+        { value: 'yes', label: 'Có' },
+        { value: 'no', label: 'Không' },
+      ],
+    },
+    {
+      name: 'bhyt',
+      label: 'Thuốc BHYT',
+      type: 'group',
+      admin: { condition: (data) => data?.baohiemyte === 'yes' },
       fields: [
         {
-          type: 'row',
+          name: 'loai',
+          label: 'Loại miễn giảm',
+          type: 'select',
+          options: [
+            { value: 'tamtram', label: '80%' },
+            { value: 'chinlam', label: '95%' },
+            { value: 'mottram', label: '100%' },
+          ],
+        },
+        {
+          name: 'items',
+          label: 'Danh sách thuốc mua',
+          type: 'array',
           fields: [
             {
-              name: 'medication',
-              label: 'Sản phẩm',
-              type: 'relationship',
-              relationTo: 'pharmacies',
-              required: true,
-            },
-            {
-              name: 'quantity',
-              label: 'Số lượng',
-              type: 'number',
-              min: 1,
-            },
-            {
-              name: 'donvi',
-              label: 'Đơn vị',
-              type: 'select',
-              options: [
-                { label: 'Hộp', value: 'hop' },
-                { label: 'Viên', value: 'vien' },
-                { label: 'Ống', value: 'ong' },
-                { label: 'Lọ', value: 'lo' },
-                { label: 'Gói', value: 'goi' },
-                { label: 'Chai', value: 'vien' },
-                { label: 'Cuộn', value: 'cuon' },
-                { label: 'Miếng', value: 'mieng' },
-                { label: 'Gói', value: 'goi' },
+              type: 'row',
+              fields: [
+                {
+                  name: 'medication',
+                  label: 'Sản phẩm',
+                  type: 'relationship',
+                  relationTo: 'pharmacies',
+                  required: true,
+                  filterOptions: async ({ req, data, siblingData }) => {
+                    if (!data) return false
+                    const id = siblingData as { medication?: string }
+                    const products = await req.payload.find({
+                      collection: 'pharmacies',
+                      where: {
+                        bhyt: { equals: 'co' }, // Giả sử field `bhyt` trong `pharmacies`
+                      },
+                      limit: 1000,
+                    })
+                    const medicationIds = data?.bhyt.items.map((dt) => dt.medication) || []
+                    const ids = products.docs
+                      .map((doc) => doc.id)
+                      .filter((id) => !medicationIds.includes(id))
+                    return {
+                      or: [
+                        { id: { in: ids !== undefined ? ids : null } },
+                        { id: { equals: id.medication } },
+                      ],
+                    }
+                  },
+                },
+                {
+                  name: 'quantity',
+                  label: 'Số lượng',
+                  type: 'number',
+                  min: 1,
+                },
+                {
+                  name: 'donvi',
+                  label: 'Đơn vị',
+                  type: 'select',
+                  options: [
+                    { label: 'Hộp', value: 'hop' },
+                    { label: 'Viên', value: 'vien' },
+                    { label: 'Ống', value: 'ong' },
+                    { label: 'Lọ', value: 'lo' },
+                    { label: 'Gói', value: 'goi' },
+                    { label: 'Chai', value: 'vien' },
+                    { label: 'Cuộn', value: 'cuon' },
+                    { label: 'Miếng', value: 'mieng' },
+                    { label: 'Gói', value: 'goi' },
+                  ],
+                },
+                {
+                  name: 'price',
+                  label: 'Giá bán',
+                  type: 'text',
+                },
+                { name: 'tien', label: 'Tổng tiền', type: 'text' },
               ],
             },
-            {
-              name: 'price',
-              label: 'Giá bán',
-              type: 'text',
-            },
-            { name: 'tien', label: 'Tổng tiền', type: 'text' },
           ],
         },
       ],
     },
+    {
+      name: 'dichvu',
+      label: 'Dịch vụ',
+      type: 'group',
+      fields: [
+        {
+          name: 'item',
+          label: 'Danh sách thuốc mua',
+          type: 'array',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'medications',
+                  label: 'Sản phẩm',
+                  type: 'relationship',
+                  relationTo: 'pharmacies',
+                  required: true,
+                  admin: { condition: (data) => data?.baohiemyte === 'yes' },
+                  filterOptions: async ({ req, data, siblingData }) => {
+                    const id = siblingData as { medications?: string }
+                    const products = await req.payload.find({
+                      collection: 'pharmacies',
+                      where: {
+                        bhyt: { equals: 'khong' }, // Giả sử field `bhyt` trong `pharmacies`
+                      },
+                      limit: 1000,
+                    })
+
+                    const medicationIds = data?.dichvu.item.map((dt) => dt.medications) || []
+                    const ids = products.docs
+                      .map((doc) => doc.id)
+                      .filter((id) => !medicationIds.includes(id))
+                    return {
+                      or: [
+                        { id: { in: ids !== undefined ? ids : null } },
+                        { id: { equals: id.medications } },
+                      ],
+                    }
+                  },
+                },
+                {
+                  name: 'sanpham',
+                  label: 'Sản phẩm',
+                  type: 'relationship',
+                  relationTo: 'pharmacies',
+                  required: true,
+                  admin: { condition: (data) => data?.baohiemyte === 'no' },
+                  filterOptions: async ({ req, data, siblingData }) => {
+                    const id = siblingData as { sanpham?: string }
+                    const products = await req.payload.find({
+                      collection: 'pharmacies',
+                      where: {},
+                      limit: 1000,
+                    })
+
+                    const medicationIds = data?.dichvu.item.map((dt) => dt.sanpham) || []
+                    const ids = products.docs
+                      .map((doc) => doc.id)
+                      .filter((id) => !medicationIds.includes(id))
+                    return {
+                      or: [
+                        { id: { in: ids !== undefined ? ids : null } },
+                        { id: { equals: id.sanpham } },
+                      ],
+                    }
+                  },
+                },
+                {
+                  name: 'quantitys',
+                  label: 'Số lượng',
+                  type: 'number',
+                  min: 1,
+                },
+
+                {
+                  name: 'donvis',
+                  label: 'Đơn vị',
+                  type: 'select',
+                  options: [
+                    { label: 'Hộp', value: 'hop' },
+                    { label: 'Viên', value: 'vien' },
+                    { label: 'Ống', value: 'ong' },
+                    { label: 'Lọ', value: 'lo' },
+                    { label: 'Gói', value: 'goi' },
+                    { label: 'Chai', value: 'vien' },
+                    { label: 'Cuộn', value: 'cuon' },
+                    { label: 'Miếng', value: 'mieng' },
+                  ],
+                },
+                {
+                  name: 'prices',
+                  label: 'Giá bán',
+                  type: 'text',
+                },
+                { name: 'tiens', label: 'Tổng tiền', type: 'text' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
     {
       name: 'totalprice',
       label: 'Tổng giá trị đơn thuốc',
@@ -85,6 +242,39 @@ export const Orders: CollectionConfig = {
       label: 'Nhân viên bán hàng',
       type: 'relationship',
       relationTo: 'users',
+      filterOptions: async ({ data, req }) => {
+        try {
+          // Lấy danh sách bác sĩ thuộc Khoa Dược
+          const khoaDuoc = await req.payload.find({
+            collection: 'departments',
+            where: { tenkhoa: { equals: 'khoaduoc' } },
+            limit: 1, // Chỉ lấy khoa Dược
+          })
+
+          const khoaDuocData = khoaDuoc?.docs?.[0] // Lấy khoa đầu tiên (nếu có)
+          const doctorsInKhoaDuoc =
+            khoaDuocData?.doctors?.map((doc) => (typeof doc === 'string' ? doc : doc?.id)) || []
+
+          // Kiểm tra nếu đã chọn bác sĩ trước đó
+          const selectedUser = data?.receiverorsender
+          const selectedUserId = typeof selectedUser === 'string' ? selectedUser : selectedUser?.id
+
+          return {
+            and: [
+              { chucvu: { equals: 'duocsi' } }, // Chỉ lấy dược sĩ
+              {
+                or: [
+                  { id: { in: doctorsInKhoaDuoc } }, // Chỉ lấy bác sĩ thuộc khoa Dược
+                  { id: { equals: selectedUserId } }, // Giữ lại người đã chọn trước đó
+                ],
+              },
+            ],
+          } as any
+        } catch (error) {
+          console.error('Lỗi khi lọc Người nhận/Người xuất:', error)
+          return {}
+        }
+      },
     },
     {
       name: 'paymentmethod',
@@ -98,6 +288,7 @@ export const Orders: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [hookTinhGiaThuoc],
+    beforeChange: [hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc],
+    afterChange: [hookTruThuocQuay],
   },
 }

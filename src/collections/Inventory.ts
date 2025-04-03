@@ -62,26 +62,53 @@ export const Inventory: CollectionConfig = {
           data?.category === 'vattutieuhao' || data?.category === 'maymocthietbi',
       },
       filterOptions: async ({ req, data }) => {
-        const existingInventory = await req.payload.find({
-          collection: 'inventory',
-          where: {},
-          limit: 1000,
-        })
-
-        // Lấy danh sách thuốc đã có trong kho
-        const usedMedications = existingInventory.docs
-          .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
-          .filter(Boolean)
-
-        // 🛠 Giữ lại thuốc đã lưu trước đó để không bị lỗi khi cập nhật
-        if (data?.items) {
-          usedMedications.splice(usedMedications.indexOf(data.items), 1)
+        if (!data?.category) return false; // Nếu chưa chọn danh mục, không hiển thị gì cả
+      
+        try {
+          // 🔍 Lấy danh sách sản phẩm đã có trong kho thuộc danh mục được chọn
+          const existingInventory = await req.payload.find({
+            collection: 'inventory',
+            where: {
+              category: { equals: data.category }, // Lọc theo danh mục đã chọn
+            },
+            limit: 1000,
+          });
+      
+          // Lấy danh sách ID của các sản phẩm đã có trong kho
+          const usedItems = existingInventory.docs
+            .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
+            .filter(Boolean); // Lọc bỏ giá trị null/undefined
+      
+          // 🛠 Giữ lại sản phẩm đã lưu trước đó để không bị lỗi khi cập nhật
+          if (data?.items) {
+            usedItems.splice(usedItems.indexOf(data.items), 1);
+          }
+      
+          // 🔍 Lấy danh sách sản phẩm thuộc danh mục từ `medicalSupplies`
+          const medicalSuppliesData = await req.payload.find({
+            collection: 'medicalSupplies',
+            where: {
+              loaivattu: { equals: data.category }, // Chỉ lấy vật tư thuộc danh mục
+            },
+            limit: 1000,
+          });
+      
+          const medicalSuppliesIds = medicalSuppliesData.docs.map((doc) => doc.id);
+      
+          // ❌ Loại bỏ các sản phẩm đã có trong kho
+          const filteredItems = medicalSuppliesIds.filter((id) => !usedItems.includes(id));
+      
+          // Nếu không còn sản phẩm hợp lệ, không hiển thị gì
+          if (filteredItems.length === 0) return false;
+      
+          return {
+            id: { in: filteredItems },
+          };
+        } catch (error) {
+          console.error('Lỗi khi lọc danh sách vật tư:', error);
+          return false; // Tránh lỗi hệ thống
         }
-
-        return {
-          id: { not_in: usedMedications },
-        }
-      },
+      },      
     },
     {
       name: 'sanpham',

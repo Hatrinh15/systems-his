@@ -30,9 +30,6 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
             if (!user) return
 
             if (user.khoa === data.tenkhoa && user.chucvu === 'truongkhoa') {
-              console.log(
-                `Trưởng khoa ${truongkhoaId} đã thuộc khoa "${data.tenkhoa}", không cần cập nhật.`,
-              )
               return
             }
 
@@ -42,8 +39,6 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
               id: truongkhoaId,
               data: { khoa: data.tenkhoa, chucvu: 'truongkhoa' },
             })
-
-            console.log(`✅ Đã cập nhật trưởng khoa ${truongkhoaId} sang "${data.tenkhoa}".`)
           } catch (error) {
             console.error(`❌ Lỗi khi cập nhật trưởng khoa ${truongkhoaId}:`, error)
           }
@@ -64,7 +59,6 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
             if (!user) return
 
             if (user.khoa === data.tenkhoa) {
-              console.log(`Bác sĩ ${doctorId} đã thuộc khoa "${data.tenkhoa}", không cần cập nhật.`)
               return
             }
 
@@ -76,8 +70,6 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
               id: doctorId,
               data: { khoa: data.tenkhoa, chucvu: newRole },
             })
-
-            console.log(`✅ Đã cập nhật khoa của bác sĩ ${doctorId} sang "${data.tenkhoa}".`)
           } catch (error) {
             console.error(`❌ Lỗi khi cập nhật khoa cho bác sĩ ${doctorId}:`, error)
           }
@@ -109,7 +101,6 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
 
           // 🛑 Nếu bác sĩ đã ở đúng khoa, không cần cập nhật
           if (user.khoa === data.tenkhoa) {
-            console.log(`Y tá ${nuresId} đã thuộc khoa "${data.tenkhoa}", không cần cập nhật.`)
             return
           }
 
@@ -119,8 +110,6 @@ export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, oper
             id: nuresId,
             data: { khoa: data.tenkhoa },
           })
-
-          console.log(`Đã cập nhật khoa của Y tá ${nuresId} sang "${data.tenkhoa}".`)
         } catch (error) {
           console.error(`Lỗi khi cập nhật khoa cho Y tá ${nuresId}:`, error)
         }
@@ -148,3 +137,65 @@ export const showTitle: CollectionBeforeChangeHook = async ({ data }) => {
   })
   return data
 }
+
+export const hookCheckKhoa: CollectionBeforeChangeHook = async ({ data, req, originalDoc, operation }) => {
+  // Kiểm tra trường "Tên Khoa"
+  if (!data.tenkhoa) {
+    throw new APIError('Tên khoa không được để trống.', 400);
+  }
+
+  // Kiểm tra trường "Ngày thành lập" trong group thongtin
+  if (!data.thongtin?.ngaythanhlap) {
+    throw new APIError('Ngày thành lập không được để trống.', 400);
+  } else {
+    const foundationDate = new Date(data.thongtin.ngaythanhlap);
+    // Kiểm tra xem có phải là một ngày hợp lệ không
+    if (isNaN(foundationDate.getTime())) {
+      throw new APIError('Ngày thành lập không hợp lệ.', 400);
+    }
+  }
+
+  // Kiểm tra nếu là thao tác cập nhật (update) và có sự thay đổi trong danh sách sản phẩm
+  if (operation === 'update' && data?.departmentInventory) {
+    data.departmentInventory.forEach((item, index) => {
+      // Kiểm tra nếu danh mục đã chọn trước đó và khác với giá trị mới
+      if (originalDoc.departmentInventory[index]?.category && 
+          originalDoc.departmentInventory[index]?.category !== item.category) {
+        throw new APIError(`Danh mục của sản phẩm tại mục số ${index + 1} không thể thay đổi.`, 400);
+      }
+    });
+  }
+
+  // Kiểm tra "Danh sách sản phẩm"
+  data.departmentInventory?.forEach((inventoryItem, index) => {
+    // Kiểm tra trường hợp nếu danh mục là "Thuốc"
+    if (inventoryItem.category === 'medications') {
+      if (!inventoryItem.item) {
+        throw new APIError(`Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn thuốc.`, 400);
+      }
+    }
+
+    // Kiểm tra trường hợp nếu danh mục là "Vật tư tiêu hao"
+    if (inventoryItem.category === 'vattutieuhao') {
+      if (!inventoryItem.items) {
+        throw new APIError(`Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn vật tư tiêu hao.`, 400);
+      }
+    }
+
+    // Kiểm tra trường hợp nếu danh mục là "Máy móc/Thiết bị"
+    if (inventoryItem.category === 'maymocthietbi') {
+      if (!inventoryItem.items) {
+        throw new APIError(`Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn máy móc/thiết bị.`, 400);
+      }
+    }
+  });
+};
+
+
+
+
+
+
+
+
+

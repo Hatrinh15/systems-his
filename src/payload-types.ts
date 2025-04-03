@@ -389,7 +389,19 @@ export interface User {
     };
     [k: string]: unknown;
   } | null;
-  khoa?: string | null;
+  khoa?:
+    | (
+        | 'tai'
+        | 'mui'
+        | 'hong'
+        | 'capcuu'
+        | 'gaymehoisuc'
+        | 'chandoanhinhanh'
+        | 'khoaxetnghiem'
+        | 'khoaduoc'
+        | 'khoakhac'
+      )
+    | null;
   phong?: string | null;
   ngayvaolam?: string | null;
   tinhtranglamviec?: ('danglam' | 'nghiviec') | null;
@@ -809,18 +821,38 @@ export interface MedicalRecod {
         ngaynhapvien?: string | null;
         sophong?: string | null;
         chuandoan?: string | null;
-        tomtat?: {
-          lydo?: string | null;
-          tomtat?: string | null;
-          tiensu?: string | null;
-          dienBienBenh?:
-            | {
-                ngay?: string | null;
-                dienBien?: string | null;
-                ghiChu?: string | null;
-                id?: string | null;
-              }[]
-            | null;
+        lydo?: string | null;
+        tomtat?: string | null;
+        tiensu?: string | null;
+        thuoc?:
+          | {
+              tenthuoc?: (string | null) | Medication;
+              quantity?: number | null;
+              donvi?: ('hop' | 'vien' | 'lo' | 'chai' | 'ong') | null;
+              unitprice?: string | null;
+              totalprice?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        vattutieuhao?:
+          | {
+              supply?: (string | null) | MedicalSupply;
+              quantity?: number | null;
+              donvi?: ('hop' | 'chai' | 'goi' | 'cuon' | 'mieng') | null;
+              unitprice?: string | null;
+              totalprice?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        dienBienBenh?:
+          | {
+              ngay?: string | null;
+              dienBien?: string | null;
+              ghiChu?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        ppdt?: {
           phuongphap?: ('dieutricanthiep' | 'dieutrihotro') | null;
           text?: string | null;
         };
@@ -983,9 +1015,8 @@ export interface Department {
         category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
         item?: (string | null) | Medication;
         items?: (string | null) | MedicalSupply;
-        quantity?: number | null;
         unit?: ('hop' | 'thung' | 'cai' | 'bo') | null;
-        expirydate?: string | null;
+        quantity?: number | null;
         id?: string | null;
       }[]
     | null;
@@ -1087,51 +1118,50 @@ export interface MedicalUsage {
   id: string;
   loaiphieu?: ('sudung' | 'huyhang') | null;
   usagedate?: string | null;
-  department: string | Department;
-  staff: string | User;
+  department?: (string | null) | Department;
+  staff?: (string | null) | User;
+  nguoixacnhanhuy?: (string | null) | User;
   ghichu?: string | null;
-  danhsachsudung?:
-    | {
-        hosobenhan?: (string | null) | MedicalRecod;
-        sohoso?: string | null;
-        bacsi?: (string | null) | User;
-        nguoixacnhanhuy?: (string | null) | User;
-        thuoc?:
-          | {
-              tenthuoc?: (string | null) | Medication;
-              quantity?: number | null;
-              donvi?: ('hop' | 'vien' | 'lo' | 'chai' | 'ong') | null;
-              unitprice?: string | null;
-              totalprice?: string | null;
-              lido?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        vattutieuhao?:
-          | {
-              supply?: (string | null) | MedicalSupply;
-              quantity?: number | null;
-              donvi?: ('hop' | 'chai' | 'goi' | 'cuon' | 'mieng') | null;
-              unitprice?: string | null;
-              totalprice?: string | null;
-              lido?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        maymocthietbi?:
-          | {
-              equipment?: (string | null) | MedicalSupply;
-              quantity?: number | null;
-              donvi?: ('cai' | 'bo') | null;
-              unitprice?: string | null;
-              totalprice?: string | null;
-              lido?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
+  danhsachsanpham?: {
+    thuoc?:
+      | {
+          tenthuoc?: (string | null) | Medication;
+          quantity?: number | null;
+          donvi?: 'hop' | null;
+          unitprice?: string | null;
+          totalprice?: string | null;
+          lido?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    vattutieuhao?:
+      | {
+          supply?: (string | null) | MedicalSupply;
+          quantity?: number | null;
+          donvi?: 'hop' | null;
+          unitprice?: string | null;
+          totalprice?: string | null;
+          lido?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    maymocthietbi?:
+      | {
+          equipment?: (string | null) | MedicalSupply;
+          quantity?: number | null;
+          donvi?: ('cai' | 'bo') | null;
+          unitprice?: string | null;
+          totalprice?: string | null;
+          lido?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  tong_gia_tri_thuoc?: string | null;
+  tong_gia_tri_vtth?: string | null;
+  tong_gia_tri_mmtb?: string | null;
+  tong_gia_tri?: string | null;
+  report_notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2071,14 +2101,11 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
   usagedate?: T;
   department?: T;
   staff?: T;
+  nguoixacnhanhuy?: T;
   ghichu?: T;
-  danhsachsudung?:
+  danhsachsanpham?:
     | T
     | {
-        hosobenhan?: T;
-        sohoso?: T;
-        bacsi?: T;
-        nguoixacnhanhuy?: T;
         thuoc?:
           | T
           | {
@@ -2112,8 +2139,12 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
               lido?: T;
               id?: T;
             };
-        id?: T;
       };
+  tong_gia_tri_thuoc?: T;
+  tong_gia_tri_vtth?: T;
+  tong_gia_tri_mmtb?: T;
+  tong_gia_tri?: T;
+  report_notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2177,20 +2208,40 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
         ngaynhapvien?: T;
         sophong?: T;
         chuandoan?: T;
-        tomtat?:
+        lydo?: T;
+        tomtat?: T;
+        tiensu?: T;
+        thuoc?:
           | T
           | {
-              lydo?: T;
-              tomtat?: T;
-              tiensu?: T;
-              dienBienBenh?:
-                | T
-                | {
-                    ngay?: T;
-                    dienBien?: T;
-                    ghiChu?: T;
-                    id?: T;
-                  };
+              tenthuoc?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              id?: T;
+            };
+        vattutieuhao?:
+          | T
+          | {
+              supply?: T;
+              quantity?: T;
+              donvi?: T;
+              unitprice?: T;
+              totalprice?: T;
+              id?: T;
+            };
+        dienBienBenh?:
+          | T
+          | {
+              ngay?: T;
+              dienBien?: T;
+              ghiChu?: T;
+              id?: T;
+            };
+        ppdt?:
+          | T
+          | {
               phuongphap?: T;
               text?: T;
             };
@@ -2552,9 +2603,8 @@ export interface DepartmentsSelect<T extends boolean = true> {
         category?: T;
         item?: T;
         items?: T;
-        quantity?: T;
         unit?: T;
-        expirydate?: T;
+        quantity?: T;
         id?: T;
       };
   updatedAt?: T;

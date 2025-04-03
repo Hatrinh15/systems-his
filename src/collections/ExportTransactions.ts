@@ -35,9 +35,9 @@ export const PhieuXuat: CollectionConfig = {
               type: 'relationship',
               relationTo: 'users',
               
-              // filterOptions: () => ({
-              //   khoa: { equals: 'khoaduoc' },
-              // }),
+              filterOptions: () => ({
+                khoa: { equals: 'khoaduoc' },
+              }),
             },
             {
               name: 'exports',
@@ -147,6 +147,7 @@ export const PhieuXuat: CollectionConfig = {
                           relationTo: 'medications',
                           filterOptions: async ({ req, data, siblingData }) : Promise<Where> => {
                             try {
+                              const ids = siblingData as {tenthuoc: string}
                               const khoaMap = new Map<string, string>();
                               const thuocKhoa = new Map<string, string[]>();
                               // Kiểm tra nếu data.exports không phải là mảng
@@ -217,7 +218,7 @@ export const PhieuXuat: CollectionConfig = {
                                         conditions.push({ id: { equals: String(tenthuoc) } });
                                       }
                           
-                                      return conditions.length > 0 ? { or: conditions } : { id: { in: null } } as any; 
+                                      return conditions.length > 0 ? { or: [{or: conditions },{id: {equals:ids.tenthuoc}}]} : { id: { in: null } } as any; 
                                     } 
                                   }
                                 }
@@ -243,7 +244,7 @@ export const PhieuXuat: CollectionConfig = {
                                         conditions.push({ id: { equals: String(tenthuoc) } });
                                       }
                           
-                                      return conditions.length > 0 ? { or: conditions } : { id: { in: null } } as any; 
+                                      return conditions.length > 0 ? { or: [{or: conditions },{id: {equals:ids.tenthuoc}}]} : { id: { in: null } } as any;
                                     } 
                                   }
                                 }
@@ -302,7 +303,7 @@ export const PhieuXuat: CollectionConfig = {
                             try {
                               const khoaMap = new Map<string, string>();
                               const vattuKhoa = new Map<string, string[]>();
-                          
+                              const ids = siblingData as {supply: string}
                               // Kiểm tra nếu data.exports không phải là mảng
                               if (!Array.isArray(data.exports)) {
                                 console.error("data.exports không phải là mảng!");
@@ -376,7 +377,7 @@ export const PhieuXuat: CollectionConfig = {
                                       if (showVattu.length > 0) {
                                         conditions.push({ id: { in: showVattu as string[] } });
                                       }
-                                      return conditions.length > 0 ? { or: conditions } : { id: { in: null } }
+                                      return conditions.length > 0 ? { or:[{or: conditions},{id: {equals: ids.supply}}] } : { id: { in: null } }
                                     }
                                   }
                                 }
@@ -399,7 +400,7 @@ export const PhieuXuat: CollectionConfig = {
                                       if (showVattu.length > 0) {
                                         conditions.push({ id: { in: showVattu.filter((item): item is string => item != null) } });
                                       }                       
-                                      return conditions.length > 0 ? { or: conditions } : { id: { in: null } } as any; 
+                                      return conditions.length > 0 ? { or:[{or: conditions},{id: {equals: ids.supply}}] } : { id: { in: null } }
                                     } 
                                   }
                                 }
@@ -457,7 +458,7 @@ export const PhieuXuat: CollectionConfig = {
                             try {
                               const khoaMap = new Map<string, string>();
                               const maymocKhoa = new Map<string, string[]>();
-                          
+                              const ids = siblingData as {equipment: string}
                               // Kiểm tra nếu data.exports không phải là mảng
                               if (!Array.isArray(data.exports)) {
                                 console.error("❌ data.exports không phải là mảng!");
@@ -531,7 +532,7 @@ export const PhieuXuat: CollectionConfig = {
                                       if (showMaymoc.length > 0) {
                                         conditions.push({ id: { in: showMaymoc as string[] } });
                                       }
-                                      return conditions.length > 0 ? { or: conditions } : { id: { in: null } } ;
+                                      return conditions.length > 0 ? { or: [{or: conditions },{id: {equals: ids.equipment}}]} : { id: { in: null } } ;
                                     }
                                   }
                                 }

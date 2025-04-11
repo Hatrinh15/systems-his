@@ -16,7 +16,7 @@ export const PhieuXuat: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Giao Dịch',
+          label: 'Thông Tin Giao Dịch',
           fields: [
             {
               name: 'transactiondate',
@@ -581,7 +581,7 @@ export const PhieuXuat: CollectionConfig = {
           ],
         },
         {
-          label: 'Báo cáo',
+          label: 'Báo Cáo',
           fields: [
             {
               type: 'row',

@@ -11,7 +11,7 @@ labels: {
     singular: 'Đặt Lịch Khám',
     plural: 'Đặt Lịch Khám',
 },
-admin: {  group: 'Bệnh Nhân Và Điều Trị' },
+admin: {  group: 'Bệnh Nhân & Điều Trị' },
 fields:[
     {
       name: 'patients',
@@ -24,12 +24,16 @@ fields:[
         label: 'Chọn bác sĩ',
         type: 'relationship',
         relationTo: 'users',
+        admin: {
+          allowCreate: false,
+        },
         filterOptions: ({ user }) => {
           return {
             chucvu: { equals: 'bacsi' } ,
             tinhtranglamviec:{not_equals:'nghiviec'}
           };
-      },},
+      },
+    },
       {
         name: 'ngaykham',
         label: 'Ngày khám',
@@ -37,11 +41,9 @@ fields:[
         admin: {
           date: {
             pickerAppearance: 'dayOnly',
-            displayFormat: 'd MMM yyy',
+            displayFormat: 'dd-MM-yyy',
           },
         },
-    
-
       },
       {
         name: 'giokham',
@@ -84,54 +86,6 @@ fields:[
       },
     ],
     hooks: {
-      beforeChange: [validateAppointment
-    //     async ({ data, operation, req }) => {
-    //       if (operation === 'create' || operation === 'update') {
-    //         const {  bacsi,ngaykham, giokham } = data;
-    
-    //         // Kiểm tra ngày khám không được ở quá khứ
-    //         const today = new Date();
-    //         today.setHours(0, 0, 0, 0);  // Đặt giờ về 00:00 để chỉ so sánh ngày
-    
-    //         const appointmentDate = new Date(ngaykham);
-    //         if (appointmentDate < today) {
-    //           throw new APIError('Ngày khám không được ở quá khứ! Vui lòng chọn ngày hiện tại hoặc tương lai.', 400);
-    //         }
-    
-    //         // Kiểm tra trùng lịch hẹn
-    //         const existingAppointments = await req.payload.find({
-    //           collection: 'appointments',  
-    //           where: {
-    //             ngaykham: { equals: ngaykham },
-    //             giokham: { equals: giokham },
-    //             bacsi: {equals: bacsi}
-    //           },
-    //         });
-    
-    //         if (existingAppointments.totalDocs > 0) {
-    //         console.log('---------------');
-            
-    //           throw new APIError('Lịch hẹn đã bị trùng! Vui lòng chọn thời gian khác.',400);
-    //         }
-    //         const duplicatePatientAppointments = await req.payload.find({
-    //           collection: 'appointments',
-    //           where: {
-    //             'patients.id': { equals: data.patients },         
-    //             ngaykham: { equals: ngaykham },
-    //           },
-    //         });
-    
-    //         console.log('Số lịch trùng của bệnh nhân:', duplicatePatientAppointments.totalDocs);
-    // console.log('check',data.patients) //kiểm tra dữ liệu của patient 
-
-    // // khai báo console.log kiểm tra kiểu dữ liệu của biến 
-    
-    //         if (duplicatePatientAppointments.totalDocs > 0) {
-    //           console.log('Lỗi: Bệnh nhân đặt 2 lịch trong cùng 1 ngày');
-    //           throw new APIError('Bạn đã đặt lịch hẹn cho ngày này! Vui lòng chọn ngày khác.',400);
-    //         }
-    //       }
-    //     },
-      ],
+      beforeChange: [validateAppointment],
   },
 }

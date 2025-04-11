@@ -71,7 +71,7 @@ export const validateAppointment: CollectionBeforeChangeHook = async ({ data, op
     });
 
     if ((totalAppointmentsInSlot?.totalDocs || 0) >= maxPatientsPerSlot) {
-      throw new APIError(`Khung giờ này đã đầy! Vui lòng chọn khung giờ khác.`, 400);
+      throw new APIError(`Khung giờ này đã đủ số lượng bệnh nhân đặt lịch! Vui lòng chọn khung giờ khác.`, 400);
     }
   }
 };

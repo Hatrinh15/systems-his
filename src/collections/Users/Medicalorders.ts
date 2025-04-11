@@ -1,9 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '@/access/authenticated'
-import { Patient } from '@/payload-types'
-import { text } from 'stream/consumers'
-import { APIError } from 'payload'
-import { valuemedicalorder } from '@/hooks/Hookmedicalorder'
+import { hookcheck, hookSoHoSo, notChangeHinhThucĐT, valuemedicalorder } from '@/hooks/Hookmedicalorder'
 
 export const Medicalorders: CollectionConfig = {
   slug: 'medicalorders',
@@ -21,88 +18,139 @@ export const Medicalorders: CollectionConfig = {
   admin: {
     defaultColumns: ['hosobenhan', 'bacsi', 'ngayLap'],
     useAsTitle: 'hosobenhan',
-    group:'Bệnh Nhân Và Điều Trị',
+    group:'Bệnh Nhân & Điều Trị',
   },
   fields: [
     {
       name: 'hosobenhan',
       label: 'Hồ sơ bệnh án',
-
       type: 'relationship',
       relationTo: 'MedicalRecods',
+      admin: {
+        allowCreate: false,
+      },
     },
     {
       name: 'khoa',
       label: 'Khoa',
-
-      type: 'select',
-      options: [
-        { label: 'Khoa Tai', value: 'khoatai' },
-        { label: 'Khoa Mũi', value: 'khoamui' },
-        { label: 'Khoa Họng', value: 'khoahong' },
-        { label: 'Khoa Cấp Cứu', value: 'khoacapcuu' },
-        { label: 'Khoa Gây Mê Hồi Sức', value: 'khoagaymehoisuc' },
-        { label: 'Khoa Dược', value: 'khoaduoc' },
-      ],
+      type: 'relationship',
+      relationTo: 'departments',
+      admin: {
+        allowCreate: false,
+      },
     },
     {
       name: 'bacsi',
       label: 'Bác sĩ phụ trách',
       type: 'relationship',
       relationTo: 'users',
+      admin: {
+        allowCreate: false,
+      },
+      filterOptions: async ({ req, data }) => {
+        if (!data?.khoa) return false; // Trả về false nếu chưa chọn khoa (ẩn toàn bộ danh sách)
+      
+        const selectedKhoa = typeof data.khoa === 'string' ? data.khoa : data.khoa.id;
+      
+        try {
+          const khoaData = await req.payload.findByID({
+            collection: 'departments',
+            id: selectedKhoa,
+          });
+      
+          if (!khoaData?.doctors || khoaData.doctors.length === 0) return false;
+      
+          const doctorIds = khoaData.doctors.map((doc) =>
+            typeof doc === 'string' ? doc : doc.id,
+          );
+      
+          return {
+            id: { in: doctorIds },
+          };
+        } catch (error) {
+          console.error('Lỗi lọc danh sách bác sĩ:', error);
+          return false;
+        }
+      }      
     },
+    
     {
       name: 'dieuduong',
-      label: 'Điều dưỡng thực hiện',
-      type: 'text',
-    },
-    {
-      name: 'ngaynhapvien',
-      label: 'Ngày nhập viện',
-      type: 'date',
-
+      label: 'Y tá/Điều dưỡng thực hiện',
+      type: 'relationship',
+      relationTo: 'users',
       admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
-        },
+        allowCreate: false,
       },
-    },
-    {
-      name: 'ngayLap',
-      label: 'Ngày lập y lệnh',
-      type: 'date',
-
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
-        },
-      },
-    },
-    {
-      name: 'chuandoan',
-      label: 'Chuẩn đoán',
-
-      type: 'textarea',
+      filterOptions: async ({ req, data }) => {
+        if (!data?.khoa) return false;
+      
+        const selectedKhoa = typeof data.khoa === 'string' ? data.khoa : data.khoa.id;
+      
+        try {
+          const khoaData = await req.payload.findByID({
+            collection: 'departments',
+            id: selectedKhoa,
+          });
+      
+          if (!khoaData?.nures || khoaData.nures.length === 0) return false;
+      
+          const nuresIds = khoaData.nures.map((nurse) =>
+            typeof nurse === 'string' ? nurse : nurse.id,
+          );
+      
+          return {
+            id: { in: nuresIds },
+          };
+        } catch (error) {
+          console.error('Lỗi lọc danh sách y tá:', error);
+          return false;
+        }
+      }      
     },
     {
       name: 'hinhthucdieutri',
       label: 'Hình thức điều trị',
-
       type: 'radio',
       options: [
         { label: 'Bệnh nhân nội trú', value: 'benhnhannoitru' },
         { label: 'Bệnh nhân ngoại trú', value: 'benhnhanngoaitru' },
       ],
     },
-    // {
-    //   name: 'hosobenhan',
-    //   label: 'Hồ sơ bệnh án',
-
-    //   type: 'relationship',
-    //   relationTo: 'MedicalRecods',
-    // },
+    {name: 'sohoso',label: 'Số hồ sơ bệnh án', type: 'text',
+      admin: {
+        condition: (data) => data?.hinhthucdieutri === 'benhnhannoitru',
+        readOnly: true,
+      },
+    },
+    {
+      name: 'ngaynhapvien',
+      label: 'Ngày nhập viện',
+      type: 'date',
+      admin: {
+        condition: (data) => data?.hinhthucdieutri === 'benhnhannoitru',
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
+      },
+    },    
+    {
+      name: 'ngayLap',
+      label: 'Ngày lập y lệnh',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
+      },
+    },
+    {
+      name: 'chuandoan',
+      label: 'Chuẩn đoán',
+      type: 'textarea',
+    },
     {
       type: 'tabs',
       tabs: [
@@ -117,21 +165,47 @@ export const Medicalorders: CollectionConfig = {
                 {
                   name: 'thuocId',
                   label: 'Chọn thuốc',
-                  type: 'text',
-                },
+                  type: 'relationship',
+                  relationTo: 'medications',
+                  admin: {
+                    allowCreate: false,
+                  },
+                  filterOptions: async ({ req, data }) => {
+                    try {
+                      const existingPharmacyMeds = await req.payload.find({
+                        collection: 'pharmacies',
+                        where: {
+                          category: {
+                            equals: 'medications',
+                          },
+                        },
+                        limit: 1000,
+                      });
+                
+                      const medicationIdsInPharmacies = existingPharmacyMeds.docs
+                        .map((doc) => (typeof doc.item === 'string' ? doc.item : doc.item?.id))
+                        .filter(Boolean);
+                
+                      // Nếu đang sửa bản ghi có thuốc đã chọn mà không nằm trong danh sách thì vẫn hiển thị
+                      if (data?.thuocId && !medicationIdsInPharmacies.includes(data.thuocId)) {
+                        medicationIdsInPharmacies.push(data.thuocId);
+                      }
+                
+                      if (!medicationIdsInPharmacies.length) return false;
+                
+                      return {
+                        id: { in: medicationIdsInPharmacies },
+                      };
+                    } catch (err) {
+                      console.error('Lỗi lọc thuốc trong quầy thuốc:', err);
+                      return false;
+                    }
+                  },
+                },     
                 { name: 'hamLuong', label: 'Hàm lượng', type: 'text' },
                 { name: 'lieuDung', label: 'Liều dùng', type: 'text' },
                 { name: 'cachDung', label: 'Cách dùng', type: 'text' },
                 { name: 'thoiGian', label: 'Thời gian', type: 'text' },
-                {
-                  name: 'trangThai',
-                  label: 'Trạng thái',
-                  type: 'select',
-                  options: [
-                    { label: 'Đang thực hiện', value: 'dangthuchien' },
-                    { label: 'Đã cấp phát', value: 'dacapphat' },
-                  ],
-                },
               ],
             },
           ],
@@ -173,6 +247,7 @@ export const Medicalorders: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeValidate: [valuemedicalorder],
+    beforeValidate: [valuemedicalorder,hookSoHoSo],
+    beforeChange: [notChangeHinhThucĐT,hookcheck],
   },
 }

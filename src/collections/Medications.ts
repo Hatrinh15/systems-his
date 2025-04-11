@@ -10,7 +10,7 @@ export const Medications: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['code', 'name', 'category', 'unit', 'expiryDate'],
-    group: 'Dược Và Vật Tư Y Tế',
+    group: 'Dược & Vật Tư Y Tế',
   },
   fields: [
     {

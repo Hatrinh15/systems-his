@@ -1,4 +1,4 @@
-import { APIError, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from 'payload'
+import { APIError, CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from 'payload'
 
 export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
   if (!data || !Array.isArray(data.hoso)) {
@@ -17,9 +17,28 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
 
     if (!record.khoa) errorArray.push('Khoa')
     if (!record.bacsi) errorArray.push('Bác sĩ')
-    // if (!record.dieuduong) errorArray.push('Điều dưỡng')
     if (!record.ngaynhapvien) errorArray.push('Ngày nhập viện')
     if (!record.chuandoan) errorArray.push('Chuẩn đoán')
+
+    // Kiểm tra phương pháp điều trị
+    if (!record.ppdt || !record.ppdt.phuongphap) {
+      errorArray.push('Phương pháp điều trị')
+    }
+
+    // Kiểm tra tình trạng (bắt buộc)
+    if (!record.tinhtrang) {
+      errorArray.push('Tình trạng')
+    } else if (record.tinhtrang === 'yes') {
+      // Nếu là "Đã xuất viện", kiểm tra mục `tinhtrangxuatvien`
+      const tinhtrang = record.tinhtrangxuatvien
+      if (
+        !tinhtrang ||
+        !tinhtrang.ngayRaVien ||
+        !tinhtrang.xuatvien
+      ) {
+        errorArray.push('Thông tin xuất viện (ngày ra viện, tình trạng xuất viện)')
+      }
+    }
 
     if (errorArray.length > 0) {
       error.push(`Hồ sơ ${index + 1} hãy điền đủ thông tin: ${errorArray.join(', ')}`)
@@ -30,6 +49,7 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
     throw new APIError(error.join('\n'), 400)
   }
 }
+
 
 export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
 
@@ -60,7 +80,7 @@ export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) 
   }
 
   if (error.length > 0) {
-    throw new APIError(error.map((err) => `• ${err}`).join('\n'), 400)
+    throw new APIError(error.map((err) => `, ${err}`).join('\n'), 400)
   }
 }
 export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async ({
@@ -136,4 +156,144 @@ export const generateMedicalRecordID: CollectionBeforeValidateHook = async ({ da
 
   return data; 
 };
+
+export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
+  try {
+    const tinhTrangCu = previousDoc?.hoso?.[0]?.tinhtrang
+    const tinhTrangMoi = doc?.hoso?.[0]?.tinhtrang
+
+    if (!tinhTrangCu || tinhTrangCu === tinhTrangMoi) return
+
+    // Chỉ thực hiện khi từ "no" => "yes" (nhập viện => xuất viện)
+    if (tinhTrangCu === 'no' && tinhTrangMoi === 'yes') {
+      const phongCu = previousDoc?.hoso?.[0]?.sophong
+      const benhNhanID = previousDoc?.thongtinbenhnhan
+
+      if (phongCu && benhNhanID) {
+        const result = await req.payload.find({
+          collection: 'Rooms',
+          where: {
+            'Phong.tenphongbenh': { equals: phongCu },
+            'Phong.benhnhan': { contains: benhNhanID },
+          },
+        })
+
+        if (result.docs.length > 0) {
+          const roomDoc = result.docs[0]
+          const updatedPhong = (roomDoc.Phong || []).map((phong) => {
+
+            if (phong.tenphongbenh === phongCu) {
+              return {
+                ...phong,
+                benhnhan: phong.benhnhan?.filter(
+                  (id) => (typeof id === 'object' ? id.id : id) !== benhNhanID
+                ),
+              }
+            }
+            return phong
+          })
+
+          await req.payload.update({
+            collection: 'Rooms',
+            id: roomDoc.id,
+            data: {
+              Phong: updatedPhong,
+            },
+          })
+        }
+      }
+    }
+  } catch (err) {
+    console.error('❌ Lỗi khi xóa bệnh nhân khỏi phòng bệnh:', err)
+  }
+}
+
+export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, req, operation }) => {
+  if (operation !== 'create' && operation !== 'update') return data;
+
+  const patientID = data?.thongtinbenhnhan;
+  const hoSoArray = data?.hoso;
+
+  if (!patientID || !hoSoArray || !Array.isArray(hoSoArray)) return data;
+
+  // Duyệt qua từng hồ sơ bệnh án trong mảng
+  for (const hoSo of hoSoArray) {
+    const tenPhongHoSo = hoSo?.sophong;
+    if (!tenPhongHoSo) continue;
+
+    // Tìm phòng chứa bệnh nhân trong collection Rooms
+    const roomsResult = await req.payload.find({
+      collection: 'Rooms',
+      where: {
+        'Phong.benhnhan': {
+          equals: patientID,
+        },
+      },
+    });
+
+    const matchedRoom = roomsResult.docs.find((room) => {
+      return room.Phong?.some((roomDetail) => {
+        return roomDetail.tenphongbenh?.toLowerCase().trim() === tenPhongHoSo.toLowerCase().trim();
+      });
+    });
+
+    if (!matchedRoom) {
+      const matchedPatientRoom = roomsResult.docs
+        .flatMap((room) =>
+          room.Phong?.filter((roomDetail) =>
+            roomDetail.benhnhan?.some((bn) =>
+              typeof bn === 'object' ? bn.id === patientID : bn === patientID
+            )
+          )
+        )
+        .map((room) => room?.tenphongbenh)
+        .filter((tenPhong): tenPhong is string => Boolean(tenPhong))[0];
+    
+      throw new APIError(
+        `Tên phòng <${tenPhongHoSo}> không trùng với phòng của bệnh nhân.\n` +
+        `Hiện bệnh nhân đang nằm trong phòng <${matchedPatientRoom || 'Không xác định'}>`,
+        400
+      );
+    }    
+  }
+
+  return data;
+};
+
+export const validateSoHoSoNoiSoi: CollectionBeforeValidateHook = async ({ data }) => {
+  const danhSachHoSo = data?.hoso || []
+  const ketQuaNoiSoi = data?.ketqua || []
+
+  // Lấy danh sách số hồ sơ bệnh án từ hoso
+  const danhSachSoHoSo = danhSachHoSo.map((item) => item.sohoso).filter(Boolean)
+
+  // Kiểm tra định dạng số hồ sơ (VD: HS-73624)
+  const soHoSoRegex = /^HS-\d{5}$/ // HS- rồi đến 5 chữ số
+
+  for (const sohoso of danhSachSoHoSo) {
+    if (!soHoSoRegex.test(sohoso)) {
+      throw new APIError(`Số hồ sơ "${sohoso}" không đúng định dạng. Vui lòng nhập theo định dạng "HS-xxxxx" (ví dụ: HS-73624).`, 400)
+    }
+  }
+
+  // Nếu không có hoso, không cho nhập kết quả
+  if (danhSachSoHoSo.length === 0 && ketQuaNoiSoi.length > 0) {
+    throw new APIError('Không thể nhập kết quả nội soi vì chưa có số hồ sơ bệnh án.', 400)
+  }
+
+  // Kiểm tra từng ketqua.infomation.sohoso xem có trong danh sách không
+  for (const ketqua of ketQuaNoiSoi) {
+    const sohoso = ketqua?.infomation?.sohoso
+
+    if (sohoso && !soHoSoRegex.test(sohoso)) {
+      throw new APIError(`Số hồ sơ trong kết quả "${sohoso}" không đúng định dạng "HS-xxxxx".`, 400)
+    }
+
+    if (sohoso && !danhSachSoHoSo.includes(sohoso)) {
+      throw new APIError(`Số hồ sơ "${sohoso}" không tồn tại trong danh sách hồ sơ bệnh án của bệnh nhân.`, 400)
+    }
+  }
+
+  return data
+}
 

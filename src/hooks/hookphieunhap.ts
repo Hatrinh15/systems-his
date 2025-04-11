@@ -623,6 +623,6 @@ export const thongBaotrong: CollectionBeforeChangeHook = async ({ data }) => {
 
   //  Nếu có lỗi, ném lỗi chứa tất cả các lỗi cùng lúc
   if (errors.length > 0) {
-    throw new APIError(`⚠️ Vui lòng kiểm tra lại các lỗi sau:\n${errors.join('\n')}`, 400)
+    throw new APIError(` Hãy kiểm tra lại các lỗi sau:\n${errors.join('\n')}`, 400)
   }
 }

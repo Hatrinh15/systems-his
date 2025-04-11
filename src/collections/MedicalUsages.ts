@@ -1,6 +1,7 @@
 import { CollectionConfig } from 'payload';
 import { hookxuatKhoKhoa,hookPhieuSuDung, autoFillUnitPrice,
-   autoCalculateTotalPrice, calculateTotalValues, hookcheckvalue, checkInventoryBeforeUsage } from '@/hooks/HookMedicalUsages';
+   autoCalculateTotalPrice, calculateTotalValues, hookcheckvalue, checkInventoryBeforeUsage, 
+   lockLoaiPhieu} from '@/hooks/HookMedicalUsages';
 
 export const medicalUsages: CollectionConfig = {
   slug: 'medicalUsages',
@@ -10,14 +11,14 @@ export const medicalUsages: CollectionConfig = {
   },
   admin: {
     useAsTitle:'department',
-     group:'Dược Và Vật Tư Y Tế'
+     group:'Dược & Vật Tư Y Tế'
   },
   fields: [
     {
       type:'tabs',
       tabs:[
         {
-          label:'Thông tin phiếu',
+          label:'Thông Tin Phiếu',
           fields:[
             {
               name : 'loaiphieu',
@@ -361,7 +362,7 @@ export const medicalUsages: CollectionConfig = {
           ]
         },
         {
-          label: 'Báo cáo',
+          label: 'Báo Cáo',
           fields:[
             {
               type: 'row',
@@ -401,6 +402,7 @@ export const medicalUsages: CollectionConfig = {
   hooks:{
     beforeChange:[hookPhieuSuDung,hookxuatKhoKhoa ,autoFillUnitPrice,
       autoCalculateTotalPrice,calculateTotalValues,hookcheckvalue,checkInventoryBeforeUsage],
+      beforeValidate:[lockLoaiPhieu]
   }
 };
 

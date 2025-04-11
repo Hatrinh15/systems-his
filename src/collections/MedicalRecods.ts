@@ -4,7 +4,10 @@ import {
   valueho_so,
   valuemedicalrecord,
   preventDuplicateMedicalRecord,
-  namePatient, generateMedicalRecordID
+  namePatient, generateMedicalRecordID,
+  removePatientFromRoom,
+  validatePatientRoom,
+  validateSoHoSoNoiSoi
 } from '@/hooks/Hookmedicalrecord'
 
 const MedicalRecods: CollectionConfig = {
@@ -13,13 +16,13 @@ const MedicalRecods: CollectionConfig = {
     singular: 'Hồ Sơ Bệnh Án',
     plural: 'Hồ Sơ Bệnh Án',
   },
-  admin: { group: 'Bệnh Nhân Và Điều Trị', useAsTitle: 'tenBenhNhan' },
+  admin: { group: 'Bệnh Nhân & Điều Trị', useAsTitle: 'tenBenhNhan' },
   fields: [
     {
       type: 'tabs',
       tabs: [
         {
-          label: 'Hồ sơ bệnh án ',
+          label: 'Hồ Sơ Bệnh Án ',
           fields: [
             {
               name: 'tenBenhNhan',
@@ -32,9 +35,9 @@ const MedicalRecods: CollectionConfig = {
               label: 'Thông tin bệnh nhân',
               type: 'relationship',
               relationTo: 'patients',
-              required: true,
               hasMany: false,
               admin: {
+                allowCreate: false, // Không cho phép tạo mới bệnh nhân từ đây
                 condition: (data) => {
                   return !data?.id // Nếu đang tạo mới thì hiển thị, nếu cập nhật thì ẩn
                 },
@@ -60,15 +63,16 @@ const MedicalRecods: CollectionConfig = {
               label: 'Hồ sơ',
               type: 'array',
               fields: [
-                {name: 'sohoso',label: 'Số hồ sơ bênh án', type: 'text',admin: {
+                {name: 'sohoso',label: 'Số hồ sơ bệnh án', type: 'text',admin: {
                   readOnly: true, 
                 },},
-                { name: 'khoa', label: 'Khoa', type: 'relationship', relationTo: 'departments' },
+                { name: 'khoa', label: 'Khoa', type: 'relationship', relationTo: 'departments',admin: {allowCreate: false} }, 
                 {
                   name: 'bacsi',
                   label: 'Bác sĩ phụ trách',
                   type: 'relationship',
                   relationTo: 'users',
+                  admin: {allowCreate: false},
                   filterOptions: async ({ req, siblingData }) => {
                     try {
                       // Kiểm tra nếu siblingData không tồn tại hoặc không có khoa thì trả về danh sách rỗng
@@ -124,13 +128,13 @@ const MedicalRecods: CollectionConfig = {
                   admin: {
                     date: {
                       pickerAppearance: 'dayOnly',
-                      displayFormat: 'd-MM-yyyy', // Đảm bảo format đúng
+                      displayFormat: 'dd-MM-yyyy', // Đảm bảo format đúng
                     },
                   },
                 },
                 {
                   name: 'sophong',
-                  label: 'Số phòng',
+                  label: 'Tên phòng',
                   type: 'text',
                 },
                 { name: 'chuandoan', label: 'Chuẩn đoán', type: 'textarea' },
@@ -257,7 +261,7 @@ const MedicalRecods: CollectionConfig = {
                               admin: {
                                 date: {
                                   pickerAppearance: 'dayOnly',
-                                  displayFormat: 'd-MM-yyy',
+                                  displayFormat: 'dd-MM-yyy',
                                 },
                               },
                             },
@@ -302,7 +306,6 @@ const MedicalRecods: CollectionConfig = {
                   name: 'tinhtrang',
                   label: 'Tình trạng',
                   type: 'radio',
-                  required: true,
                   options: [
                     { label: 'Đã xuất viện ', value: 'yes' },
                     { label: 'Nhập viện', value: 'no' },
@@ -326,11 +329,10 @@ const MedicalRecods: CollectionConfig = {
                       name: 'ngayRaVien',
                       label: 'Ngày ra viện',
                       type: 'date',
-
                       admin: {
                         date: {
                           pickerAppearance: 'dayOnly',
-                          displayFormat: 'dd/MM/yyyy',
+                          displayFormat: 'dd-MM-yyy',
                         },
                       },
                     },
@@ -361,7 +363,7 @@ const MedicalRecods: CollectionConfig = {
         },
         {
           fields: [Hoso],
-          label: 'Kết quả nội soi',
+          label: 'Kết Quả Nội Soi',
         },
         {
           fields: [
@@ -380,7 +382,8 @@ const MedicalRecods: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [namePatient, preventDuplicateMedicalRecord,],
-    beforeValidate: [valueho_so, valuemedicalrecord,generateMedicalRecordID],
+    beforeValidate: [valueho_so, valuemedicalrecord,generateMedicalRecordID,validatePatientRoom,validateSoHoSoNoiSoi],
+    afterChange: [removePatientFromRoom],
   },
 }
 

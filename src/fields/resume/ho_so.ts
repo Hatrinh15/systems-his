@@ -12,16 +12,15 @@ export const Hoso: Field=
             label: 'THÔNG TIN NỘI SOI',
             type: 'group',
             fields: [
+              {name: 'sohoso',label: 'Số hồ sơ bệnh án', type: 'text'  },
               { name: 'ngay', label: 'Ngày thực hiện', type: 'date',
-               
                 admin: {
                   date: {
                     pickerAppearance: 'dayOnly',
-                    displayFormat: 'dd/MM/yyyy',
+                    displayFormat: 'dd-MM-yyy',
                   },
                 },
                },
-              { name: 'bacsi', label: 'Bác sĩ thực hiện', type: 'text' },
               {
                 name: 'lydo',
                 label: 'Lý do nội soi',
@@ -56,7 +55,7 @@ export const Hoso: Field=
               },
               {
                 slug: 'secondaryHero',
-                labels: { singular: 'MŨI', plural: 'MŨI' },
+                labels: { singular: 'MŨI XOANG', plural: 'MŨI XOANG' },
                 fields: [
                   { name: 'binhthuong', label: 'Bình thường', type: 'checkbox' },
                   { name: 'viemmuidiung', label: 'Viêm mũi dị ứng', type: 'checkbox' },

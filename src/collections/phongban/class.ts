@@ -1,4 +1,4 @@
-import { beforeChangeclass } from '@/hooks/Hookclass'
+import { beforeChangeclass, checkclass, notChangeNameClass, showTitle } from '@/hooks/Hookclass'
 import { CollectionConfig } from 'payload'
 const Class: CollectionConfig = {
   slug: 'class',
@@ -12,8 +12,16 @@ const Class: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'Thông tin phòng ban',
+          label: 'Thông Tin Phòng Ban',
           fields: [
+            {
+              name: 'title',
+              label: 'Tên phòng',
+              type: 'text',
+              admin: {
+                hidden: true,
+              },
+            },
             {
               name: 'tenphong',
               label: 'TÊN PHÒNG',
@@ -55,7 +63,6 @@ const Class: CollectionConfig = {
 
                   return {
                     and: [
-                      { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Loại bác sĩ đã nghỉ việc
                       { chucvu: { equals: 'truongphong' } },
                       {
                         or: [
@@ -79,56 +86,47 @@ const Class: CollectionConfig = {
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 try {
-                  // Danh sách nhân viên đã chọn
                   const selectedNhanVien = Array.isArray(data?.nhanvien)
                     ? data.nhanvien
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean)
                     : []
-
-                  console.log('Nhân viên đang được chọn:', selectedNhanVien)
-
-                  // Lấy danh sách nhân viên đã có phòng trong hệ thống
-                  //dùng req.payload.find để tìm tất cả các nhân viên đã có khoa
+            
                   const existingNhanVienData = await req.payload.find({
                     collection: 'class',
                     where: { nhanvien: { exists: true } },
-                    limit: 999, // Giới hạn kết quả
+                    limit: 999,
                   })
-
-                  // Lấy danh sách ID nhân viên đã có phòng (existingNhanvien)
+            
                   const existingNhanVien =
                     existingNhanVienData?.docs?.flatMap((doc) =>
                       (doc?.nhanvien ?? [])
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean),
                     ) ?? []
-
-                  // Điều kiện lọc nhân viên theo phòng ban
+            
                   const baseCondition =
                     data?.tenphong === 'hanhchinhquantri'
-                      ? { chucvu: { equals: 'letan' } } // Lễ tân cho phòng hành chính quản trị
-                      : { chucvu: { equals: 'kythuatvien' } } // Kỹ thuật viên cho phòng khác
-
+                      ? { chucvu: { equals: 'letan' } }
+                      : { chucvu: { equals: 'kythuatvien' } }
+            
                   return {
                     and: [
                       baseCondition,
-                      { tinhtranglamviec: { not_equals: 'nghiviec' } }, // Không hiển thị nhân viên đã nghỉ việc
                       {
                         or: [
-                          { id: { not_in: existingNhanVien } }, // Không hiển thị nhân viên đã có phòng
-                          { id: { in: selectedNhanVien } }, // Giữ lại nhân viên đã chọn trước đó
+                          { id: { not_in: existingNhanVien } },
+                          { id: { in: selectedNhanVien } },
                         ],
                       },
                     ],
                   } as any
                 } catch (error) {
-                  console.error(' Lỗi truy vấn danh sách nhân viên:', error)
+                  console.error('Lỗi truy vấn danh sách nhân viên:', error)
                   return {}
                 }
               },
             },
-
             {
               name: 'thongtin',
               label: 'Thông tin hoạt động',
@@ -144,7 +142,7 @@ const Class: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [beforeChangeclass],
+    beforeChange: [beforeChangeclass,checkclass,notChangeNameClass,showTitle],
   },
 }
 export default Class

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '../../access/authenticated'
-import { checkvalueuser } from '@/hooks/checkvalueusers'
+import { checkvalueuser, hookBoPhanHienThi, removeUserFromDepartments} from '@/hooks/checkvalueusers'
+import { updateBoPhanDisplay } from '@/hooks/checkvalueusers'
 import { v4 as uuidv4 } from 'uuid'
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -16,7 +17,7 @@ export const Users: CollectionConfig = {
     plural: 'Nhân Sự',
   },
   admin: {
-    defaultColumns: ['name', 'email'],
+    defaultColumns: ['name', 'boPhanDisplay','email'],
     useAsTitle: 'name',
     group: 'Khoa & Nhân sự ',
   },
@@ -36,7 +37,7 @@ export const Users: CollectionConfig = {
       type: 'tabs',
       tabs: [
         {
-          label: 'THÔNG TIN CƠ BẢN',
+          label: 'Thông Tin Cá Nhân',
           fields: [
             {
               name: 'profilePicture',
@@ -129,7 +130,7 @@ export const Users: CollectionConfig = {
           ],
         },
         {
-          label: 'THÔNG TIN CÔNG VIỆC',
+          label: 'Thông Tin Công Việc',
           fields: [
             {
               name: 'chucvu',
@@ -149,7 +150,7 @@ export const Users: CollectionConfig = {
             {
               name: 'vitri',
               label: 'Vị trí',
-              type: 'richText',
+              type: 'textarea',
               admin: {
                 condition: (data) => data?.chucvu === 'khac',
               },
@@ -159,14 +160,14 @@ export const Users: CollectionConfig = {
               label: ' Khoa',
               type: 'select',
               options: [
-                { label: 'Khoa tai', value: 'tai' },
-                { label: 'Khoa mũi xoang', value: 'mui' },
-                { label: 'Khoa họng-thanh quản', value: 'hong' },
-                { label: 'Khoa cấp cứu', value: 'capcuu' },
-                { label: 'Khoa gây mê hồi sức', value: 'gaymehoisuc' },
-                { label: 'Khoa chẩn đoán hình ảnh', value: 'chandoanhinhanh' },
-                { label: 'Khoa xét nghiệm', value: 'khoaxetnghiem' },
-                { label: 'Khoa dược', value: 'khoaduoc' },
+                { label: 'Khoa Tai', value: 'tai' },
+                { label: 'Khoa Mũi Xoang', value: 'mui' },
+                { label: 'Khoa Họng-Thanh Quản', value: 'hong' },
+                { label: 'Khoa Cấp Cứu', value: 'capcuu' },
+                { label: 'Khoa Gây Mê Hồi Sức', value: 'gaymehoisuc' },
+                { label: 'Khoa Chẩn Đoán Hình Ảnh', value: 'chandoanhinhanh' },
+                { label: 'Khoa Xét Nghiệm', value: 'khoaxetnghiem' },
+                { label: 'Khoa Dược', value: 'khoaduoc' },
                 { label: 'Khoa khác', value: 'khoakhac' },
               ],
               admin: {
@@ -181,7 +182,12 @@ export const Users: CollectionConfig = {
             {
               name: 'phong',
               label: 'Phòng',
-              type: 'text',
+              type: 'select',
+              options: [
+                { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
+                { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
+                { label: 'Phòng an ninh', value: 'anninh' },
+              ],
               admin: {
                 readOnly: true,
                 condition: (data) =>
@@ -191,13 +197,24 @@ export const Users: CollectionConfig = {
               },
             },
             {
+              name: 'boPhanDisplay',
+              label: 'Bộ phận hiển thị',
+              type: 'text',
+
+              admin: {
+                readOnly: true,
+                hidden: true,
+              },
+            },
+            
+            {
               name: 'ngayvaolam',
               label: 'Ngày vào làm',
               type: 'date',
               admin: {
                 date: {
                   pickerAppearance: 'dayOnly',
-                  displayFormat: 'd-MM-yyy',
+                  displayFormat: 'dd-MM-yyy',
                 },
               },
             },
@@ -216,7 +233,7 @@ export const Users: CollectionConfig = {
           ],
         },
         {
-          label: 'THÔNG TIN CHUYÊN MÔN',
+          label: 'Thông Tin Chuyên Môn',
           fields: [
             {
               name: 'bangcap',
@@ -262,7 +279,9 @@ export const Users: CollectionConfig = {
           data.IDnhansu = `NS-${uuidv4()}`
         }
       },
+      updateBoPhanDisplay,hookBoPhanHienThi
     ],
     beforeChange: [checkvalueuser],
+    afterChange:[removeUserFromDepartments],
   },
 }

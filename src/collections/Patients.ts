@@ -10,7 +10,7 @@ export const Patients: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'ten',
-    group: 'Bệnh Nhân Và Điều Trị',
+    group: 'Bệnh Nhân & Điều Trị',
   },
   fields: [
     {
@@ -76,7 +76,7 @@ export const Patients: CollectionConfig = {
       admin: {
         date: {
           pickerAppearance: 'dayOnly',
-          displayFormat: 'd MMM yyy',
+          displayFormat: 'dd-MM-yyy',
         },
       },
     },

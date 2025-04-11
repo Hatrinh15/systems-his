@@ -53,3 +53,14 @@ const expiryDate = data.expirydate ? new Date(data.expirydate) : null;
   return data;
 };
 
+export const notChangeLoaiVatTu: CollectionBeforeValidateHook = async ({ data, originalDoc, operation }) => {
+  // Chỉ thực hiện khi đang cập nhật
+  if (operation === 'update' && originalDoc?.loaivattu && data?.loaivattu) {
+    // Nếu người dùng cố gắng thay đổi loại vật tư
+    if (data.loaivattu !== originalDoc.loaivattu) {
+      throw new APIError('Loại vật tư không thể thay đổi khi đã tạo.', 400);
+    }
+  }
+
+  return data;
+};

@@ -374,21 +374,7 @@ export interface User {
   diachi?: string | null;
   notes?: string | null;
   chucvu?: ('bacsi' | 'yta' | 'kythuatvien' | 'letan' | 'truongphong' | 'truongkhoa' | 'duocsi' | 'khac') | null;
-  vitri?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  vitri?: string | null;
   khoa?:
     | (
         | 'tai'
@@ -402,7 +388,8 @@ export interface User {
         | 'khoakhac'
       )
     | null;
-  phong?: string | null;
+  phong?: ('hanhchinhquantri' | 'taichinhketoan' | 'anninh') | null;
+  boPhanDisplay?: string | null;
   ngayvaolam?: string | null;
   tinhtranglamviec?: ('danglam' | 'nghiviec') | null;
   bangcap?: string | null;
@@ -773,21 +760,21 @@ export interface Form {
 export interface Medicalorder {
   id: string;
   hosobenhan?: (string | null) | MedicalRecod;
-  khoa?: ('khoatai' | 'khoamui' | 'khoahong' | 'khoacapcuu' | 'khoagaymehoisuc' | 'khoaduoc') | null;
+  khoa?: (string | null) | Department;
   bacsi?: (string | null) | User;
-  dieuduong?: string | null;
+  dieuduong?: (string | null) | User;
+  hinhthucdieutri?: ('benhnhannoitru' | 'benhnhanngoaitru') | null;
+  sohoso?: string | null;
   ngaynhapvien?: string | null;
   ngayLap?: string | null;
   chuandoan?: string | null;
-  hinhthucdieutri?: ('benhnhannoitru' | 'benhnhanngoaitru') | null;
   thuoc?:
     | {
-        thuocId?: string | null;
+        thuocId?: (string | null) | Medication;
         hamLuong?: string | null;
         lieuDung?: string | null;
         cachDung?: string | null;
         thoiGian?: string | null;
-        trangThai?: ('dangthuchien' | 'dacapphat') | null;
         id?: string | null;
       }[]
     | null;
@@ -856,7 +843,7 @@ export interface MedicalRecod {
           phuongphap?: ('dieutricanthiep' | 'dieutrihotro') | null;
           text?: string | null;
         };
-        tinhtrang: 'yes' | 'no';
+        tinhtrang?: ('yes' | 'no') | null;
         tinhtrangxuatvien?: {
           ngayRaVien?: string | null;
           xuatvien?: ('khoi' | 'do' | 'khongthaydoi' | 'nang' | 'tuvong' | 'tienluongnang' | 'chuaxacdinh') | null;
@@ -868,8 +855,8 @@ export interface MedicalRecod {
   ketqua?:
     | {
         infomation?: {
+          sohoso?: string | null;
           ngay?: string | null;
-          bacsi?: string | null;
           lydo?: {
             nghetmui?: boolean | null;
             dauhong?: boolean | null;
@@ -1103,7 +1090,7 @@ export interface MedicalSupply {
       )
     | null;
   description?: string | null;
-  unit?: ('cai' | 'hop' | 'tui' | 'vi' | 'ong' | 'chai' | 'lit' | 'ml' | 'kg' | 'gram') | null;
+  unit?: ('cai' | 'bo' | 'hop' | 'cuon' | 'mieng' | 'goi' | 'chai') | null;
   packaging?: string | null;
   manufacturer?: string | null;
   supplier?: (string | Supplier)[] | null;
@@ -1243,15 +1230,19 @@ export interface Pharmacy {
  */
 export interface Inventory {
   id: string;
-  category: 'medications' | 'vattutieuhao' | 'maymocthietbi';
+  category?: ('medications' | 'vattutieuhao' | 'maymocthietbi') | null;
   item?: (string | null) | Medication;
   items?: (string | null) | MedicalSupply;
   sanpham?: string | null;
+  unit?: ('hop' | 'thung' | 'cai' | 'bo') | null;
+  /**
+   * Nếu số lượng bằng 0 hệ thống sẽ tự động đặt tình trạng là "Hết hàng". Nếu nhỏ hơn mức cảnh báo sẽ đặt là "Sắp hết".
+   */
   quantity?: number | null;
-  stockstatus: 'conhang' | 'hethang' | 'saphet' | 'hethansudung';
+  stockstatus?: ('conhang' | 'hethang' | 'saphet') | null;
   reorderlevel?: number | null;
   supplier?: (string | Supplier)[] | null;
-  importdate?: string | null;
+  note?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1322,12 +1313,12 @@ export interface Inventorytransaction {
  */
 export interface Room {
   id: string;
-  khoa: string | Department;
-  totalRooms: number;
+  khoa?: (string | null) | Department;
+  totalRooms?: number | null;
   Phong?:
     | {
-        tenphongbenh?: (string | null) | MedicalRecod;
-        totalBeds: number;
+        tenphongbenh?: string | null;
+        totalBeds?: number | null;
         benhnhan?: (string | Patient)[] | null;
         bsi?: (string | User)[] | null;
         id?: string | null;
@@ -1398,6 +1389,7 @@ export interface Phieuxuat {
  */
 export interface Class {
   id: string;
+  title?: string | null;
   tenphong?: ('hanhchinhquantri' | 'taichinhketoan' | 'anninh') | null;
   truongphong?: (string | User)[] | null;
   nhanvien?: (string | User)[] | null;
@@ -1962,10 +1954,11 @@ export interface MedicalordersSelect<T extends boolean = true> {
   khoa?: T;
   bacsi?: T;
   dieuduong?: T;
+  hinhthucdieutri?: T;
+  sohoso?: T;
   ngaynhapvien?: T;
   ngayLap?: T;
   chuandoan?: T;
-  hinhthucdieutri?: T;
   thuoc?:
     | T
     | {
@@ -1974,7 +1967,6 @@ export interface MedicalordersSelect<T extends boolean = true> {
         lieuDung?: T;
         cachDung?: T;
         thoiGian?: T;
-        trangThai?: T;
         id?: T;
       };
   xetNghiem?:
@@ -2103,6 +2095,7 @@ export interface UsersSelect<T extends boolean = true> {
   vitri?: T;
   khoa?: T;
   phong?: T;
+  boPhanDisplay?: T;
   ngayvaolam?: T;
   tinhtranglamviec?: T;
   bangcap?: T;
@@ -2314,8 +2307,8 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
         infomation?:
           | T
           | {
+              sohoso?: T;
               ngay?: T;
-              bacsi?: T;
               lydo?:
                 | T
                 | {
@@ -2454,11 +2447,12 @@ export interface InventorySelect<T extends boolean = true> {
   item?: T;
   items?: T;
   sanpham?: T;
+  unit?: T;
   quantity?: T;
   stockstatus?: T;
   reorderlevel?: T;
   supplier?: T;
-  importdate?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2676,6 +2670,7 @@ export interface DepartmentsSelect<T extends boolean = true> {
  * via the `definition` "class_select".
  */
 export interface ClassSelect<T extends boolean = true> {
+  title?: T;
   tenphong?: T;
   truongphong?: T;
   nhanvien?: T;

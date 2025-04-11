@@ -1,4 +1,4 @@
-import { inventoryHook } from '@/hooks/HookInventory'
+import { hookCheckInfo, hookQuantity, inventoryHook } from '@/hooks/HookInventory'
 import { CollectionConfig } from 'payload'
 
 export const Inventory: CollectionConfig = {
@@ -9,8 +9,8 @@ export const Inventory: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'sanpham',
-    defaultColumns: ['sanpham', 'batchnumber', 'quantity', 'stockstatus', 'reorderlevel', 'expirydate', 'importprice'],
-    group:'Dược Và Vật Tư Y Tế'
+    defaultColumns: ['sanpham', 'quantity', 'stockstatus', 'reorderlevel'],
+    group:'Dược & Vật Tư Y Tế'
   },
   fields: [
     {
@@ -22,14 +22,13 @@ export const Inventory: CollectionConfig = {
         { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
         { label: 'Máy móc/Thiết bị', value: 'maymocthietbi' },
       ],
-      required: true,
     },
     {
       name: 'item',
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: 'medications',
-      admin: { condition: (data) => data?.category === 'medications' },
+      admin: { condition: (data) => data?.category === 'medications' , allowCreate: false },
       filterOptions: async ({ req, data }) => {
         const existingInventory = await req.payload.find({
           collection: 'inventory',
@@ -60,6 +59,7 @@ export const Inventory: CollectionConfig = {
       admin: {
         condition: (data) =>
           data?.category === 'vattutieuhao' || data?.category === 'maymocthietbi',
+        allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
         if (!data?.category) return false; // Nếu chưa chọn danh mục, không hiển thị gì cả
@@ -118,10 +118,25 @@ export const Inventory: CollectionConfig = {
         hidden: true },
     },
     {
+      name: 'unit',
+      label: 'Đơn vị tính',
+      type: 'select',
+      options: [
+        { label: 'Hộp', value: 'hop' },
+        { label: 'Thùng', value: 'thung' },
+        { label: 'Cái', value: 'cai' },
+        {label: 'Bộ', value: 'bo'},
+      ],
+    },
+    {
       name: 'quantity',
       label: 'Số lượng tồn kho',
       type: 'number',
       min: 0,
+      defaultValue: 0,
+      admin: {
+        description: 'Nếu số lượng bằng 0 hệ thống sẽ tự động đặt tình trạng là "Hết hàng". Nếu nhỏ hơn mức cảnh báo sẽ đặt là "Sắp hết".',
+      }, // Số lượng tối thiểu
     },
     {
       name: 'stockstatus',
@@ -131,10 +146,8 @@ export const Inventory: CollectionConfig = {
         { label: 'Còn hàng', value: 'conhang' },
         { label: 'Hết hàng', value: 'hethang' },
         { label: 'Sắp hết', value: 'saphet' },
-        { label: 'Hết hạn sử dụng', value: 'hethansudung' },
       ],
       defaultValue: 'conhang',
-      required: true,
     },
     {
       name: 'reorderlevel',
@@ -148,6 +161,9 @@ export const Inventory: CollectionConfig = {
       label: 'Nhà cung cấp',
       type: 'relationship',
       relationTo: 'suppliers',
+      admin: {
+        allowCreate: false,
+      },
       hasMany: true,
       filterOptions: async ({ req, data }) => {
         try {
@@ -196,19 +212,13 @@ export const Inventory: CollectionConfig = {
       },
     },
     {
-      name: 'importdate',
-      label: 'Ngày nhập',
-      type: 'date',
-      admin: {
-        date: {
-          pickerAppearance: 'dayOnly',
-          displayFormat: 'dd-MM-yyy',
-        },
-      },
+      name: 'note',
+      label: 'Ghi chú',
+      type: 'textarea',
     },
   ],
   timestamps: true,
   hooks: {
-    beforeChange: [inventoryHook]
+    beforeChange: [inventoryHook,hookCheckInfo,hookQuantity]
   }
 }

@@ -1,4 +1,4 @@
-import { beforeChangeRooms } from '@/hooks/HookRooms'
+import { beforeChangeRooms, checkTenPhong } from '@/hooks/HookRooms'
 import { CollectionConfig } from 'payload'
 
 const Rooms: CollectionConfig = {
@@ -14,13 +14,14 @@ const Rooms: CollectionConfig = {
       label: 'Khoa',
       type: 'relationship',
       relationTo: 'departments',
-      required: true,
+      admin: {
+        allowCreate: false,
+      },
     },
     {
       name: 'totalRooms',
       type: 'number',
       label: 'Tổng số phòng',
-      required: true,
       min: 1,
       max: 100,
     },
@@ -30,20 +31,17 @@ const Rooms: CollectionConfig = {
       label: 'Danh sách phòng',
       fields: [
         {
+          name: 'tenphongbenh',
+          label: 'Tên phòng',
+          type: 'text'
+        },
+        {
           type: 'row',
           fields: [
-            {
-              name: 'tenphongbenh',
-              label: 'Tên Phòng',
-              type: 'relationship',
-              relationTo: 'MedicalRecods',
-              hidden: true,
-            },
             {
               name: 'totalBeds',
               type: 'number',
               label: 'Tổng số giường',
-              required: true,
               min: 1,
               max: 100,
             },
@@ -137,6 +135,9 @@ const Rooms: CollectionConfig = {
               label: 'Bác sĩ phụ trách',
               type: 'relationship',
               relationTo: 'users',
+              admin: {
+                allowCreate: false,
+              },
               hasMany: true,
               filterOptions: async ({ req, data }) => {
                 if (!data?.khoa) return { id: { in: [] } } // Nếu chưa chọn khoa, không hiển thị bác sĩ nào
@@ -170,6 +171,6 @@ const Rooms: CollectionConfig = {
       ],
     },
   ],
-  hooks: { beforeChange: [beforeChangeRooms] },
+  hooks: { beforeChange: [beforeChangeRooms,checkTenPhong] },
 }
 export default Rooms

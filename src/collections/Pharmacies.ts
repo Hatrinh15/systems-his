@@ -9,7 +9,7 @@ export const Pharmacies: CollectionConfig = {
   admin: {
     useAsTitle: 'sanpham',
     defaultColumns: ['sanpham', 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
-    group: 'Dược Và Vật Tư Y Tế',
+    group: 'Dược & Vật Tư Y Tế',
   },
   fields: [
     {

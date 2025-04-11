@@ -1,4 +1,4 @@
-import { CollectionBeforeChangeHook } from "payload";
+import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from "payload";
 import { APIError } from "payload";
 
 export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
@@ -63,3 +63,106 @@ export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, op
     console.log("check", data);
   }
 };
+export const removeUserFromDepartments: CollectionAfterChangeHook = async ({ req, doc }) => {
+  const { id, tinhtranglamviec } = doc
+
+  // Nếu không nghỉ việc thì bỏ qua
+  if (tinhtranglamviec !== 'nghiviec') return
+
+  const payload = req.payload
+
+  // Tìm các khoa chứa user này trong truongkhoa, doctors hoặc nurses
+  const departmentsWithUser = await payload.find({
+    collection: 'departments',
+    where: {
+      or: [
+        { truongkhoa: { contains: id } },
+        { doctors: { contains: id } },
+        { nures: { contains: id } },
+      ],
+    },
+    limit: 999,
+  })
+
+  for (const department of departmentsWithUser.docs) {
+    const newDoctors = (department.doctors || []).filter((user: any) =>
+      typeof user === 'string' ? user !== id : user?.id !== id
+    )
+
+    const newTruongkhoa = (department.truongkhoa || []).filter((user: any) =>
+      typeof user === 'string' ? user !== id : user?.id !== id
+    )
+
+    const newNurses = (department.nures || []).filter((user: any) =>
+      typeof user === 'string' ? user !== id : user?.id !== id
+    )
+
+    await payload.update({
+      collection: 'departments',
+      id: department.id,
+      data: {
+        doctors: newDoctors,
+        truongkhoa: newTruongkhoa,
+        nures: newNurses,
+      },
+    })
+  }
+}
+export const updateBoPhanDisplay: CollectionBeforeValidateHook = ({ data }) => {
+  if (!data) return data // kiểm tra nếu không có data thì return luôn
+
+  const chucvu = data.chucvu ?? ''
+  if (['bacsi', 'yta', 'duocsi', 'truongkhoa'].includes(chucvu)) {
+    data.boPhanDisplay = data.khoa || 'Chưa rõ khoa'
+  } else if (['letan', 'kythuatvien', 'truongphong'].includes(chucvu)) {
+    data.boPhanDisplay = data.phong || 'Chưa rõ phòng'
+  } else {
+    data.boPhanDisplay = 'Không xác định'
+  }
+
+  return data
+}
+
+export const hookBoPhanHienThi: CollectionBeforeValidateHook = async ({ data }) => {
+  const chucvu = data?.chucvu
+
+  const khoaOptions = [
+    { label: 'Khoa Tai', value: 'tai' },
+    { label: 'Khoa Mũi Xoang', value: 'mui' },
+    { label: 'Khoa Họng-Thanh Quản', value: 'hong' },
+    { label: 'Khoa Cấp Cứu', value: 'capcuu' },
+    { label: 'Khoa Gây Mê Hồi Sức', value: 'gaymehoisuc' },
+    { label: 'Khoa Chẩn Đoán Hình Ảnh', value: 'chandoanhinhanh' },
+    { label: 'Khoa Xét Nghiệm', value: 'khoaxetnghiem' },
+    { label: 'Khoa Dược', value: 'khoaduoc' },
+    { label: 'Khoa khác', value: 'khoakhac' },
+  ]
+
+  const phongOptions = [
+    { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
+    { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
+    { label: 'Phòng an ninh', value: 'anninh' },
+  ]
+
+  let label = ''
+
+  if (
+    chucvu === 'bacsi' ||
+    chucvu === 'yta' ||
+    chucvu === 'duocsi' ||
+    chucvu === 'truongkhoa'
+  ) {
+    label = khoaOptions.find((opt) => opt.value === data?.khoa)?.label || ''
+  } else if (
+    chucvu === 'letan' ||
+    chucvu === 'kythuatvien' ||
+    chucvu === 'truongphong'
+  ) {
+    label = phongOptions.find((opt) => opt.value === data?.phong)?.label || ''
+  }
+
+  return {
+    ...data,
+    boPhanDisplay: label,
+  }
+}

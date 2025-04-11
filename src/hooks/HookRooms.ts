@@ -42,3 +42,55 @@ export const beforeChangeRooms: CollectionBeforeChangeHook = async ({ data, oper
     })
   }
 }
+
+export const checkTenPhong: CollectionBeforeChangeHook = async ({ data, req, operation, originalDoc }) => {
+  if (!data?.Phong || !Array.isArray(data.Phong)) return
+
+  const newNames = data.Phong.map((room) => room.tenphongbenh?.trim().toLowerCase()).filter(Boolean)
+  if (newNames.length === 0) return
+
+  // ✅ Kiểm tra trùng tên trong chính bản ghi đang nhập (cùng khoa)
+  const nameCounts: Record<string, number> = {}
+  newNames.forEach((name) => {
+    nameCounts[name] = (nameCounts[name] || 0) + 1
+  })
+
+  const duplicatesInSameRecord = Object.entries(nameCounts)
+    .filter(([_, count]) => count > 1)
+    .map(([name]) => name)
+
+  if (duplicatesInSameRecord.length > 0) {
+    throw new APIError(`Tên phòng đã tồn tại trong khoa: ${duplicatesInSameRecord.join(', ')}`, 400)
+  }
+
+  // Lấy tên phòng cũ từ originalDoc nếu đang update
+  const oldNames = operation === 'update' && originalDoc?.Phong
+    ? originalDoc.Phong.map((room) => room.tenphongbenh?.trim().toLowerCase()).filter(Boolean)
+    : []
+
+  // ✅ Lấy tất cả bản ghi (bao gồm cả bản ghi hiện tại)
+  const allRooms = await req.payload.find({
+    collection: 'Rooms',
+    limit: 1000,
+  })
+
+  // ✅ Kiểm tra trùng tên với các bản ghi khác trong hệ thống
+  const existingNames = new Set<string>()
+  allRooms.docs.forEach((doc) => {
+    doc?.Phong?.forEach((room) => {
+      const name = room?.tenphongbenh?.trim().toLowerCase()
+      if (name) existingNames.add(name)
+    })
+  })
+
+  // Nếu đang update, chỉ kiểm tra các tên mới (không nằm trong oldNames)
+  const namesToCheck = operation === 'update'
+    ? newNames.filter((name) => !oldNames.includes(name))
+    : newNames
+
+  const duplicatesInOtherRecords = namesToCheck.filter((name) => existingNames.has(name))
+
+  if (duplicatesInOtherRecords.length > 0) {
+    throw new APIError(`Tên phòng đã tồn tại ở khoa khác: ${duplicatesInOtherRecords.join(', ')}`, 400)
+  }
+}

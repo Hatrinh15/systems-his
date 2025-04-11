@@ -1,4 +1,4 @@
-import { APIError, CollectionBeforeChangeHook } from 'payload'
+import { APIError, CollapsedPreferences, CollectionBeforeChangeHook } from 'payload'
 
 export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === 'create') {
@@ -30,9 +30,7 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
             if (!user) return
 
             if (user.phong === data.tenphong && user.chucvu === 'truongphong') {
-              console.log(
-                `Trưởng khoa ${truongphongId} đã thuộc khoa "${data.tenphong}", không cần cập nhật.`,
-              )
+              
               return
             }
 
@@ -43,7 +41,6 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
               data: { phong: data.tenphong, chucvu: 'truongphong' },
             })
 
-            console.log(`✅ Đã cập nhật trưởng khoa ${truongphongId} sang "${data.tenphong}".`)
           } catch (error) {
             console.error(`❌ Lỗi khi cập nhật trưởng khoa ${truongphongId}:`, error)
           }
@@ -63,9 +60,7 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
             if (!user) return
 
             if (user.phong === data.tenphong) {
-              console.log(
-                `Bác sĩ ${nhanvienId} đã thuộc khoa "${data.tenphong}", không cần cập nhật.`,
-              )
+              
               return
             }
 
@@ -79,7 +74,7 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
               data: { phong: data.tenphong, chucvu: newRole },
             })
 
-            console.log(`✅ Đã cập nhật khoa của bác sĩ ${nhanvienId} sang "${data.tenkhoa}".`)
+            
           } catch (error) {
             console.error(`❌ Lỗi khi cập nhật khoa cho bác sĩ ${nhanvienId}:`, error)
           }
@@ -87,4 +82,60 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
       )
     }
   }
+}
+export const checkclass: CollectionBeforeChangeHook= async ({ data }) => {
+  const errors: string[] = []
+
+  // Kiểm tra tên phòng
+  if (!data?.tenphong) {
+    errors.push('Vui lòng chọn TÊN PHÒNG.')
+  }
+
+  // Kiểm tra trưởng phòng
+  if (!data?.truongphong || data.truongphong.length === 0) {
+    errors.push('Vui lòng chọn TRƯỞNG PHÒNG.')
+  }
+
+  // Kiểm tra nhân viên
+  if (!data?.nhanvien || data.nhanvien.length === 0) {
+    errors.push('Vui lòng chọn ít nhất một NHÂN VIÊN.')
+  }
+
+  // Kiểm tra ngày thành lập
+  if (!data?.thongtin?.ngaythanhlap) {
+    errors.push('Vui lòng chọn NGÀY THÀNH LẬP.')
+  }
+
+  if (errors.length > 0) {
+    throw new APIError(errors.join('\n'),400) // Hiển thị lỗi gộp nhiều dòng
+  }
+
+  return data
+}
+export const notChangeNameClass: CollectionBeforeChangeHook = async ({ req, data, originalDoc }) => {
+  // Nếu đang update (document đã tồn tại)
+  if (originalDoc) {
+    const oldTenPhong = originalDoc.tenphong
+    const newTenPhong = data?.tenphong
+
+    if (oldTenPhong && newTenPhong && oldTenPhong !== newTenPhong) {
+      throw new APIError('TÊN PHÒNG đã được chọn và không thể thay đổi.', 400)
+    }
+  }
+
+  return data
+}
+export const showTitle: CollectionBeforeChangeHook = async ({ data }) => {
+  if (!data) return
+  const titlePhong = [
+    { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
+    { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
+    { label: 'Phòng an ninh', value: 'anninh' },
+  ]
+  titlePhong.map((item) => {
+    if (data.tenphong === item.value) {
+      data.title = item.label
+    }
+  })
+  return data
 }

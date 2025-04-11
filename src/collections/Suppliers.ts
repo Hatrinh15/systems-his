@@ -10,7 +10,7 @@ export const Suppliers: CollectionConfig = {
   admin: {
     useAsTitle: 'nhacungcap',
     defaultColumns: ['nhacungcap', 'phone', 'email'],
-    group: 'Dược Và Vật Tư Y Tế',
+    group: 'Dược & Vật Tư Y Tế',
   },
   fields: [
     {

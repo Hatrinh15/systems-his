@@ -1,4 +1,4 @@
-import { APIError, CollectionBeforeChangeHook } from 'payload';
+import { APIError, CollectionBeforeChangeHook,CollectionBeforeValidateHook } from 'payload';
 import { PayloadRequest } from 'payload';
 
 export const hookPhieuSuDung: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
@@ -282,14 +282,6 @@ export const calculateTotalValues: CollectionBeforeChangeHook = async ({ data })
 export const hookcheckvalue: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   let errors: string[] = [];
 
-  // // Kiểm tra nếu là thao tác cập nhật (update)
-  // if (operation === 'update') {
-  //   // Kiểm tra xem trường 'loaiphieu' đã có giá trị hay chưa
-  //   if (data?.loaiphieu) {
-  //     errors.push('Loại phiếu không thể thay đổi sau khi đã được tạo.');
-  //   }
-  // }
-
   const requiredFields = [
     { field: 'loaiphieu', label: 'Loại phiếu' },
     { field: 'usagedate', label: 'Ngày sử dụng/hủy hàng' },
@@ -314,7 +306,7 @@ export const hookcheckvalue: CollectionBeforeChangeHook = async ({ data, req, op
       let missingFields: string[] = []; // Chỉ định kiểu mảng là string[]
       if (!item.tenthuoc) missingFields.push('Tên thuốc');
       if (!item.quantity) missingFields.push('Số lượng');
-      if (!item.lido) missingFields.push('Lí do sử dụng/hủy hàng');
+      // if (!item.lido) missingFields.push('Lí do sử dụng/hủy hàng');
       if (missingFields.length > 0) {
         errors.push(`Thuốc trong mục thứ ${index + 1} không được để trống: ${missingFields.join(', ')}.`);
       }
@@ -325,7 +317,7 @@ export const hookcheckvalue: CollectionBeforeChangeHook = async ({ data, req, op
       let missingFields: string[] = []; // Chỉ định kiểu mảng là string[]
       if (!item.supply) missingFields.push('Tên vật tư');
       if (!item.quantity) missingFields.push('Số lượng');
-      if (!item.lido) missingFields.push('Lí do sử dụng/hủy hàng');
+      // if (!item.lido) missingFields.push('Lí do sử dụng/hủy hàng');
       if (missingFields.length > 0) {
         errors.push(`Vật tư tiêu hao trong mục thứ  ${index + 1} không được để trống: ${missingFields.join(', ')}.`);
       }
@@ -336,7 +328,7 @@ export const hookcheckvalue: CollectionBeforeChangeHook = async ({ data, req, op
       let missingFields: string[] = []; // Chỉ định kiểu mảng là string[]
       if (!item.equipment) missingFields.push('Tên thiết bị');
       if (!item.quantity) missingFields.push('Số lượng');
-      if (!item.lido) missingFields.push('Lí do sử dụng/hủy hàng');
+      // if (!item.lido) missingFields.push('Lí do sử dụng/hủy hàng');
       if (missingFields.length > 0) {
         errors.push(`Máy móc/Thiết bị trong mục thứ  ${index + 1}không được để trống: ${missingFields.join(', ')}.`);
       }
@@ -468,7 +460,18 @@ export const checkInventoryBeforeUsage = async ({ data, req }: { data: any, req:
 
   console.log("🎉 Tất cả sản phẩm đều đủ số lượng!");
 };
+export const lockLoaiPhieu: CollectionBeforeValidateHook = async ({ data, originalDoc, operation }) => {
+  // Kiểm tra nếu đang update và có originalDoc và data
+  if (operation === 'update' && originalDoc?.loaiphieu && data?.loaiphieu) {
+    // Nếu loại phiếu đã bị thay đổi
+    if (data.loaiphieu !== originalDoc.loaiphieu) {
+      // ❌ Thông báo lỗi rõ ràng
+      throw new APIError('Loại phiếu không thể thay đổi sau khi đã tạo.',400);
+    }
+  }
 
+  return data;
+};
 
 
 

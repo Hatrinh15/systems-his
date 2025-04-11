@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload'
-import { hookMedicalSupplies } from '@/hooks/HookMedicalSupplies'
+import { hookMedicalSupplies, notChangeLoaiVatTu } from '@/hooks/HookMedicalSupplies'
 
 export const medicalSupplies: CollectionConfig = {
   slug: 'medicalSupplies',
@@ -10,7 +10,7 @@ export const medicalSupplies: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['code', 'name', 'category', 'unit', 'expirydate'],
-    group: 'Dược Và Vật Tư Y Tế',
+    group: 'Dược & Vật Tư Y Tế',
   },
   fields: [
     {
@@ -58,15 +58,12 @@ export const medicalSupplies: CollectionConfig = {
       type: 'select',
       options: [
         { label: 'Cái', value: 'cai' },
+        {label: 'Bộ', value: 'bo'},
         { label: 'Hộp', value: 'hop' },
-        { label: 'Túi', value: 'tui' },
-        { label: 'Vỉ', value: 'vi' },
-        { label: 'Ống', value: 'ong' },
+        { label: 'Cuộn', value: 'cuon' },
+        { label: 'Miếng', value: 'mieng' },
+        { label: 'Gói', value: 'goi' },
         { label: 'Chai', value: 'chai' },
-        { label: 'Lít (L)', value: 'lit' },
-        { label: 'Mililit (ml)', value: 'ml' },
-        { label: 'Kg', value: 'kg' },
-        { label: 'Gram', value: 'gram' },
       ],
     },
     {
@@ -94,6 +91,6 @@ export const medicalSupplies: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeValidate: [hookMedicalSupplies], // Áp dụng hook kiểm tra dữ liệu trước khi validate
+    beforeValidate: [hookMedicalSupplies,notChangeLoaiVatTu], // Áp dụng hook kiểm tra dữ liệu trước khi validate
   },
 }

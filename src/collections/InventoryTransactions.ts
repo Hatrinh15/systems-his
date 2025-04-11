@@ -26,13 +26,13 @@ export const InventoryTransactions: CollectionConfig = {
               admin: {
                 date: {
                   pickerAppearance: 'dayOnly',
-                  displayFormat: 'd-MM-yyy',
+                  displayFormat: 'dd-MM-yyy',
                 },
               },
             },
             {
               name: 'giaodich',
-              label: 'Giao Dịch',
+              label: 'Danh sách nhập hàng',
               type: 'array',
               fields: [
                 {
@@ -451,7 +451,7 @@ export const InventoryTransactions: CollectionConfig = {
           ],
         },
         {
-          label: 'Báo cáo',
+          label: 'Báo Cáo',
           fields: [
             {
               type: 'row',
@@ -464,7 +464,7 @@ export const InventoryTransactions: CollectionConfig = {
                 },
                 {
                   name: 'tong_gia_tri_vtth',
-                  label: 'Giá trị nhâp - Vật Tư Tiêu Hao',
+                  label: 'Giá trị nhập - Vật Tư Tiêu Hao',
                   type: 'text',
                   admin: { readOnly: true },
                 },

@@ -38,10 +38,16 @@ export const Users: CollectionConfig = {
         { label: 'Quản trị viên', value: 'admin' },
       ],
       defaultValue: 'user',
-      admin: {
-        condition: (data) => !data?.taikhoan.admin,
+      access: {
+        read: ({ req }) => req.user?.taikhoan === 'admin',
+        update: ({ req }) => req.user?.taikhoan === 'admin',
       },
-    },
+      admin: {
+        condition: ({ user }) => user?.taikhoan === 'admin',
+      }
+      
+  },
+
     {
       name: 'IDnhansu',
       label: 'ID Nhân sự',

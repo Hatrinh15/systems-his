@@ -196,7 +196,7 @@ export const hookCheckKhoa: CollectionBeforeChangeHook = async ({ data, req, ori
 export const readDepartmentAccess: Access = async ({ req }) => {
   const user = req.user;
 
-  if (!user) return false;
+  if (!user || !user.id) return false;
 
   if (user.taikhoan === 'admin') {
     return true;

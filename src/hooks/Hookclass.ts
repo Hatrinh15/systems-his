@@ -66,7 +66,7 @@ export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req,
 
             // ✅ Nếu bác sĩ này là trưởng khoa cũ, hạ xuống bác sĩ
             const newRole =
-              user.chucvu === 'letan' || user.chucvu === 'kythuatvien' ? 'truongphong' : user.chucvu
+              user.chucvu === 'nhanvienkho' ||user.chucvu === 'ketoan' || user.chucvu === 'kythuatvien' ? 'truongphong' : user.chucvu
 
             await req.payload.update({
               collection: 'users',
@@ -130,7 +130,7 @@ export const showTitle: CollectionBeforeChangeHook = async ({ data }) => {
   const titlePhong = [
     { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
     { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
-    { label: 'Phòng an ninh', value: 'anninh' },
+    { label: 'Phòng công nghệ thông tin', value: 'anninh' },
   ]
   titlePhong.map((item) => {
     if (data.tenphong === item.value) {

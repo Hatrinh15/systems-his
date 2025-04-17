@@ -1,10 +1,17 @@
 import { beforeChangeclass, checkclass, notChangeNameClass, showTitle } from '@/hooks/Hookclass'
 import { CollectionConfig } from 'payload'
+import { isAdmin,isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
 const Class: CollectionConfig = {
   slug: 'class',
   labels: {
     singular: 'Phòng ',
     plural: 'Phòng ',
+  },
+  access: {
+    create: (args) => isAdmin(args) ,
+    read: (args) => isAdmin(args) ,
+    update: (args) => isAdmin(args) ,
+    delete: (args) => isAdmin(args) ,
   },
   admin: { group: 'Khoa & Nhân sự ' },
   fields: [
@@ -29,7 +36,7 @@ const Class: CollectionConfig = {
               options: [
                 { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
                 { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
-                { label: 'Phòng an ninh', value: 'anninh' },
+                { label: 'Phòng công nghệ thông tin', value: 'anninh' },
               ],
             },
             {
@@ -91,25 +98,37 @@ const Class: CollectionConfig = {
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean)
                     : []
-            
+              
                   const existingNhanVienData = await req.payload.find({
                     collection: 'class',
                     where: { nhanvien: { exists: true } },
                     limit: 999,
                   })
-            
+              
                   const existingNhanVien =
                     existingNhanVienData?.docs?.flatMap((doc) =>
                       (doc?.nhanvien ?? [])
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean),
                     ) ?? []
-            
-                  const baseCondition =
-                    data?.tenphong === 'hanhchinhquantri'
-                      ? { chucvu: { equals: 'letan' } }
-                      : { chucvu: { equals: 'kythuatvien' } }
-            
+              
+                  // === Xác định baseCondition dựa vào phòng ===
+                  let baseCondition = {}
+              
+                  switch (data?.tenphong) {
+                    case 'hanhchinhquantri':
+                      baseCondition = { chucvu: { equals: 'nhanvienkho' } }
+                      break
+                    case 'taichinhketoan':
+                      baseCondition = { chucvu: { equals: 'ketoan' } }
+                      break
+                    case 'anninh':
+                      baseCondition = { chucvu: { equals: 'kythuatvien' } }
+                      break
+                    default:
+                      baseCondition = {}
+                  }
+              
                   return {
                     and: [
                       baseCondition,
@@ -125,7 +144,7 @@ const Class: CollectionConfig = {
                   console.error('Lỗi truy vấn danh sách nhân viên:', error)
                   return {}
                 }
-              },
+              }              
             },
             {
               name: 'thongtin',

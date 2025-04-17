@@ -1,16 +1,15 @@
 import type { CollectionConfig } from 'payload'
-import { authenticated } from '../../access/authenticated'
-import { checkvalueuser, hookBoPhanHienThi, removeUserFromDepartments} from '@/hooks/checkvalueusers'
+import { checkvalueuser, hookBoPhanHienThi, removeUserFromDepartments,canReadUsers,canUpdateUser, canReadUsersField} from '@/hooks/checkvalueusers'
 import { updateBoPhanDisplay } from '@/hooks/checkvalueusers'
 import { v4 as uuidv4 } from 'uuid'
+import { isAdmin } from '@/hooks/AccessAdmin'
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
-    admin: authenticated,
-    create: authenticated,
-    delete: authenticated,
-    read: authenticated,
-    update: authenticated,
+    create: isAdmin,
+    delete: isAdmin,
+    read: canReadUsers,
+    update: canUpdateUser
   },
   labels: {
     singular: 'Nhân Sự',
@@ -23,6 +22,18 @@ export const Users: CollectionConfig = {
   },
   auth: true,
   fields: [
+    { name: 'taikhoan',
+      label: 'Tài khoản',
+      type:'select',
+      options: [
+        { label: 'Nhân viên', value: 'user' },
+        { label: 'Quản trị viên', value: 'admin' },
+      ],
+      defaultValue: 'user',
+      admin: {
+        condition: (data) => !data?.taikhoan.admin
+    },
+  },
     {
       name: 'IDnhansu',
       label: 'ID Nhân sự',
@@ -62,6 +73,15 @@ export const Users: CollectionConfig = {
                   ? true
                   : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
               },
+              access : {
+                read: async (args) => {
+                  if (typeof canReadUsersField === 'function') {
+                    const result = await canReadUsersField(args);
+                    return typeof result === 'boolean' ? result : false;
+                  }
+                  return !!canReadUsersField;
+                }
+              }
             },
             {
               name: 'gioitinh',
@@ -137,13 +157,15 @@ export const Users: CollectionConfig = {
               label: 'Chức vụ',
               type: 'select',
               options: [
-                { label: 'Bác sĩ', value: 'bacsi' },
-                { label: 'Y tá/Điều dưỡng', value: 'yta' },
-                { label: 'Kỹ thuật viên', value: 'kythuatvien' },
-                { label: 'Lễ tân', value: 'letan' },
                 { label: 'Trưởng phòng', value: 'truongphong' },
                 { label: 'Trưởng khoa', value: 'truongkhoa' },
+                { label: 'Bác sĩ', value: 'bacsi' },
+                { label: 'Y tá/Điều dưỡng', value: 'yta' },
                 { label: 'Dược sĩ', value: 'duocsi' },
+                { label: 'Kỹ thuật viên', value: 'kythuatvien' },
+                {label: 'Kế toán', value: 'ketoan'},
+                { label: 'Quản lý hệ thống', value: 'quanly' },
+                {label: 'Nhân viên kho', value: 'nhanvienkho'},
                 { label: 'Khác', value: 'khac' },
               ],
             },
@@ -186,12 +208,13 @@ export const Users: CollectionConfig = {
               options: [
                 { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
                 { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
-                { label: 'Phòng an ninh', value: 'anninh' },
+                { label: 'Phòng công nghệ thông tin ', value: 'anninh' },
               ],
               admin: {
                 readOnly: true,
                 condition: (data) =>
-                  data?.chucvu === 'letan' ||
+                  data?.chucvu === 'ketoan' ||
+                  data?.chucvu === 'nhanvienkho' ||
                   data?.chucvu === 'kythuatvien' ||
                   data?.chucvu === 'truongphong',
               },
@@ -239,6 +262,15 @@ export const Users: CollectionConfig = {
               name: 'bangcap',
               label: 'Bằng cấp chuyên môn',
               type: 'textarea',
+              access : {
+                read: async (args) => {
+                  if (typeof canReadUsersField === 'function') {
+                    const result = await canReadUsersField(args);
+                    return typeof result === 'boolean' ? result : false;
+                  }
+                  return !!canReadUsersField;
+                }
+              }
             },
             {
               name: 'kinhnghiem',
@@ -246,11 +278,29 @@ export const Users: CollectionConfig = {
               type: 'number',
               min: 0,
               max: 100,
+              access : {
+                read: async (args) => {
+                  if (typeof canReadUsersField === 'function') {
+                    const result = await canReadUsersField(args);
+                    return typeof result === 'boolean' ? result : false;
+                  }
+                  return !!canReadUsersField;
+                }
+              }
             },
             {
               name: 'chungchi',
               label: 'Chứng chỉ hành nghề',
               type: 'array',
+              access : {
+                read: async (args) => {
+                  if (typeof canReadUsersField === 'function') {
+                    const result = await canReadUsersField(args);
+                    return typeof result === 'boolean' ? result : false;
+                  }
+                  return !!canReadUsersField;
+                }
+              },
               fields: [
                 {
                   name: 'tencc',

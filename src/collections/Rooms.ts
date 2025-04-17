@@ -7,7 +7,7 @@ const Rooms: CollectionConfig = {
     singular: 'Phòng Bệnh',
     plural: 'Phòng Bệnh',
   },
-  admin: { group: 'Khoa & Nhân sự ', useAsTitle: 'khoa' },
+  admin: { group:'Bệnh Nhân & Điều Trị', useAsTitle: 'khoa' },
   fields: [
     {
       name: 'khoa',
@@ -52,6 +52,7 @@ const Rooms: CollectionConfig = {
               type: 'relationship',
               relationTo: 'patients',
               hasMany: true,
+              admin: {allowCreate: false},
               filterOptions: async ({ req, data }) => {
                 if (!data?.khoa) {
                   return { id: { in: [] } }

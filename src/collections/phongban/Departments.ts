@@ -1,6 +1,11 @@
 import { CollectionConfig } from 'payload'
-import { beforeChange, hookCheckKhoa, showTitle,readDepartmentAccess } from '@/hooks/HookDepartments'
-import { isAdmin ,isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
+import {
+  beforeChange,
+  hookCheckKhoa,
+  showTitle,
+  readDepartmentAccess,
+} from '@/hooks/HookDepartments'
+import { isAdmin, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
@@ -10,7 +15,7 @@ const Departments: CollectionConfig = {
   access: {
     create: (args) => isAdmin(args),
     read: readDepartmentAccess,
-    update: (args) => isAdmin(args) ,
+    update: (args) => isAdmin(args),
     delete: (args) => isAdmin(args),
   },
   admin: {
@@ -201,14 +206,17 @@ const Departments: CollectionConfig = {
               type: 'group',
               fields: [
                 { name: 'mota', label: 'Mô tả', type: 'textarea' },
-                { name: 'ngaythanhlap', label: 'Ngày thành lập', type: 'date',
+                {
+                  name: 'ngaythanhlap',
+                  label: 'Ngày thành lập',
+                  type: 'date',
                   admin: {
-                  date: {
-                    pickerAppearance: 'dayOnly',
-                    displayFormat: 'dd-MM-yyy',
+                    date: {
+                      pickerAppearance: 'dayOnly',
+                      displayFormat: 'dd-MM-yyy',
+                    },
                   },
                 },
-               },
               ],
             },
           ],
@@ -230,7 +238,7 @@ const Departments: CollectionConfig = {
                     { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
                     { label: 'Máy móc/Thiết bị', value: 'maymocthietbi' },
                   ],
-                  required:true
+                  required: true,
                 },
                 {
                   type: 'row',
@@ -244,7 +252,7 @@ const Departments: CollectionConfig = {
                         allowCreate: false,
                         condition: (_, siblingData) => siblingData?.category === 'medications',
                       },
-                      filterOptions: async ({ req,data,siblingData }) => {
+                      filterOptions: async ({ req, data, siblingData }) => {
                         try {
                           // Lấy danh sách thuốc có trong kho hàng với số lượng > 0
                           const inventoryData = await req.payload.find({
@@ -254,31 +262,32 @@ const Departments: CollectionConfig = {
                               quantity: { greater_than: 0 },
                             },
                             limit: 1000,
-                          });
-                          const id = siblingData as {item?: string}
+                          })
+                          const id = siblingData as { item?: string }
 
                           // Lấy danh sách ID của thuốc có trong kho
                           const availableMedications = inventoryData.docs
-                            .map((doc) => (doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item))
-                            .filter((id) => typeof id === 'string' && id.trim() !== ''); // Lọc bỏ null/undefined
-                            const show = data.departmentInventory.map((dt) => dt.item)
-                            const findId = availableMedications.filter((dt) => !show.includes(dt)  )
+                            .map((doc) =>
+                              doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item,
+                            )
+                            .filter((id) => typeof id === 'string' && id.trim() !== '') // Lọc bỏ null/undefined
+                          const show = data.departmentInventory.map((dt) => dt.item)
+                          const findId = availableMedications.filter((dt) => !show.includes(dt))
                           // Nếu không có thuốc nào trong kho, trả về false để ẩn tất cả
-                          if (availableMedications.length === 0) return false;
+                          if (availableMedications.length === 0) return false
                           console.log(findId)
                           return {
                             or: [
-                              { id: { in: findId !== undefined ? findId : null },},
-                              {id: {equals: id.item}}
-                            ]
-                          
+                              { id: { in: findId !== undefined ? findId : null } },
+                              { id: { equals: id.item } },
+                            ],
                           }
                         } catch (error) {
-                          console.error('Lỗi khi lọc danh sách thuốc:', error);
-                          return false; // Trả về false trong trường hợp lỗi
+                          console.error('Lỗi khi lọc danh sách thuốc:', error)
+                          return false // Trả về false trong trường hợp lỗi
                         }
                       },
-                    }, 
+                    },
                     {
                       name: 'items',
                       label: 'Sản phẩm',
@@ -287,17 +296,22 @@ const Departments: CollectionConfig = {
                       admin: {
                         allowCreate: false,
                         condition: (_, siblingData) =>
-                          siblingData?.category === 'vattutieuhao' || siblingData?.category === 'maymocthietbi',
+                          siblingData?.category === 'vattutieuhao' ||
+                          siblingData?.category === 'maymocthietbi',
                       },
-                      filterOptions: async ({ req, siblingData,data }) => {
+                      filterOptions: async ({ req, siblingData, data }) => {
                         try {
-                          if (!siblingData || typeof siblingData !== 'object' || !('category' in siblingData)) {
-                            return false; // Tránh lỗi khi `category` không tồn tại
+                          if (
+                            !siblingData ||
+                            typeof siblingData !== 'object' ||
+                            !('category' in siblingData)
+                          ) {
+                            return false // Tránh lỗi khi `category` không tồn tại
                           }
-                    
+
                           // Xác định loại vật tư cần lọc trong kho hàng
-                          const selectedCategory = siblingData.category; // 'vattutieuhao' hoặc 'maymocthietbi'
-                    
+                          const selectedCategory = siblingData.category // 'vattutieuhao' hoặc 'maymocthietbi'
+
                           // Truy vấn danh sách vật tư có tồn kho theo danh mục được chọn
                           const inventoryData = await req.payload.find({
                             collection: 'inventory',
@@ -306,44 +320,47 @@ const Departments: CollectionConfig = {
                               quantity: { greater_than: 0 }, // Chỉ lấy vật tư có tồn kho
                             },
                             limit: 1000,
-                          });
-                          const id = siblingData as {items?: string}
+                          })
+                          const id = siblingData as { items?: string }
                           // Lấy danh sách ID của vật tư có trong kho
                           const availableSupplies = inventoryData.docs
-                            .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
-                            .filter((id) => typeof id === 'string' && id.trim() !== ''); // Lọc bỏ null/undefined
-                            const show = data.departmentInventory.map((dt) => dt.items)
-                            const findId = availableSupplies.filter((dt) => !show.includes(dt))
+                            .map((doc) =>
+                              doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items,
+                            )
+                            .filter((id) => typeof id === 'string' && id.trim() !== '') // Lọc bỏ null/undefined
+                          const show = data.departmentInventory.map((dt) => dt.items)
+                          const findId = availableSupplies.filter((dt) => !show.includes(dt))
                           // Nếu không có vật tư nào phù hợp, trả về false để ẩn danh sách
-                          if (availableSupplies.length === 0) return false;
+                          if (availableSupplies.length === 0) return false
                           return {
                             or: [
-                              {id: { in: findId !== undefined ? findId : null }},
-                              {id: {in: id.items}}
-                            ]
-                          // Chỉ hiển thị vật tư có tồn kho
-                          };
+                              { id: { in: findId !== undefined ? findId : null } },
+                              { id: { in: id.items } },
+                            ],
+                            // Chỉ hiển thị vật tư có tồn kho
+                          }
                         } catch (error) {
-                          console.error('Lỗi khi lọc danh sách vật tư:', error);
-                          return false; // Trả về false nếu có lỗi
+                          console.error('Lỗi khi lọc danh sách vật tư:', error)
+                          return false // Trả về false nếu có lỗi
                         }
                       },
-                    },                   
+                    },
                     {
                       name: 'unit',
                       label: 'Đơn vị tính',
                       type: 'select',
                       options: [
-                        {label:'Hộp',value:'hop'},
+                        { label: 'Hộp', value: 'hop' },
                         {
-                          label:'Thùng',value:'thung'
+                          label: 'Thùng',
+                          value: 'thung',
                         },
-                        {label:'Cái',value: 'cai'},
-                        {label:'Bộ',value:'bo'}
+                        { label: 'Cái', value: 'cai' },
+                        { label: 'Bộ', value: 'bo' },
                       ],
                       admin: {
-                        readOnly :true
-                      }
+                        readOnly: true,
+                      },
                     },
                     {
                       name: 'quantity',
@@ -351,7 +368,7 @@ const Departments: CollectionConfig = {
                       type: 'number',
                       min: 0,
                       // admin: { readOnly: true },
-                      defaultValue: 0
+                      defaultValue: 0,
                     },
                   ],
                 },
@@ -363,7 +380,7 @@ const Departments: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [beforeChange, showTitle,hookCheckKhoa],
+    beforeChange: [beforeChange, showTitle, hookCheckKhoa],
   },
 }
 export default Departments

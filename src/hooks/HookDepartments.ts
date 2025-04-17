@@ -3,16 +3,17 @@ import { Access } from 'payload'
 import { User } from '@/payload-types'
 
 export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
+  if (operation === 'create') {
     const existingDepartments = await req.payload.find({
       collection: 'departments',
       where: { tenkhoa: { equals: data?.tenkhoa } },
     })
-    const existingDepartmentID = existingDepartments.docs[0].id
-  if (operation === 'create') {
+
     if (existingDepartments.docs.length > 0) {
       throw new APIError(`Khoa này đã tồn tại trong danh sách! Vui lòng chọn khoa khác.`, 400)
     }
   }
+
   /// cập nhật cho trưởng khoa
   if (operation === 'create' || operation === 'update') {
     if (!data?.tenkhoa) {
@@ -140,20 +141,25 @@ export const showTitle: CollectionBeforeChangeHook = async ({ data }) => {
   return data
 }
 
-export const hookCheckKhoa: CollectionBeforeChangeHook = async ({ data, req, originalDoc, operation }) => {
+export const hookCheckKhoa: CollectionBeforeChangeHook = async ({
+  data,
+  req,
+  originalDoc,
+  operation,
+}) => {
   // Kiểm tra trường "Tên Khoa"
   if (!data.tenkhoa) {
-    throw new APIError('Tên khoa không được để trống.', 400);
+    throw new APIError('Tên khoa không được để trống.', 400)
   }
 
   // Kiểm tra trường "Ngày thành lập" trong group thongtin
   if (!data.thongtin?.ngaythanhlap) {
-    throw new APIError('Ngày thành lập không được để trống.', 400);
+    throw new APIError('Ngày thành lập không được để trống.', 400)
   } else {
-    const foundationDate = new Date(data.thongtin.ngaythanhlap);
+    const foundationDate = new Date(data.thongtin.ngaythanhlap)
     // Kiểm tra xem có phải là một ngày hợp lệ không
     if (isNaN(foundationDate.getTime())) {
-      throw new APIError('Ngày thành lập không hợp lệ.', 400);
+      throw new APIError('Ngày thành lập không hợp lệ.', 400)
     }
   }
 
@@ -161,11 +167,13 @@ export const hookCheckKhoa: CollectionBeforeChangeHook = async ({ data, req, ori
   if (operation === 'update' && data?.departmentInventory) {
     data.departmentInventory.forEach((item, index) => {
       // Kiểm tra nếu danh mục đã chọn trước đó và khác với giá trị mới
-      if (originalDoc.departmentInventory[index]?.category && 
-          originalDoc.departmentInventory[index]?.category !== item.category) {
-        throw new APIError(`Danh mục của sản phẩm tại mục số ${index + 1} không thể thay đổi.`, 400);
+      if (
+        originalDoc.departmentInventory[index]?.category &&
+        originalDoc.departmentInventory[index]?.category !== item.category
+      ) {
+        throw new APIError(`Danh mục của sản phẩm tại mục số ${index + 1} không thể thay đổi.`, 400)
       }
-    });
+    })
   }
 
   // Kiểm tra "Danh sách sản phẩm"
@@ -173,48 +181,57 @@ export const hookCheckKhoa: CollectionBeforeChangeHook = async ({ data, req, ori
     // Kiểm tra trường hợp nếu danh mục là "Thuốc"
     if (inventoryItem.category === 'medications') {
       if (!inventoryItem.item) {
-        throw new APIError(`Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn thuốc.`, 400);
+        throw new APIError(
+          `Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn thuốc.`,
+          400,
+        )
       }
     }
 
     // Kiểm tra trường hợp nếu danh mục là "Vật tư tiêu hao"
     if (inventoryItem.category === 'vattutieuhao') {
       if (!inventoryItem.items) {
-        throw new APIError(`Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn vật tư tiêu hao.`, 400);
+        throw new APIError(
+          `Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn vật tư tiêu hao.`,
+          400,
+        )
       }
     }
 
     // Kiểm tra trường hợp nếu danh mục là "Máy móc/Thiết bị"
     if (inventoryItem.category === 'maymocthietbi') {
       if (!inventoryItem.items) {
-        throw new APIError(`Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn máy móc/thiết bị.`, 400);
+        throw new APIError(
+          `Mục sản phẩm thứ ${index + 1}: Hãy điền đủ tên sản phẩm khi chọn máy móc/thiết bị.`,
+          400,
+        )
       }
     }
-  });
-};
+  })
+}
 
 export const readDepartmentAccess: Access = async ({ req }) => {
-  const user = req.user;
+  const user = req.user
 
-  if (!user) return false;
+  if (!user) return false
 
   if (user.taikhoan === 'admin') {
-    return true;
+    return true
   }
 
   if (user.chucvu && ['bacsi', 'yta', 'truongkhoa', 'duocsi'].includes(user.chucvu)) {
-    const conditions: Where[] = [];
+    const conditions: Where[] = []
 
     if (user.chucvu === 'bacsi') {
-      conditions.push({ doctors: { contains: user.id } });
+      conditions.push({ doctors: { contains: user.id } })
     }
 
     if (user.chucvu === 'yta') {
-      conditions.push({ nures: { contains: user.id } });
+      conditions.push({ nures: { contains: user.id } })
     }
 
     if (user.chucvu === 'truongkhoa') {
-      conditions.push({ truongkhoa: { contains: user.id } });
+      conditions.push({ truongkhoa: { contains: user.id } })
     }
 
     if (user.chucvu === 'duocsi') {
@@ -224,15 +241,8 @@ export const readDepartmentAccess: Access = async ({ req }) => {
 
     return {
       or: conditions,
-    };
+    }
   }
 
-  return false;
-};
-
-
-
-
-
-
-
+  return false
+}

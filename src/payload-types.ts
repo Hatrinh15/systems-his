@@ -364,6 +364,7 @@ export interface Category {
  */
 export interface User {
   id: string;
+  taikhoan?: ('user' | 'admin') | null;
   IDnhansu?: string | null;
   profilePicture?: (string | null) | Media;
   name?: string | null;
@@ -373,7 +374,20 @@ export interface User {
   sdt?: string | null;
   diachi?: string | null;
   notes?: string | null;
-  chucvu?: ('bacsi' | 'yta' | 'kythuatvien' | 'letan' | 'truongphong' | 'truongkhoa' | 'duocsi' | 'khac') | null;
+  chucvu?:
+    | (
+        | 'truongphong'
+        | 'truongkhoa'
+        | 'bacsi'
+        | 'yta'
+        | 'duocsi'
+        | 'kythuatvien'
+        | 'ketoan'
+        | 'quanly'
+        | 'nhanvienkho'
+        | 'khac'
+      )
+    | null;
   vitri?: string | null;
   khoa?:
     | (
@@ -1159,13 +1173,13 @@ export interface MedicalUsage {
  */
 export interface Order {
   id: string;
-  customer: string | Patient;
+  customer?: (string | null) | Patient;
   baohiemyte?: ('yes' | 'no') | null;
   bhyt?: {
     loai?: ('tamtram' | 'chinlam' | 'mottram') | null;
     items?:
       | {
-          medication: string | Pharmacy;
+          medication?: (string | null) | Pharmacy;
           quantity?: number | null;
           donvi?: ('hop' | 'vien' | 'ong' | 'lo' | 'goi' | 'cuon' | 'mieng') | null;
           price?: string | null;
@@ -1180,7 +1194,7 @@ export interface Order {
           medications?: (string | null) | Pharmacy;
           sanpham?: (string | null) | Pharmacy;
           quantitys?: number | null;
-          donvis?: ('hop' | 'vien' | 'ong' | 'lo' | 'goi' | 'cuon' | 'mieng') | null;
+          donvi?: ('hop' | 'vien' | 'ong' | 'lo' | 'goi' | 'cuon' | 'mieng') | null;
           prices?: string | null;
           tiens?: string | null;
           id?: string | null;
@@ -1191,6 +1205,7 @@ export interface Order {
   orderdate?: string | null;
   staff?: (string | null) | User;
   paymentmethod?: ('cash' | 'card' | 'insurance') | null;
+  ghichu?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1200,11 +1215,11 @@ export interface Order {
  */
 export interface Pharmacy {
   id: string;
-  category: 'medications' | 'vattutieuhao';
+  category?: ('medications' | 'vattutieuhao') | null;
   item?: (string | null) | Medication;
   items?: (string | null) | MedicalSupply;
   sanpham?: string | null;
-  unit?: string | null;
+  unit?: 'hop' | null;
   quantity?: number | null;
   price?: string | null;
   tam?: string | null;
@@ -1219,6 +1234,8 @@ export interface Pharmacy {
   chinlam?: string | null;
   mottram?: string | null;
   bhyt?: ('co' | 'khong') | null;
+  stockstatus?: ('conhang' | 'hethang' | 'saphet') | null;
+  reorderlevel?: number | null;
   expirydate?: string | null;
   notes?: string | null;
   updatedAt: string;
@@ -1241,7 +1258,6 @@ export interface Inventory {
   quantity?: number | null;
   stockstatus?: ('conhang' | 'hethang' | 'saphet') | null;
   reorderlevel?: number | null;
-  supplier?: (string | Supplier)[] | null;
   note?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -2082,6 +2098,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  taikhoan?: T;
   IDnhansu?: T;
   profilePicture?: T;
   name?: T;
@@ -2204,7 +2221,7 @@ export interface OrdersSelect<T extends boolean = true> {
               medications?: T;
               sanpham?: T;
               quantitys?: T;
-              donvis?: T;
+              donvi?: T;
               prices?: T;
               tiens?: T;
               id?: T;
@@ -2214,6 +2231,7 @@ export interface OrdersSelect<T extends boolean = true> {
   orderdate?: T;
   staff?: T;
   paymentmethod?: T;
+  ghichu?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2451,7 +2469,6 @@ export interface InventorySelect<T extends boolean = true> {
   quantity?: T;
   stockstatus?: T;
   reorderlevel?: T;
-  supplier?: T;
   note?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2542,6 +2559,8 @@ export interface PharmaciesSelect<T extends boolean = true> {
   chinlam?: T;
   mottram?: T;
   bhyt?: T;
+  stockstatus?: T;
+  reorderlevel?: T;
   expirydate?: T;
   notes?: T;
   updatedAt?: T;

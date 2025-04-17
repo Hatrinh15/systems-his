@@ -28,7 +28,7 @@ export const baoGia: CollectionConfig = {
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: 'medications',
-      admin: { condition: (data) => data?.category === 'medications' },
+      admin: { condition: (data) => data?.category === 'medications', allowCreate: false },
       filterOptions: async ({ req, data }) => {
         const existingInventory = await req.payload.find({
           collection: 'baogia',
@@ -59,6 +59,7 @@ export const baoGia: CollectionConfig = {
       relationTo: 'medicalSupplies',
       admin: {
         condition: (data) => data?.category === 'medicalSupplies',
+        allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
         //  Lấy danh sách vật tư tiêu hao trong kho
@@ -125,6 +126,7 @@ export const baoGia: CollectionConfig = {
           label: 'Nhà cung cấp',
           type: 'relationship',
           relationTo: 'suppliers',
+          admin: {allowCreate:false},
           filterOptions: async ({ req, data }) => {
             try {
               // 1️ Xác định sản phẩm đã chọn
@@ -254,7 +256,7 @@ export const baoGia: CollectionConfig = {
         },
         { name: 'quychuan', label: 'Quy chuẩn', type: 'number' },
         { name: 'phantram', label: '%', type: 'number' },
-        { name: 'tien', label: 'Gía tiền', type: 'text' },
+        { name: 'tien', label: 'Giá tiền', type: 'text' },
         {
           name: 'tammuoi',
           label: '80%',

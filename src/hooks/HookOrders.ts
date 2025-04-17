@@ -1,4 +1,4 @@
-import { CollectionBeforeChangeHook, CollectionAfterChangeHook } from 'payload'
+import { CollectionBeforeChangeHook, CollectionAfterChangeHook ,APIError,PayloadRequest} from 'payload'
 
 export const hookTinhGiaThuoc: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (!data) {
@@ -369,3 +369,97 @@ export const hookTruThuocQuay: CollectionAfterChangeHook = async ({
     console.error('❌ Lỗi khi cập nhật kho:', error)
   }
 }
+
+export const hookCheckOrderDate: CollectionBeforeChangeHook = async ({ req, data, originalDoc, operation }) => {
+  const isCreating = operation === 'create'
+
+  // Điều kiện 1: Không được chọn ngày trong tương lai
+  if (data.orderdate) {
+    const selectedDate = new Date(data.orderdate)
+    selectedDate.setHours(0, 0, 0, 0) // Cắt phần giờ
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (selectedDate > today) {
+      throw new APIError('Ngày mua không được ở tương lai.', 400)
+    }
+  }
+
+  // Điều kiện 2: Không được chỉnh sửa phiếu đã tạo
+  if (!isCreating) {
+    throw new APIError('Phiếu đã được tạo, không thể chỉnh sửa.', 400)
+  }
+
+  return data
+}
+
+export const hookValidateOrderFields: CollectionBeforeChangeHook = async ({ data, operation }) => {
+  const errors: string[] = []
+
+  // 1. Bệnh nhân
+  if (!data.customer) {
+    errors.push('Vui lòng chọn bệnh nhân mua thuốc.')
+  }
+
+  // 2. BHYT
+  if (!data.baohiemyte) {
+    errors.push('Vui lòng chọn thông tin BHYT (Có / Không).')
+  }
+
+  // 3. Ngày mua
+  if (!data.orderdate) {
+    errors.push('Vui lòng chọn ngày mua.')
+  }
+
+  // 4. Nhân viên bán hàng
+  if (!data.staff) {
+    errors.push('Vui lòng chọn nhân viên bán hàng.')
+  }
+
+  // 5. Hình thức thanh toán
+  if (!data.paymentmethod) {
+    errors.push('Vui lòng chọn hình thức thanh toán.')
+  }
+
+  // 6. Danh sách thuốc BHYT (nếu có BHYT)
+  if (data.baohiemyte === 'yes') {
+    const bhytItems = data?.bhyt?.items
+    if (!bhytItems || bhytItems.length === 0) {
+      errors.push('Danh sách thuốc BHYT không được để trống.')
+    } else {
+      bhytItems.forEach((item, index) => {
+        if (!item.medication) errors.push(`Thuốc BHYT hàng ${index + 1} chưa chọn sản phẩm.`)
+        if (!item.quantity) errors.push(`Thuốc BHYT hàng ${index + 1} chưa nhập số lượng.`)
+        if (!item.donvi) errors.push(`Thuốc BHYT hàng ${index + 1} chưa chọn đơn vị.`)
+      })
+    }
+  }
+
+  // 7. Danh sách thuốc dịch vụ (nếu không BHYT hoặc dịch vụ)
+  const dvItems = data?.dichvu?.item
+  if (!dvItems || dvItems.length === 0) {
+    errors.push('Danh sách thuốc dịch vụ không được để trống.')
+  } else {
+    dvItems.forEach((item, index) => {
+      const hasMed = item?.medications || item?.sanpham
+      if (!hasMed) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa chọn sản phẩm.`)
+      if (!item.quantitys) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa nhập số lượng.`)
+      if (!item.donvi) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa chọn đơn vị.`)
+    })
+  }
+
+  // 8. Nếu có lỗi, ném lỗi về
+  if (errors.length > 0) {
+    throw new APIError(errors.join('\n'), 400)
+  }
+
+  return data
+}
+
+
+
+
+
+
+

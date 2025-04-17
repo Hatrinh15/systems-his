@@ -1,5 +1,7 @@
 import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from "payload";
 import { APIError } from "payload";
+import { Access ,AccessArgs } from "payload";
+import { User } from "@/payload-types";
 
 export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === "create") {
@@ -63,6 +65,8 @@ export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, op
     console.log("check", data);
   }
 };
+
+//điều kiện xóa nhân viên khỏi khoa chưa có điều kiện xóa nhân viên khỏi phòng 
 export const removeUserFromDepartments: CollectionAfterChangeHook = async ({ req, doc }) => {
   const { id, tinhtranglamviec } = doc
 
@@ -114,7 +118,7 @@ export const updateBoPhanDisplay: CollectionBeforeValidateHook = ({ data }) => {
   const chucvu = data.chucvu ?? ''
   if (['bacsi', 'yta', 'duocsi', 'truongkhoa'].includes(chucvu)) {
     data.boPhanDisplay = data.khoa || 'Chưa rõ khoa'
-  } else if (['letan', 'kythuatvien', 'truongphong'].includes(chucvu)) {
+  } else if (['quanly','nhanvienkho','ketoan', 'kythuatvien', 'truongphong'].includes(chucvu)) {
     data.boPhanDisplay = data.phong || 'Chưa rõ phòng'
   } else {
     data.boPhanDisplay = 'Không xác định'
@@ -141,7 +145,7 @@ export const hookBoPhanHienThi: CollectionBeforeValidateHook = async ({ data }) 
   const phongOptions = [
     { label: 'Phòng hành chính-quản trị', value: 'hanhchinhquantri' },
     { label: 'Phòng tài chính-kế toán', value: 'taichinhketoan' },
-    { label: 'Phòng an ninh', value: 'anninh' },
+    { label: 'Phòng công nghệ thông tin', value: 'anninh' },
   ]
 
   let label = ''
@@ -154,7 +158,9 @@ export const hookBoPhanHienThi: CollectionBeforeValidateHook = async ({ data }) 
   ) {
     label = khoaOptions.find((opt) => opt.value === data?.khoa)?.label || ''
   } else if (
-    chucvu === 'letan' ||
+    chucvu === 'quanly' ||
+    chucvu === 'ketoan' ||
+    chucvu === 'nhanvienkho' ||
     chucvu === 'kythuatvien' ||
     chucvu === 'truongphong'
   ) {
@@ -165,4 +171,61 @@ export const hookBoPhanHienThi: CollectionBeforeValidateHook = async ({ data }) 
     ...data,
     boPhanDisplay: label,
   }
+}
+// ✅ Trưởng khoa hoặc trưởng phòng chỉ xem được nhân sự cùng khoa hoặc cùng phòng
+export const canReadUsers: Access = ({ req,id }): any => {
+
+  const user = req.user;
+  if(id !== undefined) {
+    if(user && id === user.id) {
+      return true
+    }
+  }
+  if (user?.taikhoan === 'admin') {
+    return true;
+  }
+  if(user?.taikhoan === 'user') {
+    if(user.khoa) {
+      return {
+        khoa: {
+          equals: user.khoa,
+        }
+      }
+    }
+    if(user.phong) {
+      return {
+        phong: {
+          equals: user.phong
+        }
+      }
+    }
+  }
+}; 
+
+export const canUpdateUser: Access = ({ req }) => {
+  const user = req.user;
+
+  if (user?.taikhoan === 'admin') {
+    return true;
+  }
+  if(user?.id) {
+    return {
+      id: {
+        equals: user.id,
+      }
+    }
+  }
+  return false; // Không cho phép truy cập nếu không phải admin hoặc trưởng khoa/phòng
+}; 
+export const canReadUsersField: Access = ({ req,id })  => {
+  const user = req.user;
+  if (user?.taikhoan === 'admin') {
+    return true;
+  }
+  if(id !== undefined) {
+    if(user && id !== user.id) {
+      return false
+    }
+  }
+  return true
 }

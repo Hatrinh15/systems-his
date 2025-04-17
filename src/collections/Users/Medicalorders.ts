@@ -1,15 +1,14 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '@/access/authenticated'
-import { hookcheck, hookSoHoSo, notChangeHinhThucĐT, valuemedicalorder } from '@/hooks/Hookmedicalorder'
-
+import { hookcheck, hookSoHoSo, notChangeHinhThucĐT, valuemedicalorder ,checkKhoaRead, checkAutoKhoa,BacSiyTa} from '@/hooks/Hookmedicalorder'
+import { isAdmin , isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
 export const Medicalorders: CollectionConfig = {
   slug: 'medicalorders',
   access: {
-    admin: authenticated,
-    create: authenticated,
-    delete: authenticated,
-    read: authenticated,
-    update: authenticated,
+    create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    delete:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    read:  checkKhoaRead,
+    update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
   },
   labels: {
     singular: 'Y Lệnh',
@@ -47,17 +46,19 @@ export const Medicalorders: CollectionConfig = {
       admin: {
         allowCreate: false,
       },
-      filterOptions: async ({ req, data }) => {
-        if (!data?.khoa) return false; // Trả về false nếu chưa chọn khoa (ẩn toàn bộ danh sách)
-      
-        const selectedKhoa = typeof data.khoa === 'string' ? data.khoa : data.khoa.id;
-      
+      filterOptions: async ({ req, data }) => { // Trả về false nếu chưa chọn khoa (ẩn toàn bộ danh sách
+        const selectedKhoa = req.user?.khoa; // Khoa của người dùng, là chuỗi
+
         try {
-          const khoaData = await req.payload.findByID({
+          const find = await req.payload.find({
             collection: 'departments',
-            id: selectedKhoa,
-          });
-      
+           where: {
+            tenkhoa: {
+              equals: selectedKhoa
+           } }
+          })
+     
+      const khoaData = find.docs[0]
           if (!khoaData?.doctors || khoaData.doctors.length === 0) return false;
       
           const doctorIds = khoaData.doctors.map((doc) =>
@@ -83,15 +84,17 @@ export const Medicalorders: CollectionConfig = {
         allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
-        if (!data?.khoa) return false;
-      
-        const selectedKhoa = typeof data.khoa === 'string' ? data.khoa : data.khoa.id;
+        const selectedKhoa = req.user?.khoa;
       
         try {
-          const khoaData = await req.payload.findByID({
+          const find = await req.payload.find({
             collection: 'departments',
-            id: selectedKhoa,
-          });
+           where: {
+            tenkhoa: {
+              equals: selectedKhoa
+           } }
+          })
+      const khoaData = find.docs[0]
       
           if (!khoaData?.nures || khoaData.nures.length === 0) return false;
       
@@ -248,6 +251,6 @@ export const Medicalorders: CollectionConfig = {
   timestamps: true,
   hooks: {
     beforeValidate: [valuemedicalorder,hookSoHoSo],
-    beforeChange: [notChangeHinhThucĐT,hookcheck],
+    beforeChange: [notChangeHinhThucĐT,hookcheck,checkAutoKhoa,BacSiyTa],
   },
 }

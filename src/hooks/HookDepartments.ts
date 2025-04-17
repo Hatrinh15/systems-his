@@ -1,12 +1,14 @@
-import { APIError, CollectionBeforeChangeHook } from 'payload'
+import { APIError, CollectionBeforeChangeHook, Where } from 'payload'
+import { Access } from 'payload'
+import { User } from '@/payload-types'
 
 export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
-  if (operation === 'create') {
     const existingDepartments = await req.payload.find({
       collection: 'departments',
       where: { tenkhoa: { equals: data?.tenkhoa } },
     })
-
+    const existingDepartmentID = existingDepartments.docs[0].id
+  if (operation === 'create') {
     if (existingDepartments.docs.length > 0) {
       throw new APIError(`Khoa này đã tồn tại trong danh sách! Vui lòng chọn khoa khác.`, 400)
     }
@@ -191,7 +193,42 @@ export const hookCheckKhoa: CollectionBeforeChangeHook = async ({ data, req, ori
   });
 };
 
+export const readDepartmentAccess: Access = async ({ req }) => {
+  const user = req.user;
 
+  if (!user) return false;
+
+  if (user.taikhoan === 'admin') {
+    return true;
+  }
+
+  if (user.chucvu && ['bacsi', 'yta', 'truongkhoa', 'duocsi'].includes(user.chucvu)) {
+    const conditions: Where[] = [];
+
+    if (user.chucvu === 'bacsi') {
+      conditions.push({ doctors: { contains: user.id } });
+    }
+
+    if (user.chucvu === 'yta') {
+      conditions.push({ nures: { contains: user.id } });
+    }
+
+    if (user.chucvu === 'truongkhoa') {
+      conditions.push({ truongkhoa: { contains: user.id } });
+    }
+
+    if (user.chucvu === 'duocsi') {
+      // Nếu dược sĩ cũng được liên kết với khoa qua trường khác, thêm ở đây
+      // Ví dụ: { pharmacists: { contains: user.id } }
+    }
+
+    return {
+      or: conditions,
+    };
+  }
+
+  return false;
+};
 
 
 

@@ -1,13 +1,15 @@
 import { APIError, CollectionBeforeValidateHook, CollectionBeforeChangeHook } from 'payload'
+import { PayloadRequest } from 'payload'
+import { Access } from 'payload'
+import { User } from '@/payload-types'
+import { isAdmin, isBacSiYTaTruongKhoa } from './AccessAdmin'
 
 export const valuemedicalorder: CollectionBeforeValidateHook = ({ data }) => {
   if (!data) return
 
   const error: string[] = []
   if(!data.hosobenhan) error.push('Hồ sơ bệnh án')
-  if (!data.khoa) error.push('Khoa')
-  if (!data.bacsi) error.push('Bác sĩ')
-  if (!data.dieuduong) error.push('Điều dưỡng')
+ 
   if (!data.chuandoan) error.push('Chuẩn đoán')
   if (!data.hinhthucdieutri) {
     error.push('Hình thức điều trị')
@@ -137,4 +139,77 @@ export const notChangeHinhThucĐT: CollectionBeforeChangeHook = async ({ data, r
   }
 
   return data
+}
+
+export const checkKhoaRead = async (args: { req: PayloadRequest, data: any }): Promise<boolean> => {
+  const { req, data } = args;
+  const user = req.user as User;
+
+  // Kiểm tra nếu là admin hoặc bác sĩ/y tá/trưởng khoa
+  if (isAdmin(args) || isBacSiYTaTruongKhoa(args)) {
+    return true;
+  }
+
+  // Kiểm tra khoa của người dùng và khoa trong bản ghi
+const userKhoa = user?.khoa; // Khoa của người dùng, là chuỗi
+const recordKhoa = data?.khoa; // Khoa của bản ghi, là chuỗi
+
+// Nếu khoa của người dùng trùng với khoa của bản ghi, cho phép xem
+if (userKhoa && recordKhoa && userKhoa === recordKhoa) {
+  return true;
+}
+  // Nếu không thỏa mãn, không cho phép xem
+  return false;
+};
+
+export const checkAutoKhoa: CollectionBeforeChangeHook = async ({ req, data, originalDoc }) => {
+  // Nếu là admin thì không cần tự động gán khoa
+  const user = req.user
+
+  // Nếu là admin thì bỏ qua
+  if ((user as User & { role?: string })?.role === 'admin') {
+    return data
+  }
+  const find = await req.payload.find({
+    collection: 'departments',
+    where: {
+      tenkhoa: { equals: user?.khoa, },
+    }
+  })
+  const id = find.docs[0]?.id
+  // Kiểm tra nếu user có liên kết đến khoa
+  if (user?.khoa) {
+    // Nếu trường khoa chưa có hoặc muốn ghi đè
+    return {
+      ...data,
+      khoa: id, // Gán khoa từ tài khoản nhân sự đang đăng nhập
+    }
+  }
+
+  return data
+}
+export const BacSiyTa: CollectionBeforeChangeHook = async ({ req, data, originalDoc }) => {
+  if(!data) return
+  const user = req.user
+
+const name: (string | undefined)[] = []
+name.push(user?.id)
+console.log('user', name)
+if (user?.chucvu === 'bacsi') {
+   if(!data.bacsi)  {
+    return {
+      ...data,
+      bacsi: name// Gán khoa từ tài khoản nhân sự đang đăng nhập
+    }
+  }
+}
+if (user?.chucvu === 'yta') {
+    if(!data.dieuduong)  {
+    return {
+      ...data,
+      dieuduong: req.user?.id// Gán khoa từ tài khoản nhân sự đang đăng nhập
+    }
+  }
+}
+
 }

@@ -1,5 +1,5 @@
 import { CollectionConfig } from 'payload'
-import { hookQuayThuoc } from '@/hooks/Hookpharmacies'
+import { hookcheck, hookQuayThuoc, hookTinhTrangHang } from '@/hooks/Hookpharmacies'
 export const Pharmacies: CollectionConfig = {
   slug: 'pharmacies',
   labels: {
@@ -20,7 +20,6 @@ export const Pharmacies: CollectionConfig = {
         { label: 'Thuốc', value: 'medications' },
         { label: 'Vật tư tiêu hao', value: 'vattutieuhao' },
       ],
-      required: true,
     },
     {
       name: 'item',
@@ -29,6 +28,7 @@ export const Pharmacies: CollectionConfig = {
       relationTo: 'medications',
       admin: {
         condition: (data) => data?.category === 'medications',
+        allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
         // 🏥 Lấy danh sách vật tư tiêu hao trong kho
@@ -86,6 +86,7 @@ export const Pharmacies: CollectionConfig = {
       relationTo: 'medicalSupplies',
       admin: {
         condition: (data) => data?.category === 'vattutieuhao',
+        allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
         //  Lấy danh sách vật tư tiêu hao trong kho
@@ -148,19 +149,23 @@ export const Pharmacies: CollectionConfig = {
         {
           name: 'unit',
           label: 'Đơn vị ',
-          type: 'text',
-          defaultValue: 'Hộp',
+          type: 'select',
+          options: [
+            { label: 'Hộp', value: 'hop' },
+          ],
         },
         {
           name: 'quantity',
           label: 'Số lượng ',
           type: 'number',
           min: 0,
+          defaultValue: 0,
         },
         {
           name: 'price',
           label: 'Giá niêm yết',
           type: 'text',
+          defaultValue: '0',
         },
         {
           name: 'tam',
@@ -213,8 +218,8 @@ export const Pharmacies: CollectionConfig = {
           ],
         },
         { name: 'quychuan', label: 'Quy chuẩn', type: 'number', admin: { readOnly: true } },
-        { name: 'soluong', label: 'Tổng số lượng theo đơn vị', type: 'number' },
-        { name: 'tongtien', label: 'Tiền theo đơn vị tính bán lẻ', type: 'text' },
+        { name: 'soluong', label: 'Tổng số lượng theo đơn vị', type: 'number' ,defaultValue: 0},
+        { name: 'tongtien', label: 'Tiền theo đơn vị tính bán lẻ', type: 'text', defaultValue: '0' },
         {
           name: 'tammuoi',
           label: '80%',
@@ -237,13 +242,31 @@ export const Pharmacies: CollectionConfig = {
     },
     {
       name: 'bhyt',
-      label: 'BHYT',
-      type: 'radio',
+      label: 'Bảo hiểm y tế',
+      type: 'select',
       options: [
         { value: 'co', label: 'Có' },
         { value: 'khong', label: 'Không' },
       ],
     },
+        {
+          name: 'stockstatus',
+          label: 'Tình trạng hàng hóa',
+          type: 'select',
+          options: [
+            { label: 'Còn hàng', value: 'conhang' },
+            { label: 'Hết hàng', value: 'hethang' },
+            { label: 'Sắp hết', value: 'saphet' },
+          ],
+          defaultValue: 'conhang',
+        },
+        {
+          name: 'reorderlevel',
+          label: 'Mức cảnh báo tồn',
+          type: 'number',
+          min: 0,
+          defaultValue: 10, // Số lượng tối thiểu để cảnh báo
+        },
     {
       name: 'expirydate',
       label: 'Hạn sử dụng',
@@ -256,6 +279,6 @@ export const Pharmacies: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [hookQuayThuoc],
+    beforeChange: [hookQuayThuoc,hookcheck,hookTinhTrangHang],
   },
 }

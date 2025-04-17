@@ -1,8 +1,10 @@
 import {
+  hookCheckOrderDate,
   hookTinhGiaThuoc,
   hookTinhGiaThuocSanpham,
   hookTinhTongDonThuoc,
   hookTruThuocQuay,
+  hookValidateOrderFields,
 } from '@/hooks/HookOrders'
 import { CollectionConfig } from 'payload'
 
@@ -22,7 +24,8 @@ export const Orders: CollectionConfig = {
       label: 'Bệnh nhân mua thuốc',
       type: 'relationship',
       relationTo: 'patients',
-      required: true,
+      admin: {
+        allowCreate: false}
     },
     {
       name: 'baohiemyte',
@@ -62,7 +65,8 @@ export const Orders: CollectionConfig = {
                   label: 'Sản phẩm',
                   type: 'relationship',
                   relationTo: 'pharmacies',
-                  required: true,
+          
+                  admin:{allowCreate: false},
                   filterOptions: async ({ req, data, siblingData }) => {
                     if (!data) return false
                     const id = siblingData as { medication?: string }
@@ -137,8 +141,10 @@ export const Orders: CollectionConfig = {
                   label: 'Sản phẩm',
                   type: 'relationship',
                   relationTo: 'pharmacies',
-                  required: true,
-                  admin: { condition: (data) => data?.baohiemyte === 'yes' },
+          
+                  admin: { condition: (data) => data?.baohiemyte === 'yes',
+                    allowCreate: false 
+                   },
                   filterOptions: async ({ req, data, siblingData }) => {
                     const id = siblingData as { medications?: string }
                     const products = await req.payload.find({
@@ -166,8 +172,10 @@ export const Orders: CollectionConfig = {
                   label: 'Sản phẩm',
                   type: 'relationship',
                   relationTo: 'pharmacies',
-                  required: true,
-                  admin: { condition: (data) => data?.baohiemyte === 'no' },
+          
+                  admin: { condition: (data) => data?.baohiemyte === 'no',
+                    allowCreate: false
+                   },
                   filterOptions: async ({ req, data, siblingData }) => {
                     const id = siblingData as { sanpham?: string }
                     const products = await req.payload.find({
@@ -196,7 +204,7 @@ export const Orders: CollectionConfig = {
                 },
 
                 {
-                  name: 'donvis',
+                  name: 'donvi',
                   label: 'Đơn vị',
                   type: 'select',
                   options: [
@@ -236,12 +244,19 @@ export const Orders: CollectionConfig = {
       name: 'orderdate',
       label: 'Ngày mua',
       type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
+      },
     },
     {
       name: 'staff',
       label: 'Nhân viên bán hàng',
       type: 'relationship',
       relationTo: 'users',
+      admin: {allowCreate: false},
       filterOptions: async ({ data, req }) => {
         try {
           // Lấy danh sách bác sĩ thuộc Khoa Dược
@@ -286,9 +301,15 @@ export const Orders: CollectionConfig = {
         { label: 'Bảo hiểm y tế', value: 'insurance' },
       ],
     },
+    {
+      name: 'ghichu',
+      label: 'Ghi chú',
+      type: 'textarea',
+    }
   ],
   hooks: {
-    beforeChange: [hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc],
+    beforeChange: [hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
+      hookCheckOrderDate,hookValidateOrderFields],
     afterChange: [hookTruThuocQuay],
   },
 }

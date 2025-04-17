@@ -1,11 +1,17 @@
 import { CollectionConfig } from 'payload'
-import { beforeChange, hookCheckKhoa, showTitle } from '@/hooks/HookDepartments'
-
+import { beforeChange, hookCheckKhoa, showTitle,readDepartmentAccess } from '@/hooks/HookDepartments'
+import { isAdmin ,isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
     singular: 'Khoa',
     plural: 'Khoa',
+  },
+  access: {
+    create: (args) => isAdmin(args),
+    read: readDepartmentAccess,
+    update: (args) => isAdmin(args) ,
+    delete: (args) => isAdmin(args),
   },
   admin: {
     group: 'Khoa & Nhân sự ',
@@ -93,7 +99,7 @@ const Departments: CollectionConfig = {
             },
             {
               name: 'doctors',
-              label: 'Bác sĩ',
+              label: 'Bác sĩ / Dược sĩ',
               type: 'relationship',
               relationTo: 'users',
               hasMany: true,

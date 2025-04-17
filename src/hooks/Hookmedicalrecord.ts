@@ -159,18 +159,26 @@ export const generateMedicalRecordID: CollectionBeforeValidateHook = async ({ da
 
 export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
   try {
-    const tinhTrangCu = previousDoc?.hoso?.[0]?.tinhtrang
-    const tinhTrangMoi = doc?.hoso?.[0]?.tinhtrang
+    const hoSoCu = previousDoc?.hoso || []
+    const hoSoMoi = doc?.hoso || []
+    const benhNhanID = doc?.thongtinbenhnhan
 
-    if (!tinhTrangCu || tinhTrangCu === tinhTrangMoi) return
+    if (!benhNhanID || hoSoMoi.length === 0) return
 
-    // Chỉ thực hiện khi từ "no" => "yes" (nhập viện => xuất viện)
-    if (tinhTrangCu === 'no' && tinhTrangMoi === 'yes') {
-      const phongCu = previousDoc?.hoso?.[0]?.sophong
-      const benhNhanID = previousDoc?.thongtinbenhnhan
+    for (let i = 0; i < hoSoMoi.length; i++) {
+      const hsMoi = hoSoMoi[i]
+      const hsCu = hoSoCu[i]
 
-      if (phongCu && benhNhanID) {
-        const result = await req.payload.find({
+      const tinhTrangCu = hsCu?.tinhtrang
+      const tinhTrangMoi = hsMoi?.tinhtrang
+      const phongCu = hsMoi?.sophong
+
+      // Nếu không thay đổi tình trạng hoặc không có phòng thì bỏ qua
+      if (!phongCu || tinhTrangCu === tinhTrangMoi) continue
+
+      // Chỉ xử lý khi chuyển từ nhập viện (no) sang xuất viện (yes)
+      if (tinhTrangCu === 'no' && tinhTrangMoi === 'yes') {
+        const roomsResult = await req.payload.find({
           collection: 'Rooms',
           where: {
             'Phong.tenphongbenh': { equals: phongCu },
@@ -178,27 +186,28 @@ export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, pr
           },
         })
 
-        if (result.docs.length > 0) {
-          const roomDoc = result.docs[0]
-          const updatedPhong = (roomDoc.Phong || []).map((phong) => {
+        if (roomsResult.docs.length > 0) {
+          const roomDoc = roomsResult.docs[0]
 
-            if (phong.tenphongbenh === phongCu) {
-              return {
-                ...phong,
-                benhnhan: phong.benhnhan?.filter(
-                  (id) => (typeof id === 'object' ? id.id : id) !== benhNhanID
-                ),
-              }
-            }
-            return phong
-          })
+          const updatedPhong = Array.isArray(roomDoc.Phong)
+  ? roomDoc.Phong.map((phong) => {
+      if (phong.tenphongbenh === phongCu) {
+        return {
+          ...phong,
+          benhnhan: phong.benhnhan?.filter(
+            (id) => (typeof id === 'object' ? id.id : id) !== benhNhanID
+          ),
+        }
+      }
+      return phong
+    })
+  : []
+
 
           await req.payload.update({
             collection: 'Rooms',
             id: roomDoc.id,
-            data: {
-              Phong: updatedPhong,
-            },
+            data: { Phong: updatedPhong },
           })
         }
       }
@@ -208,6 +217,7 @@ export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, pr
   }
 }
 
+
 export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, req, operation }) => {
   if (operation !== 'create' && operation !== 'update') return data;
 
@@ -216,12 +226,17 @@ export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, 
 
   if (!patientID || !hoSoArray || !Array.isArray(hoSoArray)) return data;
 
-  // Duyệt qua từng hồ sơ bệnh án trong mảng
   for (const hoSo of hoSoArray) {
     const tenPhongHoSo = hoSo?.sophong;
+    const tinhtrang = hoSo?.tinhtrang; // lấy giá trị tình trạng: 'yes' hoặc 'no'
+
+    // Nếu không có tên phòng thì bỏ qua
     if (!tenPhongHoSo) continue;
 
-    // Tìm phòng chứa bệnh nhân trong collection Rooms
+    // Nếu tình trạng là "Đã xuất viện" thì không cần kiểm tra phòng
+    if (tinhtrang === 'yes') continue;
+
+    // Lấy tất cả phòng mà bệnh nhân đang nằm (nếu còn)
     const roomsResult = await req.payload.find({
       collection: 'Rooms',
       where: {
@@ -231,13 +246,14 @@ export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, 
       },
     });
 
-    const matchedRoom = roomsResult.docs.find((room) => {
-      return room.Phong?.some((roomDetail) => {
-        return roomDetail.tenphongbenh?.toLowerCase().trim() === tenPhongHoSo.toLowerCase().trim();
-      });
-    });
+    const matchedRoom = roomsResult.docs.find((room) =>
+      room.Phong?.some((roomDetail) =>
+        roomDetail.tenphongbenh?.toLowerCase().trim() === tenPhongHoSo.toLowerCase().trim()
+      )
+    );
 
     if (!matchedRoom) {
+      // Tìm tên phòng thật sự mà bệnh nhân đang nằm (nếu có)
       const matchedPatientRoom = roomsResult.docs
         .flatMap((room) =>
           room.Phong?.filter((roomDetail) =>
@@ -248,13 +264,13 @@ export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, 
         )
         .map((room) => room?.tenphongbenh)
         .filter((tenPhong): tenPhong is string => Boolean(tenPhong))[0];
-    
+
       throw new APIError(
         `Tên phòng <${tenPhongHoSo}> không trùng với phòng của bệnh nhân.\n` +
-        `Hiện bệnh nhân đang nằm trong phòng <${matchedPatientRoom || 'Không xác định'}>`,
+        `Hiện bệnh nhân đang nằm trong phòng <${matchedPatientRoom || 'Không xác định'}>.`,
         400
       );
-    }    
+    }
   }
 
   return data;

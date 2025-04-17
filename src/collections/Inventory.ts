@@ -156,61 +156,61 @@ export const Inventory: CollectionConfig = {
       min: 0,
       defaultValue: 10, // Số lượng tối thiểu để cảnh báo
     },
-    {
-      name: 'supplier',
-      label: 'Nhà cung cấp',
-      type: 'relationship',
-      relationTo: 'suppliers',
-      admin: {
-        allowCreate: false,
-      },
-      hasMany: true,
-      filterOptions: async ({ req, data }) => {
-        try {
-          // 1️ Xác định sản phẩm đã chọn
-          const selectedProduct = data?.item || data?.items
-          if (!selectedProduct) {
-            return { id: { in: [] } } // Nếu chưa chọn sản phẩm, không hiển thị nhà cung cấp nào
-          }
+    // {
+    //   name: 'supplier',
+    //   label: 'Nhà cung cấp',
+    //   type: 'relationship',
+    //   relationTo: 'suppliers',
+    //   admin: {
+    //     allowCreate: false,
+    //   },
+    //   hasMany: true,
+    //   filterOptions: async ({ req, data }) => {
+    //     try {
+    //       // 1️ Xác định sản phẩm đã chọn
+    //       const selectedProduct = data?.item || data?.items
+    //       if (!selectedProduct) {
+    //         return { id: { in: [] } } // Nếu chưa chọn sản phẩm, không hiển thị nhà cung cấp nào
+    //       }
 
-          // 2️ Xác định collection tương ứng (medications hoặc medicalSupplies)
-          const collection = data?.category === 'medications' ? 'medications' : 'medicalSupplies'
+    //       // 2️ Xác định collection tương ứng (medications hoặc medicalSupplies)
+    //       const collection = data?.category === 'medications' ? 'medications' : 'medicalSupplies'
 
-          // 3️ Truy vấn danh sách nhà cung cấp từ bảng thuốc/vật tư
-          const product = await req.payload.find({
-            collection: collection,
-            where: { id: { equals: selectedProduct } },
-            limit: 1000,
-          })
+    //       // 3️ Truy vấn danh sách nhà cung cấp từ bảng thuốc/vật tư
+    //       const product = await req.payload.find({
+    //         collection: collection,
+    //         where: { id: { equals: selectedProduct } },
+    //         limit: 1000,
+    //       })
 
-          if (!product || !product.docs || product.docs.length === 0) {
-            return { id: { in: [] } }
-          }
+    //       if (!product || !product.docs || product.docs.length === 0) {
+    //         return { id: { in: [] } }
+    //       }
 
-          // 4️ Lấy danh sách nhà cung cấp từ sản phẩm
-          const supplierIds = product.docs[0].supplier // Giả sử `supplier` là một mảng hoặc một ID
+    //       // 4️ Lấy danh sách nhà cung cấp từ sản phẩm
+    //       const supplierIds = product.docs[0].supplier // Giả sử `supplier` là một mảng hoặc một ID
 
-          // Nếu `supplier` là object hoặc mảng, chuẩn hóa thành danh sách ID
-          const supplierIdList = Array.isArray(supplierIds)
-            ? supplierIds.map((s) => (typeof s === 'string' ? s : s.id))
-            : []
+    //       // Nếu `supplier` là object hoặc mảng, chuẩn hóa thành danh sách ID
+    //       const supplierIdList = Array.isArray(supplierIds)
+    //         ? supplierIds.map((s) => (typeof s === 'string' ? s : s.id))
+    //         : []
 
-          if (!supplierIdList.length) {
-            return { id: { in: [] } }
-          }
+    //       if (!supplierIdList.length) {
+    //         return { id: { in: [] } }
+    //       }
 
-          // 5️ Trả về danh sách nhà cung cấp phù hợp
-          return {
-            id: {
-              in: supplierIdList,
-            },
-          }
-        } catch (error) {
-          console.error('🚨 Lỗi khi lọc nhà cung cấp theo thuốc:', error)
-          return { id: { in: [] } }
-        }
-      },
-    },
+    //       // 5️ Trả về danh sách nhà cung cấp phù hợp
+    //       return {
+    //         id: {
+    //           in: supplierIdList,
+    //         },
+    //       }
+    //     } catch (error) {
+    //       console.error('🚨 Lỗi khi lọc nhà cung cấp theo thuốc:', error)
+    //       return { id: { in: [] } }
+    //     }
+    //   },
+    // },
     {
       name: 'note',
       label: 'Ghi chú',

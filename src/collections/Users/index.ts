@@ -1,5 +1,12 @@
 import type { CollectionConfig } from 'payload'
-import { checkvalueuser, hookBoPhanHienThi, removeUserFromDepartments,canReadUsers,canUpdateUser, canReadUsersField} from '@/hooks/checkvalueusers'
+import {
+  checkvalueuser,
+  hookBoPhanHienThi,
+  removeUserFromDepartments,
+  canReadUsers,
+  canUpdateUser,
+  canReadUsersField,
+} from '@/hooks/checkvalueusers'
 import { updateBoPhanDisplay } from '@/hooks/checkvalueusers'
 import { v4 as uuidv4 } from 'uuid'
 import { isAdmin } from '@/hooks/AccessAdmin'
@@ -9,22 +16,23 @@ export const Users: CollectionConfig = {
     create: isAdmin,
     delete: isAdmin,
     read: canReadUsers,
-    update: canUpdateUser
+    update: canUpdateUser,
   },
   labels: {
     singular: 'Nhân Sự',
     plural: 'Nhân Sự',
   },
   admin: {
-    defaultColumns: ['name', 'boPhanDisplay','email'],
+    defaultColumns: ['name', 'boPhanDisplay', 'email'],
     useAsTitle: 'name',
     group: 'Khoa & Nhân sự ',
   },
   auth: true,
   fields: [
-    { name: 'taikhoan',
+    {
+      name: 'taikhoan',
       label: 'Tài khoản',
-      type:'select',
+      type: 'select',
       options: [
         { label: 'Nhân viên', value: 'user' },
         { label: 'Quản trị viên', value: 'admin' },
@@ -39,6 +47,7 @@ export const Users: CollectionConfig = {
       }
       
   },
+
     {
       name: 'IDnhansu',
       label: 'ID Nhân sự',
@@ -78,15 +87,15 @@ export const Users: CollectionConfig = {
                   ? true
                   : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
               },
-              access : {
+              access: {
                 read: async (args) => {
                   if (typeof canReadUsersField === 'function') {
-                    const result = await canReadUsersField(args);
-                    return typeof result === 'boolean' ? result : false;
+                    const result = await canReadUsersField(args)
+                    return typeof result === 'boolean' ? result : false
                   }
-                  return !!canReadUsersField;
-                }
-              }
+                  return !!canReadUsersField
+                },
+              },
             },
             {
               name: 'gioitinh',
@@ -168,9 +177,9 @@ export const Users: CollectionConfig = {
                 { label: 'Y tá/Điều dưỡng', value: 'yta' },
                 { label: 'Dược sĩ', value: 'duocsi' },
                 { label: 'Kỹ thuật viên', value: 'kythuatvien' },
-                {label: 'Kế toán', value: 'ketoan'},
+                { label: 'Kế toán', value: 'ketoan' },
                 { label: 'Quản lý hệ thống', value: 'quanly' },
-                {label: 'Nhân viên kho', value: 'nhanvienkho'},
+                { label: 'Nhân viên kho', value: 'nhanvienkho' },
                 { label: 'Khác', value: 'khac' },
               ],
             },
@@ -234,7 +243,7 @@ export const Users: CollectionConfig = {
                 hidden: true,
               },
             },
-            
+
             {
               name: 'ngayvaolam',
               label: 'Ngày vào làm',
@@ -267,15 +276,15 @@ export const Users: CollectionConfig = {
               name: 'bangcap',
               label: 'Bằng cấp chuyên môn',
               type: 'textarea',
-              access : {
+              access: {
                 read: async (args) => {
                   if (typeof canReadUsersField === 'function') {
-                    const result = await canReadUsersField(args);
-                    return typeof result === 'boolean' ? result : false;
+                    const result = await canReadUsersField(args)
+                    return typeof result === 'boolean' ? result : false
                   }
-                  return !!canReadUsersField;
-                }
-              }
+                  return !!canReadUsersField
+                },
+              },
             },
             {
               name: 'kinhnghiem',
@@ -283,28 +292,28 @@ export const Users: CollectionConfig = {
               type: 'number',
               min: 0,
               max: 100,
-              access : {
+              access: {
                 read: async (args) => {
                   if (typeof canReadUsersField === 'function') {
-                    const result = await canReadUsersField(args);
-                    return typeof result === 'boolean' ? result : false;
+                    const result = await canReadUsersField(args)
+                    return typeof result === 'boolean' ? result : false
                   }
-                  return !!canReadUsersField;
-                }
-              }
+                  return !!canReadUsersField
+                },
+              },
             },
             {
               name: 'chungchi',
               label: 'Chứng chỉ hành nghề',
               type: 'array',
-              access : {
+              access: {
                 read: async (args) => {
                   if (typeof canReadUsersField === 'function') {
-                    const result = await canReadUsersField(args);
-                    return typeof result === 'boolean' ? result : false;
+                    const result = await canReadUsersField(args)
+                    return typeof result === 'boolean' ? result : false
                   }
-                  return !!canReadUsersField;
-                }
+                  return !!canReadUsersField
+                },
               },
               fields: [
                 {
@@ -334,9 +343,10 @@ export const Users: CollectionConfig = {
           data.IDnhansu = `NS-${uuidv4()}`
         }
       },
-      updateBoPhanDisplay,hookBoPhanHienThi
+      updateBoPhanDisplay,
+      hookBoPhanHienThi,
     ],
     beforeChange: [checkvalueuser],
-    afterChange:[removeUserFromDepartments],
+    afterChange: [removeUserFromDepartments],
   },
 }

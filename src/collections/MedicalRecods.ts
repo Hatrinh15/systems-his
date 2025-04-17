@@ -4,10 +4,11 @@ import {
   valueho_so,
   valuemedicalrecord,
   preventDuplicateMedicalRecord,
-  namePatient, generateMedicalRecordID,
+  namePatient,
+  generateMedicalRecordID,
   removePatientFromRoom,
   validatePatientRoom,
-  validateSoHoSoNoiSoi
+  validateSoHoSoNoiSoi,
 } from '@/hooks/Hookmedicalrecord'
 
 const MedicalRecods: CollectionConfig = {
@@ -63,16 +64,27 @@ const MedicalRecods: CollectionConfig = {
               label: 'Hồ sơ',
               type: 'array',
               fields: [
-                {name: 'sohoso',label: 'Số hồ sơ bệnh án', type: 'text',admin: {
-                  readOnly: true, 
-                },},
-                { name: 'khoa', label: 'Khoa', type: 'relationship', relationTo: 'departments',admin: {allowCreate: false} }, 
+                {
+                  name: 'sohoso',
+                  label: 'Số hồ sơ bệnh án',
+                  type: 'text',
+                  admin: {
+                    readOnly: true,
+                  },
+                },
+                {
+                  name: 'khoa',
+                  label: 'Khoa',
+                  type: 'relationship',
+                  relationTo: 'departments',
+                  admin: { allowCreate: false },
+                },
                 {
                   name: 'bacsi',
                   label: 'Bác sĩ phụ trách',
                   type: 'relationship',
                   relationTo: 'users',
-                  admin: {allowCreate: false},
+                  admin: { allowCreate: false },
                   filterOptions: async ({ req, siblingData }) => {
                     try {
                       // Kiểm tra nếu siblingData không tồn tại hoặc không có khoa thì trả về danh sách rỗng
@@ -154,8 +166,8 @@ const MedicalRecods: CollectionConfig = {
                       ],
                     },
                     {
-                      label:'Thuốc điều trị',
-                      fields:[
+                      label: 'Thuốc điều trị',
+                      fields: [
                         {
                           name: 'thuoc',
                           label: 'Thuốc',
@@ -169,23 +181,28 @@ const MedicalRecods: CollectionConfig = {
                                   label: 'Tên thuốc',
                                   type: 'relationship',
                                   relationTo: 'medications',
-                                  admin:{
-                                    allowCreate: false
-                                  }
+                                  admin: {
+                                    allowCreate: false,
+                                  },
                                 },
-                                { name: 'quantity', label: 'Số lượng sử dụng', type: 'number', min: 1 },
+                                {
+                                  name: 'quantity',
+                                  label: 'Số lượng sử dụng',
+                                  type: 'number',
+                                  min: 1,
+                                },
                                 {
                                   name: 'donvi',
                                   label: 'Đơn vị',
                                   type: 'select',
-                                  options:[
-                                    {label: 'Hộp',value:'hop'},
-                                    {label: 'Viên',value:'vien' },
-                                    {label: 'Lọ', value: 'lo'},
-                                    {label: 'Chai',value: 'chai'},
-                                    {label:'Ống',value: 'ong'}
+                                  options: [
+                                    { label: 'Hộp', value: 'hop' },
+                                    { label: 'Viên', value: 'vien' },
+                                    { label: 'Lọ', value: 'lo' },
+                                    { label: 'Chai', value: 'chai' },
+                                    { label: 'Ống', value: 'ong' },
                                   ],
-                                  defaultValue :'hop'
+                                  defaultValue: 'hop',
                                 },
                                 { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
                                 {
@@ -211,21 +228,26 @@ const MedicalRecods: CollectionConfig = {
                                   label: 'Tên vật tư y tế',
                                   type: 'relationship',
                                   relationTo: 'medicalSupplies',
-                                  admin:{
-                                    allowCreate: false
-                                  }
+                                  admin: {
+                                    allowCreate: false,
+                                  },
                                 },
-                                { name: 'quantity', label: 'Số lượng sử dụng', type: 'number', min: 1 },
+                                {
+                                  name: 'quantity',
+                                  label: 'Số lượng sử dụng',
+                                  type: 'number',
+                                  min: 1,
+                                },
                                 {
                                   name: 'donvi',
                                   label: 'Đơn vị',
                                   type: 'select',
-                                  options:[
-                                    {label: 'Hộp',value:'hop'},
-                                    {label: 'Chai',value:'chai'},
-                                    {label: 'Gói', value: 'goi'},
-                                    {label: 'Cuộn', value: 'cuon'},
-                                    {label: 'Miếng',value: 'mieng'}
+                                  options: [
+                                    { label: 'Hộp', value: 'hop' },
+                                    { label: 'Chai', value: 'chai' },
+                                    { label: 'Gói', value: 'goi' },
+                                    { label: 'Cuộn', value: 'cuon' },
+                                    { label: 'Miếng', value: 'mieng' },
                                   ],
                                   defaultValue: 'hop',
                                 },
@@ -240,7 +262,7 @@ const MedicalRecods: CollectionConfig = {
                             },
                           ],
                         },
-                      ]
+                      ],
                     },
                     {
                       label: 'Diễn biến bệnh',
@@ -283,9 +305,9 @@ const MedicalRecods: CollectionConfig = {
                 },
                 {
                   name: 'ppdt',
-                  label:'',
+                  label: '',
                   type: 'group',
-                  fields:[
+                  fields: [
                     {
                       name: 'phuongphap',
                       label: 'Phương pháp điều trị',
@@ -300,7 +322,7 @@ const MedicalRecods: CollectionConfig = {
                       label: 'Mô tả chi tiết',
                       type: 'textarea',
                     },
-                  ]
+                  ],
                 },
                 {
                   name: 'tinhtrang',
@@ -381,8 +403,14 @@ const MedicalRecods: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [namePatient, preventDuplicateMedicalRecord,],
-    beforeValidate: [valueho_so, valuemedicalrecord,generateMedicalRecordID,validatePatientRoom,validateSoHoSoNoiSoi],
+    beforeChange: [namePatient, preventDuplicateMedicalRecord],
+    beforeValidate: [
+      valueho_so,
+      valuemedicalrecord,
+      generateMedicalRecordID,
+      validatePatientRoom,
+      validateSoHoSoNoiSoi,
+    ],
     afterChange: [removePatientFromRoom],
   },
 }

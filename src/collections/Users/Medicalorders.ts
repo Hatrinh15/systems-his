@@ -6,7 +6,7 @@ export const Medicalorders: CollectionConfig = {
   slug: 'medicalorders',
   access: {
     create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
-    delete:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    delete:  (args) => isAdmin(args) ,
     read:  checkKhoaRead,
     update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
   },
@@ -34,6 +34,20 @@ export const Medicalorders: CollectionConfig = {
       label: 'Khoa',
       type: 'relationship',
       relationTo: 'departments',
+      access:{
+        create: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        },
+        update: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        }
+      },
       admin: {
         allowCreate: false,
       },
@@ -43,33 +57,68 @@ export const Medicalorders: CollectionConfig = {
       label: 'Bác sĩ phụ trách',
       type: 'relationship',
       relationTo: 'users',
+      access: {
+        create: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          if(req.user?.chucvu === 'yta') {
+            return true
+           }
+
+          return false
+        },
+        update: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          if(req.user?.chucvu === 'yta') {
+            return true
+           }
+
+          return false
+        }
+      },
       admin: {
         allowCreate: false,
       },
-      filterOptions: async ({ req, data }) => { // Trả về false nếu chưa chọn khoa (ẩn toàn bộ danh sách
-        const selectedKhoa = req.user?.khoa; // Khoa của người dùng, là chuỗi
-
+      filterOptions: async ({ req }) => {
+        const selectedKhoa = req.user?.khoa; // Lấy khoa của người dùng đang đăng nhập
+      
+        if (!selectedKhoa) return false;
+      
         try {
+          // Tìm thông tin khoa theo tên khoa
           const find = await req.payload.find({
             collection: 'departments',
-           where: {
-            tenkhoa: {
-              equals: selectedKhoa
-           } }
-          })
-     
-      const khoaData = find.docs[0]
-          if (!khoaData?.doctors || khoaData.doctors.length === 0) return false;
+            where: {
+              tenkhoa: {
+                equals: selectedKhoa,
+              },
+            },
+            limit: 1,
+          });
       
-          const doctorIds = khoaData.doctors.map((doc) =>
-            typeof doc === 'string' ? doc : doc.id,
+          const khoaData = find.docs[0];
+          if (!khoaData) return false;
+      
+          // Lấy danh sách ID bác sĩ và trưởng khoa
+          const doctorIds = (khoaData.doctors ?? []).map((doc) =>
+            typeof doc === 'string' ? doc : doc.id
+          );
+          const truongKhoaIds = (khoaData.truongkhoa ?? []).map((doc) =>
+            typeof doc === 'string' ? doc : doc.id
           );
       
+          const allUserIds = [...new Set([...doctorIds, ...truongKhoaIds])];
+      
+          if (allUserIds.length === 0) return false;
+      
           return {
-            id: { in: doctorIds },
+            id: { in: allUserIds },
           };
         } catch (error) {
-          console.error('Lỗi lọc danh sách bác sĩ:', error);
+          console.error('Lỗi lọc danh sách bác sĩ và trưởng khoa:', error);
           return false;
         }
       }      
@@ -80,6 +129,28 @@ export const Medicalorders: CollectionConfig = {
       label: 'Y tá/Điều dưỡng thực hiện',
       type: 'relationship',
       relationTo: 'users',
+      access: {
+        create: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          if (req.user?.chucvu === 'bacsi' || req.user?.chucvu === 'truongkhoa') {
+            return true
+           }
+
+          return false
+        },
+        update: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          if (req.user?.chucvu === 'bacsi' || req.user?.chucvu === 'truongkhoa') {
+            return true
+           }
+
+          return false
+        }
+      },
       admin: {
         allowCreate: false,
       },
@@ -250,7 +321,7 @@ export const Medicalorders: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeValidate: [valuemedicalorder,hookSoHoSo],
-    beforeChange: [notChangeHinhThucĐT,hookcheck,checkAutoKhoa,BacSiyTa],
+    beforeValidate: [valuemedicalorder],
+    beforeChange: [notChangeHinhThucĐT,hookcheck,checkAutoKhoa,BacSiyTa,hookSoHoSo],
   },
 }

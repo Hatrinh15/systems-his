@@ -2,6 +2,7 @@ import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBefore
 import { APIError } from "payload";
 import { Access ,AccessArgs } from "payload";
 import { User } from "@/payload-types";
+import { headers } from "next/headers";
 
 export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === "create") {
@@ -173,7 +174,13 @@ export const hookBoPhanHienThi: CollectionBeforeValidateHook = async ({ data }) 
   }
 }
 // ✅ Trưởng khoa hoặc trưởng phòng chỉ xem được nhân sự cùng khoa hoặc cùng phòng
-export const canReadUsers: Access = ({ req,id }): any => {
+export const canReadUsers: Access = async ({ req,id }): Promise<any> => {
+  const referer = (await headers()).get('referer');
+const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRecods') || false;
+
+if (isFromMedicalRecodsAdmin) {
+  return true;
+}
 
   const user = req.user;
   if(id !== undefined) {

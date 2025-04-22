@@ -1,5 +1,6 @@
 import { APIError, CollectionBeforeValidateHook } from "payload";
-
+import { Access } from "payload";
+import { User } from "@/payload-types";
 export const hookSupplier: CollectionBeforeValidateHook = async ({ data, req, originalDoc }) => {
   if (!data) return;
   const { payload } = req;
@@ -96,3 +97,25 @@ if (!originalDoc || originalDoc.email !== data.email) {
 
   return data;
 };
+export const canReadSuppliers: Access = ({ req }) => {
+  const user = req.user as User
+
+  if (!user) return false
+
+  // Admin toàn quyền
+  if (user.taikhoan === 'admin') return true
+
+  const { chucvu, phong, khoa } = user
+
+  // Người trong phòng hành chính - quản trị
+  const isHanhChinhQuanTri =
+    phong === 'hanhchinhquantri' &&
+    ['truongphong', 'nhanvienkho'].includes(chucvu ?? '')
+
+  // Người trong khoa Dược
+  const isKhoaDuoc =
+    khoa === 'khoaduoc' &&
+    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+
+  return isHanhChinhQuanTri || isKhoaDuoc
+}

@@ -1,5 +1,8 @@
 import { APIError, CollapsedPreferences, CollectionBeforeChangeHook } from 'payload'
+import { User } from '@/payload-types'
+import { Access } from 'payload'
 
+import { isAdmin } from './AccessAdmin'
 export const beforeChangeclass: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === 'create') {
     const existingClass = await req.payload.find({
@@ -139,3 +142,38 @@ export const showTitle: CollectionBeforeChangeHook = async ({ data }) => {
   })
   return data
 }
+ 
+export const readClassAccess: Access = async ({ req }) => {
+
+  // Admin thì truy cập toàn quyền
+  if (req?.user?.taikhoan === 'admin') {
+    return true
+  }
+  const chucvu = req?.user?.chucvu
+
+  // Nếu không phải bác sĩ, y tá, trưởng khoa => không thấy gì cả
+  const allowedRoles = ['nhanvienkho', 'ketoan', 'truongphong']
+  if (!chucvu || !allowedRoles.includes(chucvu)) {
+    return false
+  }
+
+  // Nếu user có khoa, thì trả về khoa tương ứng
+  const find = await req.payload.find({
+    collection: 'class',
+    where: {
+      tenphong: { equals: req?.user?.phong },
+    },
+  })
+
+  const id = find.docs[0]?.id
+
+  // Nếu không tìm thấy khoa thì không trả về gì cả
+  if (!id) return false
+
+  return {
+    id: {
+      equals: id,
+    },
+  }
+}
+

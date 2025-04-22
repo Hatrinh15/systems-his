@@ -1,12 +1,15 @@
 import { APIError, CollectionConfig } from "payload";
 import { validateAppointment } from "@/hooks/hookappointment";
-import { Patient } from "@/payload-types";
-import { Label } from "@radix-ui/react-select";
-import { Info } from "lucide-react";
-import { log } from "console";
+import { isAdmin, isBacSiYTaTruongKhoa } from "@/hooks/AccessAdmin";
 
 export const Appointments: CollectionConfig = {
 slug: 'appointments',
+access: {
+  create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+  delete:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+  update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+  read: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+},
 labels: {
     singular: 'Đặt Lịch Khám',
     plural: 'Đặt Lịch Khám',

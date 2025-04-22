@@ -1,8 +1,15 @@
 import { CollectionConfig } from 'payload'
 import { validateMedicationData } from '@/hooks/HookMedication'
-
+import { isAdmin,isAdminDuocSi ,isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
+import { canReadSuppliers } from '@/hooks/HookSuppliers'
 export const Medications: CollectionConfig = {
   slug: 'medications',
+access: {
+        create: (args) => isAdminDuocSi(args),
+        delete:  (args) => isAdminDuocSi(args) ,
+        update:  (args) => isAdminDuocSi(args) ,
+        read:  (args) => canReadSuppliers(args)||isBacSiYTaTruongKhoa(args),
+      },
   labels: {
     singular: 'Thuốc',
     plural: 'Thuốc',

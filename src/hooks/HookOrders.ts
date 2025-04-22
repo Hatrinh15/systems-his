@@ -1,4 +1,6 @@
-import { CollectionBeforeChangeHook, CollectionAfterChangeHook ,APIError,PayloadRequest} from 'payload'
+import { CollectionBeforeChangeHook, CollectionAfterChangeHook ,APIError,PayloadRequest,CollectionAfterReadHook} from 'payload'
+import { Access } from 'payload'
+import { User } from '@/payload-types'
 
 export const hookTinhGiaThuoc: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (!data) {
@@ -413,9 +415,9 @@ export const hookValidateOrderFields: CollectionBeforeChangeHook = async ({ data
   }
 
   // 4. Nhân viên bán hàng
-  if (!data.staff) {
-    errors.push('Vui lòng chọn nhân viên bán hàng.')
-  }
+  // if (!data.staff) {
+  //   errors.push('Vui lòng chọn nhân viên bán hàng.')
+  // }
 
   // 5. Hình thức thanh toán
   if (!data.paymentmethod) {
@@ -457,9 +459,78 @@ export const hookValidateOrderFields: CollectionBeforeChangeHook = async ({ data
   return data
 }
 
+export const canReadOrders: Access = ({ req }) => {
+  const user = req.user as User
 
+  if (!user) return false
 
+  // Admin toàn quyền
+  if (user.taikhoan === 'admin') return true
 
+  const { chucvu, phong, khoa } = user
 
+  // Người trong phòng hành chính - quản trị
+  const isTaiChinhKeToan =
+    phong === 'taichinhketoan' &&
+    ['truongphong', 'ketoan'].includes(chucvu ?? '')
 
+  // Người trong khoa Dược
+  const isKhoaDuoc =
+    khoa === 'khoaduoc' &&
+    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+
+  return isTaiChinhKeToan || isKhoaDuoc
+}
+
+export const autoStaff: CollectionBeforeChangeHook = async ({ req, data, operation }) => {
+  if (operation === 'create' && req.user) {
+    const user = req.user as User;
+
+    // Nếu chưa có sẵn giá trị từ client, sẽ tự động gán
+    return {
+      ...data,
+      staff: data?.staff || user.id,             // Gán luôn ID người dùng đang đăng nhập
+    };
+  }
+
+  return data;
+};
+
+export const afterReadOrdersCustomerLabel: CollectionAfterReadHook = async ({ doc, req }) => {
+  if (doc.customer && typeof doc.customer === 'string') {
+    try {
+      const patient = await req.payload.findByID({
+        collection: 'patients',
+        id: doc.customer,
+      });
+      doc.customerLabel = patient?.ten || '[Không xác định]';
+    } catch (err) {
+      doc.customerLabel = '[Ẩn]';
+    }
+  } else {
+    doc.customerLabel = '[Chưa chọn]';
+  }
+
+  return doc;
+};
+
+export const afterReadOrdersStaffLabel: CollectionAfterReadHook = async ({ doc, req }) => {
+  if (req.user?.taikhoan !== 'admin') {
+    // Nếu không phải admin, tạo label hiển thị tên nhân viên
+    const staff = doc?.staff
+    if (staff) {
+      if (typeof staff === 'object') {
+        doc.staffLabel = staff.name || ''
+      } else {
+        // Trường hợp staff chỉ là ID -> fetch thêm
+        const staffUser = await req.payload.findByID({
+          collection: 'users',
+          id: staff,
+        })
+        doc.staffLabel = staffUser?.name || ''
+      }
+    }
+  }
+  return doc
+}
 

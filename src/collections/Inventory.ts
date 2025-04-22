@@ -1,8 +1,14 @@
 import { hookCheckInfo, hookQuantity, inventoryHook } from '@/hooks/HookInventory'
 import { CollectionConfig } from 'payload'
-
+import { isAdminNhanVienKho } from '@/hooks/AccessAdmin'
 export const Inventory: CollectionConfig = {
   slug: 'inventory',
+  access: {
+    create: isAdminNhanVienKho,
+    read: isAdminNhanVienKho, 
+    update: isAdminNhanVienKho,
+    delete: isAdminNhanVienKho,
+  },
   labels: {
     singular: 'Kho Hàng',
     plural: 'Kho Hàng',

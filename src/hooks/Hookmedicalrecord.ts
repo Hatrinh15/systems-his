@@ -1,5 +1,7 @@
 import { APIError, CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from 'payload'
 
+import isEqual from 'lodash/isEqual';
+
 export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
   if (!data || !Array.isArray(data.hoso)) {
     throw new APIError('Hãy nhập thông tin hồ sơ hợp lệ!', 400)
@@ -15,8 +17,7 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
 
     const errorArray: string[] = []
 
-    if (!record.khoa) errorArray.push('Khoa')
-    if (!record.bacsi) errorArray.push('Bác sĩ')
+    // if (!record.bacsi) errorArray.push('Bác sĩ')
     if (!record.ngaynhapvien) errorArray.push('Ngày nhập viện')
     if (!record.chuandoan) errorArray.push('Chuẩn đoán')
 
@@ -50,7 +51,6 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
   }
 }
 
-
 export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
 
 
@@ -83,6 +83,7 @@ export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) 
     throw new APIError(error.map((err) => `, ${err}`).join('\n'), 400)
   }
 }
+
 export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async ({
   data,
   req,
@@ -104,6 +105,21 @@ export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async (
     }
   }
 }
+
+export const validateNhapVienOnlyOnce: CollectionBeforeValidateHook = async ({ data, originalDoc }) => {
+  // Nếu tình trạng hiện tại vẫn là "Nhập viện"
+  if (data?.tinhtrang === 'no') {
+    // Nếu đã có hồ sơ trong originalDoc (tức là cập nhật), không cho thêm mới nếu đã tồn tại hồ sơ nhập viện
+    const existingHosoba = originalDoc?.hoso || [];
+
+    // Nếu đang thêm mới hoặc đã có nhiều hơn một hồ sơ → chặn lại
+    if (existingHosoba.length >= 1) {
+      throw new APIError('Không thể tạo thêm hồ sơ khi bệnh nhân đang trong tình trạng nhập viện.', 400);
+    }
+  }
+
+  return data;
+};
 
 export const namePatient = async ({ data, req }) => {
   if (data.thongtinbenhnhan) {
@@ -217,7 +233,6 @@ export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, pr
   }
 }
 
-
 export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, req, operation }) => {
   if (operation !== 'create' && operation !== 'update') return data;
 
@@ -313,3 +328,80 @@ export const validateSoHoSoNoiSoi: CollectionBeforeValidateHook = async ({ data 
   return data
 }
 
+export const validateSoHoSo: CollectionBeforeValidateHook = async ({ data, req, originalDoc, operation }) => {
+  if (!data || !req.user || !originalDoc || operation !== 'update') return data;
+
+  // Bỏ qua nếu là admin
+  if (req.user.taikhoan === 'admin') return data;
+
+  const user = req.user;
+
+  // Tìm khoa của user
+  const find = await req.payload.find({
+    collection: 'departments',
+    where: {
+      tenkhoa: {
+        equals: user.khoa,
+      },
+    },
+  });
+
+  const userDepartmentId = find.docs[0]?.id;
+  if (!userDepartmentId) {
+    throw new APIError('Không tìm thấy khoa của người dùng.', 400);
+  }
+
+  // Nếu có trường hoso là mảng
+  if (Array.isArray(data.hoso) && Array.isArray(originalDoc.hoso)) {
+    for (let i = 0; i < data.hoso.length; i++) {
+      const newItem = data.hoso[i];
+      const oldItem = originalDoc.hoso[i];
+
+      // Nếu mục này thuộc khoa người dùng → cho thay đổi
+      if (newItem.khoa === userDepartmentId) continue;
+
+      const isDifferent = !isEqual(newItem, oldItem);
+      if (isDifferent) {
+        throw new APIError('Không được thay đổi dữ liệu không thuộc khoa của bạn.', 400);
+      }
+    }
+  }
+
+  return data;
+}
+
+export const autoDepartment: CollectionBeforeValidateHook = async ({ data, req }) => { 
+  if(!data || !req.user) return data
+  if (req.user.taikhoan === 'admin') return data;
+
+  const user = req.user;
+
+  // Tìm khoa của user
+  const find = await req.payload.find({
+    collection: 'departments',
+    where: {
+      tenkhoa: {
+        equals: user.khoa,
+      },
+    },
+  });
+
+  const userDepartmentId = find.docs[0]?.id;
+  if (!userDepartmentId) {
+    throw new APIError('Không tìm thấy khoa của người dùng.', 400);
+  }
+  for (const item of data.hoso) {
+    if (!item.khoa) {
+    console.log('Gán khoa cho mục này:', item); // Ghi log để kiểm tra
+      item.khoa = userDepartmentId; 
+    }
+    if (!item.bacsi) {
+      if (user.chucvu === 'truongkhoa' || user.chucvu === 'bacsi') {
+        item.bacsi = user.id; // Gán ID của bác sĩ hoặc trưởng khoa vào trường bacsi
+        console.log('Tự động gán bác sĩ phụ trách:', user.name); // Ghi log để kiểm tra
+      }
+    }
+  }
+
+  return data; // Trả về dữ liệu đã chỉnh sửa
+}

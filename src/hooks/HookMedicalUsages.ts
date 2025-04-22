@@ -1,5 +1,7 @@
 import { APIError, CollectionBeforeChangeHook,CollectionBeforeValidateHook } from 'payload';
 import { PayloadRequest } from 'payload';
+import { Access } from 'payload';
+import { User } from '@/payload-types';
 
 export const hookPhieuSuDung: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
   const currentDate = new Date();
@@ -286,7 +288,7 @@ export const hookcheckvalue: CollectionBeforeChangeHook = async ({ data, req, op
     { field: 'loaiphieu', label: 'Loại phiếu' },
     { field: 'usagedate', label: 'Ngày sử dụng/hủy hàng' },
     { field: 'department', label: 'Khoa sử dụng' },
-    { field: 'staff', label: 'Nhân viên thực hiện' },
+    // { field: 'staff', label: 'Nhân viên thực hiện' },
     { field: 'danhsachsanpham', label: 'Danh sách sản phẩm' }
   ];
 
@@ -473,12 +475,58 @@ export const lockLoaiPhieu: CollectionBeforeValidateHook = async ({ data, origin
   return data;
 };
 
+export const canReadMedical: Access = async ({ req }) => {
+  const user = req.user as User;
+  // Nếu là admin thì truy cập toàn bộ
+  if (user?.taikhoan === 'admin') {
+    return true;
+  }
 
+  // Nếu không có khoa thì từ chối
+  if (!user?.khoa) {
+    return false;
+  }
 
+  // Tìm ID của khoa tương ứng
+  try {
+    const result = await req.payload.find({
+      collection: 'departments',
+      where: {
+        tenkhoa: {
+          equals: user.khoa,
+        },
+      },
+    });
 
+    const departmentId = result?.docs?.[0]?.id;
 
+    if (!departmentId) {
+      return false;
+    }
+    return {
+      department: {
+        equals: departmentId,
+      },
+    };
+  } catch (error) {
+    console.error('Lỗi khi truy vấn khoa:', error);
+    return false;
+  }
+};
 
+export const autoAssignStaff: CollectionBeforeChangeHook = async ({ req, data, operation }) => {
+  if (operation === 'create' && req.user) {
+    const user = req.user as User;
 
+    // Nếu chưa có sẵn giá trị từ client, sẽ tự động gán
+    return {
+      ...data,
+      staff: data?.staff || user.id,             // Gán luôn ID người dùng đang đăng nhập
+    };
+  }
+
+  return data;
+};
 
 
 

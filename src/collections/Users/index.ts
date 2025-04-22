@@ -42,10 +42,6 @@ export const Users: CollectionConfig = {
         read: ({ req }) => req.user?.taikhoan === 'admin',
         update: ({ req }) => req.user?.taikhoan === 'admin',
       },
-      admin: {
-        condition: ({ user }) => user?.taikhoan === 'admin',
-      }
-      
   },
 
     {

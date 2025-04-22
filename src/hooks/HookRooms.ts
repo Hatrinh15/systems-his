@@ -1,5 +1,6 @@
 import { APIError, CollectionBeforeChangeHook } from 'payload'
-
+import { Access } from 'payload'
+import { User } from '@/payload-types'
 export const beforeChangeRooms: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
   if (operation !== 'create' && operation !== 'update') return
   if (operation === 'create') {
@@ -93,4 +94,55 @@ export const checkTenPhong: CollectionBeforeChangeHook = async ({ data, req, ope
   if (duplicatesInOtherRecords.length > 0) {
     throw new APIError(`Tên phòng đã tồn tại ở khoa khác: ${duplicatesInOtherRecords.join(', ')}`, 400)
   }
+}
+
+export const checkKhoaRead: Access= async ({req,data})=> {
+  const user = req.user as User;
+  // Kiểm tra nếu là admin hoặc bác sĩ/y tá/trưởng khoa
+  if (user?.taikhoan === 'admin') {
+    return true;
+  }
+
+  // Kiểm tra khoa của người dùng và khoa trong bản ghi
+const userKhoa = user?.khoa; // Khoa của người dùng, là chuỗi
+const find = await req.payload.find({
+  collection: 'departments',
+  where: {
+    tenkhoa: { equals: userKhoa },
+  }
+})
+const id = find.docs[0]?.id
+// Nếu khoa của người dùng trùng với khoa của bản ghi, cho phép xem
+  if (user?.chucvu === 'bacsi' ||user?.chucvu === 'truongkhoa' || user?.chucvu === 'yta') {
+  return {
+    khoa : {
+      equals: id
+    }
+  }
+}
+
+  return false;
+}
+
+export const themOrXoaRoom: CollectionBeforeChangeHook = async ({ data, req, originalDoc }) => {
+  const user = req.user as User
+
+  // Kiểm tra nếu không phải admin
+  if (user?.taikhoan !== 'admin') {
+    const originalRooms = originalDoc?.Phong || []
+    const updatedRooms = data?.Phong || []
+
+    const originalLength = originalRooms.length
+    const updatedLength = updatedRooms.length
+
+    // Nếu số lượng phòng khác => hoặc có thêm hoặc có xóa
+    if (updatedLength !== originalLength) {
+      throw new APIError('Bạn không được phép thêm hoặc xóa phòng bệnh!',400)
+    }
+
+    // Nếu người dùng cố gắng sửa danh sách (ví dụ thay đổi tên), bạn có thể kiểm tra thêm từng phòng
+    // (phần này tuỳ chọn nếu bạn muốn kiểm soát cả update nội dung)
+  }
+
+  return data
 }

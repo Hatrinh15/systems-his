@@ -1174,6 +1174,7 @@ export interface MedicalUsage {
 export interface Order {
   id: string;
   customer?: (string | null) | Patient;
+  customerLabel?: string | null;
   baohiemyte?: ('yes' | 'no') | null;
   bhyt?: {
     loai?: ('tamtram' | 'chinlam' | 'mottram') | null;
@@ -1204,6 +1205,7 @@ export interface Order {
   totalprice?: string | null;
   orderdate?: string | null;
   staff?: (string | null) | User;
+  staffLabel?: string | null;
   paymentmethod?: ('cash' | 'card' | 'insurance') | null;
   ghichu?: string | null;
   updatedAt: string;
@@ -2196,6 +2198,7 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
+  customerLabel?: T;
   baohiemyte?: T;
   bhyt?:
     | T
@@ -2230,6 +2233,7 @@ export interface OrdersSelect<T extends boolean = true> {
   totalprice?: T;
   orderdate?: T;
   staff?: T;
+  staffLabel?: T;
   paymentmethod?: T;
   ghichu?: T;
   updatedAt?: T;

@@ -31,7 +31,7 @@ import { medicalUsages } from './collections/MedicalUsages'
 import { Orders } from './collections/Orders'
 import { PhieuXuat } from './collections/ExportTransactions'
 import { baoGia } from './collections/Baogia'
-import { test } from './collections/test'
+
 import { Pharmacies } from './collections/Pharmacies'
 import { InventoryTransactions } from './collections/InventoryTransactions'
 

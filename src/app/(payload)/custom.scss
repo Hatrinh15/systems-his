@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  /* Variables */
+  --theme-bg: #cbe5ec;
+  --theme-input-bg: #92cedd;
+  --theme-text: #303873;
+  --theme-overlay: #93b8b4;
+  --font-body: 'Slabo 27px', serif;
+  --font-mono: 'Droid Sans Mono', monospace;
+  --font-serif: Georgia, serif;
+  --style-radius-s: 19px;
+  --style-radius-m: 8px;
+  --style-radius-l: 17px;
+  --nav-width: 250px;
+}
+//cá mục trong màn hình chính
+.dashboard__label {
+  fontfamily: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 18px;
+  background-color: #cbe5ec;
+  border: 1px ridge #cbe5ec;
+  border-radius: 1px;
+  color: #0e0101;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+//nav là điều chỉnh khung sidebar
+.nav {
+  background-color: #cedde3;
+  font-size: 15px;
+  font-family: Times New Roman;
+  font-weight: normal;
+  border: 1px dashed #000000;
+  border-radius: 14px;
+  color: #0a416b;
+}
+.nav-group__label {
+  color: var(--theme-elevation-700);
+  font-size: 14px;
+  border-radius: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-family: Times New Roman;
+  font-weight: bold;
+}
+//thanhdropdown
+.nav-group__indicator svg .stroke {
+  stroke: #041114;
+  padding-left: 19px;
+  padding-right: 19px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+:root {
+  --theme-elevation-100: #cedde3;
+  --theme-elevation-200: #accfda;
+  --theme-elevation-300: #65a1bf;
+
+  --sidebar-bg: #ccdae4;
+  --card-bg: #e9f4f7; // màu sáng hơn nếu muốn trắng nhẹ
+
+  --text-color: #0e0101;
+}
+
+// Override sidebar
+.sidebar {
+  background-color: var(--sidebar-bg) !important;
+  color: white;
+}
+
+// Override card
+.card {
+  background-color: var(--card-bg) !important;
+  border: 3px solid var(--theme-elevation-200);
+  border-radius: 0.5rem;
+  color: var(--text-color);
+  border-radius: 50px;
+  padding-left: 21px;
+  padding-right: 21px;
+}
+//chữ trong các ô
+.field-type.text:not(.has-many) input {
+  border: 1px dotted var(--theme-elevation-200);
+  font-size: 14px;
+  font-family: Times New Roman;
+  font-weight: normal;
+  color: #0d0d0e;
+  padding-left: 15px;
+  padding-right: 125px;
+}
+// .tab-panel {
+//   padding-top: 2px;
+//   padding-bottom: 2px;
+// }
+// .template-default__wrap {
+//   font-size: 19px;
+//   font-family: Times New Roman;
+//   font-weight: normal;
+// }

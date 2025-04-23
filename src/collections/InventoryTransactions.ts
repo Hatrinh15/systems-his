@@ -40,7 +40,7 @@ export const InventoryTransactions: CollectionConfig = {
                   label: 'Nhà cung cấp',
                   type: 'relationship',
                   relationTo: 'suppliers',
-                  admin: {allowCreate:false},
+                  admin: { allowCreate: false },
                 },
                 {
                   name: 'thoigian',
@@ -61,7 +61,7 @@ export const InventoryTransactions: CollectionConfig = {
                   label: 'Người nhận',
                   type: 'relationship',
                   relationTo: 'users',
-                  admin: {allowCreate:false},
+                  admin: { allowCreate: false },
 
                   filterOptions: async ({ data, req }) => {
                     try {
@@ -113,7 +113,7 @@ export const InventoryTransactions: CollectionConfig = {
                           label: 'Tên thuốc',
                           type: 'relationship',
                           relationTo: 'medications',
-                          admin: {allowCreate:false},
+                          admin: { allowCreate: false },
                           filterOptions: async ({ req, siblingData, data }) => {
                             if (!data) return false
 
@@ -236,7 +236,7 @@ export const InventoryTransactions: CollectionConfig = {
                           label: ' Tên vật tư tiêu hao',
                           type: 'relationship',
                           relationTo: 'medicalSupplies',
-                          admin: {allowCreate:false},
+                          admin: { allowCreate: false },
                           filterOptions: async ({ req, siblingData, data }) => {
                             if (!data) return false
 
@@ -362,7 +362,7 @@ export const InventoryTransactions: CollectionConfig = {
                           label: 'Tên máy móc - thiết bị',
                           type: 'relationship',
                           relationTo: 'medicalSupplies',
-                          admin: {allowCreate:false},
+                          admin: { allowCreate: false },
                           filterOptions: async ({ req, siblingData, data }) => {
                             if (!data) return false
 

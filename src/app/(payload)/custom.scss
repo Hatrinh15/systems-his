@@ -3,9 +3,9 @@
 @tailwind utilities;
 :root {
   /* Variables */
-  --theme-bg: #cbe5ec;
-  --theme-input-bg: #92cedd;
-  --theme-text: #303873;
+  --theme-bg: #ffffff;
+  --theme-input-bg: #ffffff;
+  --theme-text: #0b2751;
   --theme-overlay: #93b8b4;
   --font-body: 'Slabo 27px', serif;
   --font-mono: 'Droid Sans Mono', monospace;
@@ -19,8 +19,8 @@
 .dashboard__label {
   fontfamily: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
   font-size: 18px;
-  background-color: #cbe5ec;
-  border: 1px ridge #cbe5ec;
+  background-color: #ffffff;
+  border: 1px ridge #ffffff;
   border-radius: 1px;
   color: #0e0101;
   padding-left: 5px;
@@ -30,11 +30,10 @@
 }
 //nav là điều chỉnh khung sidebar
 .nav {
-  background-color: #cedde3;
+  background-color: #cbe5ec;
   font-size: 15px;
   font-family: Times New Roman;
   font-weight: normal;
-  border: 1px dashed #000000;
   border-radius: 14px;
   color: #0a416b;
 }
@@ -82,22 +81,78 @@
   padding-left: 21px;
   padding-right: 21px;
 }
-//chữ trong các ô
-.field-type.text:not(.has-many) input {
-  border: 1px dotted var(--theme-elevation-200);
+
+.tab-panel {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+//custom nút ấn save
+.btn--style-primary {
+  background-color: #accfda;
+  font-size: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 15px;
+  font-weight: bold;
+}
+//custom useastitle
+.doc-header__title {
+  font-family: Helvetica;
+  font-size: 37px;
+  font-weight: normal;
+  border-radius: 15px;
+
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+// khoảng cách giữa các tabs trong cùng một collection
+.tabs-field__tabs {
+  display: flex;
+  gap: 12px; /* chỉnh số này để giãn nhiều hay ít */
+  margin-bottom: 12px; /* nếu muốn cách phía dưới */
+}
+
+.tabs-fields_tab-button {
+  margin-right: 12px; /* tạo khoảng cách giữa các tab */
+  border-radius: 10px;
+  padding: 8px 16px;
+  background-color: #e1edf0; /* nền nhẹ nhàng, có thể tùy chỉnh */
+  color: #0b2751;
+  font-family: Times New Roman;
+  font-weight: bold;
+}
+// ẩn chữ togger và vẫn giữ nguyên chức năng click
+.collapsible__toggle-wrap .collapsible__toggle {
+  color: transparent; /* Ẩn chữ mà vẫn giữ kích thước */
+  pointer-events: auto; /* Đảm bảo click vẫn hoạt động */
+}
+//tạo viền cho các collection
+.field-type__wrap {
+  border: 2px solid var(--theme-elevation-200);
+  border-radius: 14px;
   font-size: 14px;
   font-family: Times New Roman;
   font-weight: normal;
-  color: #0d0d0e;
-  padding-left: 15px;
-  padding-right: 125px;
+  padding-left: 10px;
+  padding-right: 10px;
+  color: #0b2751;
 }
-// .tab-panel {
-//   padding-top: 2px;
-//   padding-bottom: 2px;
-// }
-// .template-default__wrap {
-//   font-size: 19px;
-//   font-family: Times New Roman;
-//   font-weight: normal;
+.field-type__wrap * {
+  border-radius: 0 !important; /* xóa bo góc bên trong */
+  box-shadow: none !important; /* đề phòng có shadow bo tròn */
+}
+// button,
+// [role='button'] {
+//   background-color: #accfda;
+//   font-size: 14px;
+//   padding-top: 10px;
+//   padding-bottom: 10px;
+//   padding-left: 12px;
+//   padding-right: 12px;
+//   border-radius: 15px;
+//   font-weight: bold;
 // }

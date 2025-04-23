@@ -1,8 +1,17 @@
 import { CollectionConfig, Where } from 'payload'
-import { hookBaoGia, hookNhapQuayThuoc, hookxuatkho, showPrice ,hookNhapKhoKhoa, checkInventoryBeforeExport ,hookCheckinfo,showTotalPrice} from '@/hooks/Hook_Xuat_Kho'
+import { hookBaoGia, hookNhapQuayThuoc, hookxuatkho, showPrice ,
+  hookNhapKhoKhoa, checkInventoryBeforeExport ,hookCheckinfo,showTotalPrice,autoAssignNguoiLapPhieu} from '@/hooks/Hook_Xuat_Kho'
+import { isAdmin,isAdminNhanVienKho ,isAdminKeToanNhanVienKho} from '@/hooks/AccessAdmin'
+import { User } from 'payload'
 
 export const PhieuXuat: CollectionConfig = {
   slug: 'phieuxuat',
+  access: {
+    create: isAdminNhanVienKho,
+    delete: isAdminNhanVienKho,
+    update: isAdminNhanVienKho,
+    read: isAdminKeToanNhanVienKho,
+  },
   labels: {
     singular: 'Phiếu Xuất Kho',
     plural: 'Phiếu Xuất Kho',
@@ -34,9 +43,18 @@ export const PhieuXuat: CollectionConfig = {
               label: 'Người lập phiếu',
               type: 'relationship',
               relationTo: 'users',
-              
+              access: {
+                create: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
               filterOptions: () => ({
-                khoa: { equals: 'khoaduoc' },
+                phong: { equals: 'hanhchinhquantri' },
               }),
             },
             {
@@ -620,7 +638,7 @@ export const PhieuXuat: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeChange: [hookBaoGia, checkInventoryBeforeExport, hookCheckinfo, showPrice],
+    beforeChange: [hookBaoGia, checkInventoryBeforeExport, hookCheckinfo, showPrice,autoAssignNguoiLapPhieu],
     afterRead: [showTotalPrice],
     afterChange: [hookxuatkho, hookNhapQuayThuoc, hookNhapKhoKhoa],
   },

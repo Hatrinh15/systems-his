@@ -98,24 +98,15 @@ if (!originalDoc || originalDoc.email !== data.email) {
   return data;
 };
 export const canReadSuppliers: Access = ({ req }) => {
-  const user = req.user as User
+  const user = req.user as User;
+  const chucvuChoPhep = [
+    'truongphong', 'nhanvienkho',
+    'ketoan', 'duocsi',
+    'truongkhoa', 'bacsi', 'yta',
+  ];
 
-  if (!user) return false
-
-  // Admin toàn quyền
-  if (user.taikhoan === 'admin') return true
-
-  const { chucvu, phong, khoa } = user
-
-  // Người trong phòng hành chính - quản trị
-  const isHanhChinhQuanTri =
-    phong === 'hanhchinhquantri' &&
-    ['truongphong', 'nhanvienkho'].includes(chucvu ?? '')
-
-  // Người trong khoa Dược
-  const isKhoaDuoc =
-    khoa === 'khoaduoc' &&
-    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
-
-  return isHanhChinhQuanTri || isKhoaDuoc
-}
+  return (
+    user?.taikhoan === 'admin' ||
+    chucvuChoPhep.includes(user?.chucvu ?? '')
+  );
+};

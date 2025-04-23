@@ -1,8 +1,16 @@
-import { checkDate, hookNhapKho, showPrice, thongBaotrong } from '@/hooks/hookphieunhap'
+import { autoNguoiLapPhieu, checkDate, hookNhapKho, showPrice, thongBaotrong } from '@/hooks/hookphieunhap'
 import { CollectionConfig } from 'payload'
+import { isAdmin,isAdminKeToanNhanVienKho ,isAdminNhanVienKho} from '@/hooks/AccessAdmin'
+import { User } from 'payload'
 
 export const InventoryTransactions: CollectionConfig = {
   slug: 'inventorytransactions',
+  access: {
+      create: isAdminNhanVienKho,
+      delete: isAdminNhanVienKho,
+      update: isAdminNhanVienKho,
+      read: isAdminKeToanNhanVienKho,
+    },
   labels: {
     singular: 'Phiếu Nhập Kho',
     plural: 'Phiếu Nhập Kho',
@@ -31,6 +39,26 @@ export const InventoryTransactions: CollectionConfig = {
               },
             },
             {
+              name: 'receiverorsender',
+              label: 'Người nhận',
+              type: 'relationship',
+              relationTo: 'users',
+              admin: {allowCreate:false},
+              access: {
+                              create: ({ req }) => {
+                                const user = req.user as User
+                                return user?.taikhoan === 'admin'
+                              },
+                              update: ({ req }) => {
+                                const user = req.user as User
+                                return user?.taikhoan === 'admin'
+                              },
+                            },
+          filterOptions: () => ({
+            phong: { equals: 'hanhchinhquantri' },
+          }),
+            },
+            {
               name: 'giaodich',
               label: 'Danh sách nhập hàng',
               type: 'array',
@@ -55,50 +83,6 @@ export const InventoryTransactions: CollectionConfig = {
                       ],
                     },
                   ],
-                },
-                {
-                  name: 'receiverorsender',
-                  label: 'Người nhận',
-                  type: 'relationship',
-                  relationTo: 'users',
-                  admin: {allowCreate:false},
-
-                  filterOptions: async ({ data, req }) => {
-                    try {
-                      // Lấy danh sách bác sĩ thuộc Khoa Dược
-                      const khoaDuoc = await req.payload.find({
-                        collection: 'departments',
-                        where: { tenkhoa: { equals: 'khoaduoc' } },
-                        limit: 1, // Chỉ lấy khoa Dược
-                      })
-
-                      const khoaDuocData = khoaDuoc?.docs?.[0] // Lấy khoa đầu tiên (nếu có)
-                      const doctorsInKhoaDuoc =
-                        khoaDuocData?.doctors?.map((doc) =>
-                          typeof doc === 'string' ? doc : doc?.id,
-                        ) || []
-
-                      // Kiểm tra nếu đã chọn bác sĩ trước đó
-                      const selectedUser = data?.receiverorsender
-                      const selectedUserId =
-                        typeof selectedUser === 'string' ? selectedUser : selectedUser?.id
-
-                      return {
-                        and: [
-                          { chucvu: { equals: 'duocsi' } }, // Chỉ lấy dược sĩ
-                          {
-                            or: [
-                              { id: { in: doctorsInKhoaDuoc } }, // Chỉ lấy bác sĩ thuộc khoa Dược
-                              { id: { equals: selectedUserId } }, // Giữ lại người đã chọn trước đó
-                            ],
-                          },
-                        ],
-                      } as any
-                    } catch (error) {
-                      console.error('Lỗi khi lọc Người nhận/Người xuất:', error)
-                      return {}
-                    }
-                  },
                 },
                 {
                   name: 'thuoc',
@@ -495,7 +479,7 @@ export const InventoryTransactions: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [showPrice, thongBaotrong],
+    beforeChange: [showPrice, thongBaotrong,autoNguoiLapPhieu],
     beforeValidate: [checkDate],
     afterChange: [hookNhapKho],
   },

@@ -7,7 +7,7 @@ export const Suppliers: CollectionConfig = {
         create: (args) => isAdmin(args),
         delete:  (args) => isAdmin(args) ,
         update:  (args) => isAdmin(args) ,
-        read:  (args) => canReadSuppliers(args)||isBacSiYTaTruongKhoa(args),
+        read:  (args) => canReadSuppliers(args),
       },
   labels: {
     singular: 'Nhà Cung Cấp',

@@ -78,3 +78,21 @@ export const isAdminKeToan: Access = ({ req }) => {
 
   return isAdminAccount || isKeToanFullAccess
 } 
+
+export const isAdminKeToanNhanVienKho: Access = ({ req }) => {
+  const user = req.user as User;
+
+  if (!user) return false;
+
+  const isAdminAccount = user.taikhoan === 'admin';
+
+  const isKeToanFullAccess =
+    user.phong === 'taichinhketoan' &&
+    ['ketoan', 'truongphong'].includes(user.chucvu ?? '');
+
+  const isHanhChinhQuanTri =
+    user.phong === 'hanhchinhquantri' &&
+    ['truongphong', 'nhanvienkho'].includes(user.chucvu ?? '');
+
+  return isAdminAccount || isKeToanFullAccess || isHanhChinhQuanTri;
+};

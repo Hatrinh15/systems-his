@@ -91,22 +91,22 @@ export const checkclass: CollectionBeforeChangeHook= async ({ data }) => {
 
   // Kiểm tra tên phòng
   if (!data?.tenphong) {
-    errors.push('Vui lòng chọn TÊN PHÒNG.')
+    errors.push('Vui lòng chọn Tên phòng.')
   }
 
   // Kiểm tra trưởng phòng
   if (!data?.truongphong || data.truongphong.length === 0) {
-    errors.push('Vui lòng chọn TRƯỞNG PHÒNG.')
+    errors.push('Vui lòng chọn Trưởng phòng.')
   }
 
   // Kiểm tra nhân viên
-  if (!data?.nhanvien || data.nhanvien.length === 0) {
-    errors.push('Vui lòng chọn ít nhất một NHÂN VIÊN.')
-  }
+  // if (!data?.nhanvien || data.nhanvien.length === 0) {
+  //   errors.push('Vui lòng chọn ít nhất một NHÂN VIÊN.')
+  // }
 
   // Kiểm tra ngày thành lập
   if (!data?.thongtin?.ngaythanhlap) {
-    errors.push('Vui lòng chọn NGÀY THÀNH LẬP.')
+    errors.push('Vui lòng chọn Ngày thành lập.')
   }
 
   if (errors.length > 0) {

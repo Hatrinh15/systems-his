@@ -87,3 +87,16 @@ export const accessMedicalSupplies: Access = ({ req }) => {
 
   return isHanhChinhQuanTri || isKhoaDuoc
 }
+export const canReadMedicalSupplies: Access = ({ req }) => {
+  const user = req.user as User;
+  const chucvuChoPhep = [
+    'truongphong', 'nhanvienkho',
+    'ketoan', 'duocsi',
+    'truongkhoa', 'bacsi', 'yta',
+  ];
+
+  return (
+    user?.taikhoan === 'admin' ||
+    chucvuChoPhep.includes(user?.chucvu ?? '')
+  );
+};

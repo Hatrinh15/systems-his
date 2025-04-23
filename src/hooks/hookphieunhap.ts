@@ -13,9 +13,9 @@ export const checkDate: CollectionBeforeValidateHook = async ({ req, data, opera
       collection: 'inventorytransactions',
       where: { transactiondate: { equals: data?.transactiondate } },
     })
-    if (existingTransaction.docs.length > 0) {
-      throw new APIError('Ngày giao dịch đã tồn tại trong hệ thống!', 400)
-    }
+    // if (existingTransaction.docs.length > 0) {
+    //   throw new APIError('Ngày giao dịch đã tồn tại trong hệ thống!', 400)
+    // }
   }
   if (!data) {
     throw new APIError('Dữ liệu không hợp lệ!', 400)
@@ -593,9 +593,9 @@ export const thongBaotrong: CollectionBeforeChangeHook = async ({ data }) => {
     if (!giaodich.nhacungcap) {
       errors.push(` Giao dịch ${giaodichIndex + 1}: Vui lòng chọn nhà cung cấp!`)
     }
-    if (!giaodich.receiverorsender) {
-      errors.push(` Giao dịch ${giaodichIndex + 1}: Vui lòng chọn người nhận hàng !`)
-    }
+    // if (!giaodich.receiverorsender) {
+    //   errors.push(` Giao dịch ${giaodichIndex + 1}: Vui lòng chọn người nhận hàng !`)
+    // }
     // Kiểm tra danh sách thuốc
     giaodich.thuoc?.forEach((thuoc, index) => {
       if (!thuoc.tenthuoc)
@@ -625,4 +625,24 @@ export const thongBaotrong: CollectionBeforeChangeHook = async ({ data }) => {
   if (errors.length > 0) {
     throw new APIError(` Hãy kiểm tra lại các lỗi sau:\n${errors.join('\n')}`, 400)
   }
+}
+export const autoNguoiLapPhieu: CollectionBeforeChangeHook = async ({ req, data }) => {
+  if (!data) return
+
+  const user = req.user
+
+  if (!user) return
+
+  // Nếu là bác sĩ hoặc trưởng khoa
+  if (user.chucvu === 'nhanvienkho' || user.chucvu === 'truongphong') {
+    // Nếu chưa có người được gán vào trường bác sĩ
+    if (!data.receiverorsender) {
+      return {
+        ...data,
+        receiverorsender: user.id, // Gán user hiện tại làm bác sĩ
+      }
+    }
+  }
+
+  return data
 }

@@ -1,8 +1,15 @@
 import { CollectionConfig } from 'payload'
-import { hookMedicalSupplies, notChangeLoaiVatTu } from '@/hooks/HookMedicalSupplies'
-
+import { hookMedicalSupplies, notChangeLoaiVatTu, } from '@/hooks/HookMedicalSupplies'
+import { isAdmin, isAdminDuocSi, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
+import { accessMedicalSupplies ,canReadMedicalSupplies} from '@/hooks/HookMedicalSupplies'
 export const medicalSupplies: CollectionConfig = {
   slug: 'medicalSupplies',
+access: {
+        create: (args) => accessMedicalSupplies(args),
+        delete:  (args) => accessMedicalSupplies(args) ,
+        update:  (args) => accessMedicalSupplies(args) ,
+        read:  (args) => canReadMedicalSupplies(args),
+      },
   labels: {
     singular: 'Vật Tư Y Tế',
     plural: 'Vật Tư Y Tế',

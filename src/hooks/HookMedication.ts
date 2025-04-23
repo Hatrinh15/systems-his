@@ -1,4 +1,6 @@
 import { APIError, CollectionBeforeValidateHook } from "payload";
+import { Access } from "payload";
+import { User } from "@/payload-types";
 
 export const validateMedicationData: CollectionBeforeValidateHook = async ({ data, req, originalDoc }) => {
   if (!data) return;
@@ -57,4 +59,18 @@ if (!originalDoc || originalDoc.name !== data.name) {
   }
 }
   return data;
+};
+
+export const canReadMedication: Access = ({ req }) => {
+  const user = req.user as User;
+  const chucvuChoPhep = [
+    'truongphong', 'nhanvienkho',
+    'ketoan', 'duocsi',
+    'truongkhoa', 'bacsi', 'yta',
+  ];
+
+  return (
+    user?.taikhoan === 'admin' ||
+    chucvuChoPhep.includes(user?.chucvu ?? '')
+  );
 };

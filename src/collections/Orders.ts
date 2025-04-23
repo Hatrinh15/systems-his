@@ -4,12 +4,22 @@ import {
   hookTinhGiaThuocSanpham,
   hookTinhTongDonThuoc,
   hookTruThuocQuay,
-  hookValidateOrderFields,
+  hookValidateOrderFields, canReadOrders,
+  autoStaff,
+  afterReadOrdersCustomerLabel,
+  afterReadOrdersStaffLabel
 } from '@/hooks/HookOrders'
 import { CollectionConfig } from 'payload'
+import { isAdminDuocSi } from '@/hooks/AccessAdmin'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  access: { 
+    create: isAdminDuocSi,
+    read: canReadOrders,  
+    update: isAdminDuocSi,
+    delete: isAdminDuocSi,
+  },
   labels: {
     singular: 'Tạo Đơn Thuốc',
     plural: 'Tạo Đơn Thuốc',
@@ -26,6 +36,19 @@ export const Orders: CollectionConfig = {
       relationTo: 'patients',
       admin: {
         allowCreate: false}
+    },
+    {
+      name: 'customerLabel',
+      label: 'Tên bệnh nhân',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        condition: () => true, // luôn hiển thị
+      },
+      access: {
+        read: () => true,
+        update: () => false,
+      }
     },
     {
       name: 'baohiemyte',
@@ -256,6 +279,20 @@ export const Orders: CollectionConfig = {
       label: 'Nhân viên bán hàng',
       type: 'relationship',
       relationTo: 'users',
+      access:{
+        create: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        },
+        update: ({req}) => {
+          if(req.user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        }
+      },
       admin: {allowCreate: false},
       filterOptions: async ({ data, req }) => {
         try {
@@ -292,6 +329,19 @@ export const Orders: CollectionConfig = {
       },
     },
     {
+      name: 'staffLabel',
+      label: 'Tên nhân viên',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        condition: () => true, // Luôn hiển thị nếu có
+      },
+      access: {
+        read: () => true,
+        update: () => false,
+      }
+    },    
+    {
       name: 'paymentmethod',
       label: 'Hình thức thanh toán',
       type: 'select',
@@ -309,7 +359,8 @@ export const Orders: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
-      hookCheckOrderDate,hookValidateOrderFields],
+      hookCheckOrderDate,hookValidateOrderFields,autoStaff],
     afterChange: [hookTruThuocQuay],
+    afterRead:[afterReadOrdersCustomerLabel,afterReadOrdersStaffLabel]
   },
 }

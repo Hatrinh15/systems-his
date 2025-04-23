@@ -1,7 +1,14 @@
 import { CollectionConfig } from 'payload'
 import { hookcheck, hookQuayThuoc, hookTinhTrangHang } from '@/hooks/Hookpharmacies'
+import { isAdminDuocSi } from '@/hooks/AccessAdmin'
 export const Pharmacies: CollectionConfig = {
   slug: 'pharmacies',
+access: { 
+  create: isAdminDuocSi,
+  read: isAdminDuocSi,  
+  update: isAdminDuocSi,
+  delete: isAdminDuocSi,
+},
   labels: {
     singular: 'Quầy Thuốc',
     plural: 'Quầy Thuốc',

@@ -5,7 +5,8 @@ import {
   showTitle,
   readDepartmentAccess,
 } from '@/hooks/HookDepartments'
-import { isAdmin, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
+import { isAdmin, isBacSiYTaTruongKhoaDuocSi } from '@/hooks/AccessAdmin'
+import { User } from 'payload'
 const Departments: CollectionConfig = {
   slug: 'departments',
   labels: {
@@ -15,7 +16,7 @@ const Departments: CollectionConfig = {
   access: {
     create: (args) => isAdmin(args),
     read: readDepartmentAccess,
-    update: (args) => isAdmin(args),
+    update: (args) => isAdmin(args)|| isBacSiYTaTruongKhoaDuocSi(args),
     delete: (args) => isAdmin(args),
   },
   admin: {
@@ -41,6 +42,12 @@ const Departments: CollectionConfig = {
               name: 'tenkhoa',
               label: 'TÊN KHOA',
               type: 'select',
+              access: {
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
               admin: {
                 isClearable: true,
               },
@@ -101,6 +108,12 @@ const Departments: CollectionConfig = {
                   return {}
                 }
               },
+              access: {
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
             },
             {
               name: 'doctors',
@@ -153,6 +166,12 @@ const Departments: CollectionConfig = {
                   return {}
                 }
               },
+              access: {
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
             },
             {
               name: 'nures',
@@ -199,11 +218,23 @@ const Departments: CollectionConfig = {
                   return {}
                 }
               },
+              access: {
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
             },
             {
               name: 'thongtin',
               label: 'Thông tin hoạt động',
               type: 'group',
+              access: {
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
               fields: [
                 { name: 'mota', label: 'Mô tả', type: 'textarea' },
                 {

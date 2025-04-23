@@ -6,6 +6,7 @@ import {
   canReadUsers,
   canUpdateUser,
   canReadUsersField,
+  removeUserFromClass,
 } from '@/hooks/checkvalueusers'
 import { updateBoPhanDisplay } from '@/hooks/checkvalueusers'
 import { v4 as uuidv4 } from 'uuid'
@@ -42,7 +43,8 @@ export const Users: CollectionConfig = {
         read: ({ req }) => req.user?.taikhoan === 'admin',
         update: ({ req }) => req.user?.taikhoan === 'admin',
       },
-    },
+  },
+
 
     {
       name: 'IDnhansu',
@@ -263,6 +265,7 @@ export const Users: CollectionConfig = {
                 { label: 'Nghỉ việc', value: 'nghiviec' },
               ],
             },
+            
           ],
         },
         {
@@ -343,6 +346,7 @@ export const Users: CollectionConfig = {
       hookBoPhanHienThi,
     ],
     beforeChange: [checkvalueuser],
-    afterChange: [removeUserFromDepartments],
+    afterChange: [removeUserFromDepartments,removeUserFromClass],
+    // beforeLogin:[checkLoginStatus]
   },
 }

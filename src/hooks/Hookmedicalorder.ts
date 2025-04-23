@@ -101,7 +101,7 @@ export const hookcheck: CollectionBeforeChangeHook = async ({ data }) => {
   return data
 }
 
-export const hookSoHoSo: CollectionBeforeValidateHook = async ({ data, req }) => {
+export const hookSoHoSo: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (!data?.hosobenhan) return data
 
   const recordID = typeof data.hosobenhan === 'string' ? data.hosobenhan : data.hosobenhan.id
@@ -141,27 +141,34 @@ export const notChangeHinhThucĐT: CollectionBeforeChangeHook = async ({ data, r
   return data
 }
 
-export const checkKhoaRead = async (args: { req: PayloadRequest, data: any }): Promise<boolean> => {
-  const { req, data } = args;
+export const checkKhoaRead: Access= async ({req,data})=> {
   const user = req.user as User;
-
   // Kiểm tra nếu là admin hoặc bác sĩ/y tá/trưởng khoa
-  if (isAdmin(args) || isBacSiYTaTruongKhoa(args)) {
+  if (user?.taikhoan === 'admin') {
     return true;
   }
 
   // Kiểm tra khoa của người dùng và khoa trong bản ghi
 const userKhoa = user?.khoa; // Khoa của người dùng, là chuỗi
-const recordKhoa = data?.khoa; // Khoa của bản ghi, là chuỗi
-
+const find = await req.payload.find({
+  collection: 'departments',
+  where: {
+    tenkhoa: { equals: userKhoa },
+  }
+})
+const id = find.docs[0]?.id
 // Nếu khoa của người dùng trùng với khoa của bản ghi, cho phép xem
-if (userKhoa && recordKhoa && userKhoa === recordKhoa) {
-  return true;
+  if (user?.chucvu === 'bacsi' ||user?.chucvu === 'truongkhoa' || user?.chucvu === 'yta') {
+  return {
+    khoa : {
+      equals: id
+    }
+  }
+}
+
+  return false;
 }
   // Nếu không thỏa mãn, không cho phép xem
-  return false;
-};
-
 export const checkAutoKhoa: CollectionBeforeChangeHook = async ({ req, data, originalDoc }) => {
   // Nếu là admin thì không cần tự động gán khoa
   const user = req.user
@@ -188,28 +195,33 @@ export const checkAutoKhoa: CollectionBeforeChangeHook = async ({ req, data, ori
 
   return data
 }
-export const BacSiyTa: CollectionBeforeChangeHook = async ({ req, data, originalDoc }) => {
-  if(!data) return
+export const BacSiyTa: CollectionBeforeChangeHook = async ({ req, data }) => {
+  if (!data) return
+
   const user = req.user
 
-const name: (string | undefined)[] = []
-name.push(user?.id)
-console.log('user', name)
-if (user?.chucvu === 'bacsi') {
-   if(!data.bacsi)  {
-    return {
-      ...data,
-      bacsi: name// Gán khoa từ tài khoản nhân sự đang đăng nhập
-    }
-  }
-}
-if (user?.chucvu === 'yta') {
-    if(!data.dieuduong)  {
-    return {
-      ...data,
-      dieuduong: req.user?.id// Gán khoa từ tài khoản nhân sự đang đăng nhập
-    }
-  }
-}
+  if (!user) return
 
+  // Nếu là bác sĩ hoặc trưởng khoa
+  if (user.chucvu === 'bacsi' || user.chucvu === 'truongkhoa') {
+    // Nếu chưa có người được gán vào trường bác sĩ
+    if (!data.bacsi) {
+      return {
+        ...data,
+        bacsi: user.id, // Gán user hiện tại làm bác sĩ
+      }
+    }
+  }
+
+  // Nếu là y tá
+  if (user.chucvu === 'yta') {
+    if (!data.dieuduong) {
+      return {
+        ...data,
+        dieuduong: user.id, // Gán user hiện tại làm điều dưỡng
+      }
+    }
+  }
+
+  return data
 }

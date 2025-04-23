@@ -10,6 +10,24 @@ export const Header: GlobalConfig = {
   },
   fields: [
     {
+      name: 'banner',
+      label: 'ẢNH',
+      type: 'array',
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+        {
+          name: 'alt',
+          type: 'text',
+          label: 'Alt text',
+        },
+      ],
+    },
+    {
       name: 'navItems',
       type: 'array',
       fields: [

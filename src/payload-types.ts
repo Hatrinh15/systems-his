@@ -2993,6 +2993,13 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  banner?:
+    | {
+        image: string | Media;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   navItems?:
     | {
         link: {
@@ -3050,6 +3057,13 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  banner?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
   navItems?:
     | T
     | {

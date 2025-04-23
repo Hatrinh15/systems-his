@@ -45,6 +45,7 @@ export const Users: CollectionConfig = {
       },
   },
 
+
     {
       name: 'IDnhansu',
       label: 'ID Nhân sự',

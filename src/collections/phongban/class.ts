@@ -1,6 +1,12 @@
-import { beforeChangeclass, checkclass, notChangeNameClass, showTitle,readClassAccess} from '@/hooks/Hookclass'
+import {
+  beforeChangeclass,
+  checkclass,
+  notChangeNameClass,
+  showTitle,
+  readClassAccess,
+} from '@/hooks/Hookclass'
 import { CollectionConfig } from 'payload'
-import { isAdmin,isTruongPhongNhanVien} from '@/hooks/AccessAdmin'
+import { isAdmin, isTruongPhongNhanVien } from '@/hooks/AccessAdmin'
 const Class: CollectionConfig = {
   slug: 'class',
   labels: {
@@ -8,12 +14,12 @@ const Class: CollectionConfig = {
     plural: 'Phòng ',
   },
   access: {
-    create: isAdmin ,
+    create: isAdmin,
     read: readClassAccess,
-    update: isAdmin ,
-    delete: isAdmin ,
+    update: isAdmin,
+    delete: isAdmin,
   },
-  admin: { group: 'Khoa & Nhân sự ' },
+  admin: { group: 'Khoa & Nhân Sự' },
   fields: [
     {
       type: 'tabs',
@@ -98,23 +104,23 @@ const Class: CollectionConfig = {
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean)
                     : []
-              
+
                   const existingNhanVienData = await req.payload.find({
                     collection: 'class',
                     where: { nhanvien: { exists: true } },
                     limit: 999,
                   })
-              
+
                   const existingNhanVien =
                     existingNhanVienData?.docs?.flatMap((doc) =>
                       (doc?.nhanvien ?? [])
                         .map((nv) => (typeof nv === 'string' ? nv : nv?.id))
                         .filter(Boolean),
                     ) ?? []
-              
+
                   // === Xác định baseCondition dựa vào phòng ===
                   let baseCondition = {}
-              
+
                   switch (data?.tenphong) {
                     case 'hanhchinhquantri':
                       baseCondition = { chucvu: { equals: 'nhanvienkho' } }
@@ -128,7 +134,7 @@ const Class: CollectionConfig = {
                     default:
                       baseCondition = {}
                   }
-              
+
                   return {
                     and: [
                       baseCondition,
@@ -144,7 +150,7 @@ const Class: CollectionConfig = {
                   console.error('Lỗi truy vấn danh sách nhân viên:', error)
                   return {}
                 }
-              }              
+              },
             },
             {
               name: 'thongtin',
@@ -161,7 +167,7 @@ const Class: CollectionConfig = {
     },
   ],
   hooks: {
-    beforeChange: [beforeChangeclass,checkclass,notChangeNameClass,showTitle],
+    beforeChange: [beforeChangeclass, checkclass, notChangeNameClass, showTitle],
   },
 }
 export default Class

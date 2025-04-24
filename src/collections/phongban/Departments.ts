@@ -16,11 +16,11 @@ const Departments: CollectionConfig = {
   access: {
     create: (args) => isAdmin(args),
     read: readDepartmentAccess,
-    update: (args) => isAdmin(args)|| isBacSiYTaTruongKhoaDuocSi(args),
+    update: (args) => isAdmin(args) || isBacSiYTaTruongKhoaDuocSi(args),
     delete: (args) => isAdmin(args),
   },
   admin: {
-    group: 'Khoa & Nhân sự ',
+    group: 'Khoa & Nhân Sự',
     useAsTitle: 'title',
   },
   fields: [

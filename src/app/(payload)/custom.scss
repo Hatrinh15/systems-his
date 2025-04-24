@@ -41,8 +41,8 @@
   color: var(--theme-elevation-700);
   font-size: 14px;
   border-radius: 10px;
-  padding-left: 5px;
-  padding-right: 5px;
+  // padding-left: 5px;
+  // padding-right: 5px;
   font-family: Times New Roman;
   font-weight: bold;
 }
@@ -131,28 +131,239 @@
   pointer-events: auto; /* Đảm bảo click vẫn hoạt động */
 }
 //tạo viền cho các collection
-.field-type__wrap {
-  border: 2px solid var(--theme-elevation-200);
-  border-radius: 14px;
+.field-type__wrap:not(.field--radio) {
+  border: 1px solid #cedde3;
+  border-radius: 21px;
   font-size: 14px;
   font-family: Times New Roman;
   font-weight: normal;
-  padding-left: 10px;
-  padding-right: 10px;
   color: #0b2751;
 }
-.field-type__wrap * {
-  border-radius: 0 !important; /* xóa bo góc bên trong */
-  box-shadow: none !important; /* đề phòng có shadow bo tròn */
+.field-type__wrap:has(input[type='radio']) {
+  border: none !important;
+  padding: 0 !important;
 }
-// button,
-// [role='button'] {
-//   background-color: #accfda;
-//   font-size: 14px;
-//   padding-top: 10px;
-//   padding-bottom: 10px;
-//   padding-left: 12px;
-//   padding-right: 12px;
-//   border-radius: 15px;
-//   font-weight: bold;
-// }
+
+//để bên trong khớp với viền được bao bọc
+.field-type__wrap input,
+.field-type__wrap select,
+.field-type__wrap textarea {
+  // padding: 6px 10px;
+  padding-left: 10px;
+  box-shadow: none;
+}
+/* Radio gốc nằm giữa */
+.radio-input input[type='radio'] {
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  transform: translateY(-50%);
+  margin: 0;
+  width: 25px;
+  height: 25px;
+  accent-color: navy;
+  z-index: 2;
+  opacity: 1; /* hoặc 0 nếu bạn muốn ẩn radio */
+}
+
+// tạo các nút ấn trong các collection như mục use là change passwword
+button,
+input:not([type='date']),
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+//chỉnh chữ "chào mừng đến với hệ thống"
+.banner__content {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 26px;
+  font-weight: normal;
+  color: #0b2751;
+  text-align: center;
+}
+.before-dashboard__instructions {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px;
+  padding-top: 20px;
+  font-weight: normal;
+  color: #0b2751;
+  // text-align: center;
+}
+#nav-group-Collections .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/collection.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Globals .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/global.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Bệnh\ Nhân\ \&\ Điều\ Trị .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/doctor.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Khoa\ \&\ Nhân\ Sự .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/khoa.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Quản\ Lý\ Phiếu\ \&\ Bảng\ Giá .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/medical.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+#nav-group-Dược\ \&\ Vật\ Tư\ Y\ Tế .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/thuoc.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+// Theme mặc định (light)
+:root {
+  --theme-bg: #ffffff;
+  --theme-text: #0b2751;
+}
+
+// Khi ở chế độ dark mode
+html[data-theme='dark'] {
+  // Màu nền toàn hệ thống
+  --theme-bg: #121212;
+  --theme-text: #ffffff;
+
+  body {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+  }
+
+  .nav {
+    background-color: #1e1e1e;
+    color: white;
+  }
+
+  .nav-group__label {
+    color: white;
+  }
+
+  .sidebar {
+    background-color: #1a1a1a !important;
+    color: white;
+  }
+
+  .card {
+    background-color: #2a2a2a !important;
+    color: white;
+    border-color: #3a3a3a;
+  }
+
+  .dashboard__label,
+  .doc-header__title,
+  .banner__content,
+  .before-dashboard__instructions {
+    background-color: #000000 !important;
+    color: white;
+  }
+
+  .tab-panel,
+  .tabs-field__tabs,
+  .tabs-fields_tab-button,
+  .field-type__wrap {
+    background-color: #1f1f1f;
+    color: white;
+  }
+
+  // Nút Save
+  .btn--style-primary {
+    background-color: #37474f;
+    color: white;
+  }
+
+  // Field input
+  input,
+  select,
+  textarea {
+    background-color: #2e2e2e;
+    color: white;
+    border-color: #444;
+  }
+
+  // Radio
+  .radio-input input[type='radio'] {
+    accent-color: white;
+  }
+}
+//chèn icon thay thế icon trên đầu thay thế icon payload
+.step-nav__home {
+  position: relative;
+
+  svg {
+    display: none; // Ẩn icon SVG mặc định
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 25px;
+    background-image: url('/icons/xe.svg'); // đường dẫn tới icon mới
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+}
+//thay đổi icon người dùng
+.app-header__account img {
+  display: none; // Ẩn ảnh mặc định
+}
+
+.app-header__account {
+  width: 25px;
+  height: 25px;
+  background-image: url('/icons/nguoi.svg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+}

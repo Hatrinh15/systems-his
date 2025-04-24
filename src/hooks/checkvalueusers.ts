@@ -1,8 +1,9 @@
-import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook, CollectionBeforeLoginHook } from "payload";
+import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook, CollectionBeforeLoginHook,AuthenticationError } from "payload";
 import { APIError } from "payload";
 import { Access ,AccessArgs } from "payload";
 import { User } from "@/payload-types";
 import { headers } from "next/headers";
+
 
 export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === "create") {
@@ -224,7 +225,16 @@ const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRe
 if (isFromMedicalRecodsAdmin) {
   return true;
 }
+const isFromMedicalRecodsAdminExport = referer?.includes('/admin/collections/phieuxuat') || false;
 
+if (isFromMedicalRecodsAdminExport) {
+  return true;
+}
+const isFromMedicalRecodsAdminInport = referer?.includes('/admin/collections/inventorytransactions') || false;
+
+if (isFromMedicalRecodsAdminInport) {
+  return true;
+}
   const user = req.user;
   if(id !== undefined) {
     if(user && id === user.id) {
@@ -280,32 +290,8 @@ export const canReadUsersField: Access = ({ req,id })  => {
   return true
 }
 
-// export const checkLoginStatus: CollectionBeforeLoginHook = async ({ req }) => {
-//   let email: string | undefined;
-
-//   if (req.json) {
-//     const body = await req.json(); // Parse the request body as JSON
-//     email = body.email; // Lấy email từ yêu cầu đăng nhập
-//   } else {
-//     throw new APIError('Không thể lấy dữ liệu yêu cầu.',400);
-//   }
-
-//   if (!email) {
-//     throw new APIError('Email không được để trống.',400);
-//   }
-
-//   // Lấy email từ yêu cầu đăng nhập
-//   const user = await req.payload.find({
-//     collection: 'users',
-//     where: {
-//       email: {
-//         equals: email,
-//       },
-//     },
-//   });
-
-//   // Kiểm tra nếu người dùng có trạng thái nghỉ việc
-//   if (user[0]?.tinhtranglamviec === 'nghiviec') {
-//     throw new APIError('Tài khoản này đã bị khóa.',400);
-//   }
-// };
+export const BeforeLoginUser: CollectionBeforeLoginHook = async ({ user }) => {
+  if (user.tinhtranglamviec === 'nghiviec') {
+    throw new AuthenticationError(() => 'Tài khoản của bạn đã bị khóa.')
+  }
+}

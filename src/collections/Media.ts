@@ -11,18 +11,21 @@ import crypto from 'crypto'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
-
+import { isAdmin } from '@/hooks/AccessAdmin'
+import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: anyone,
-    update: authenticated,
+    create: isAdmin,
+    delete: isAdmin,
+    read: authenticatedOrPublished,
+    update:  isAdmin,
   },
+  admin: {
+    hidden: ({ user }) => user?.taikhoan !== 'admin'},
   fields: [
     {
       name: 'alt',

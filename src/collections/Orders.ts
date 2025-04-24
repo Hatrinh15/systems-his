@@ -35,7 +35,20 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'patients',
       admin: {
-        allowCreate: false}
+        allowCreate: false,
+      },
+      access: {
+        read: ({req}) =>{
+          const user = req.user
+          if(user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong' || user?.chucvu === 'duocsi') {
+            return true
+          }
+          if(user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        }
+      }
     },
     {
       name: 'customerLabel',
@@ -45,10 +58,15 @@ export const Orders: CollectionConfig = {
         readOnly: true,
         condition: () => true, // luôn hiển thị
       },
-      access: {
-        read: () => true,
-        update: () => false,
-      }
+      // access: {
+      //   read: ({req}) => {
+      //     const user = req.user 
+      //     if(user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong' || user?.chucvu === 'ketoan') {
+      //       return true
+      //     }  
+      //     return false
+      //   },
+      // }
     },
     {
       name: 'baohiemyte',
@@ -279,15 +297,13 @@ export const Orders: CollectionConfig = {
       label: 'Nhân viên bán hàng',
       type: 'relationship',
       relationTo: 'users',
-      access:{
-        create: ({req}) => {
-          if(req.user?.taikhoan === 'admin') {
+      access: {
+        read: ({req}) =>{
+          const user = req.user
+          if(user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong' || user?.chucvu === 'duocsi') {
             return true
           }
-          return false
-        },
-        update: ({req}) => {
-          if(req.user?.taikhoan === 'admin') {
+          if(user?.taikhoan === 'admin') {
             return true
           }
           return false
@@ -334,11 +350,15 @@ export const Orders: CollectionConfig = {
       type: 'text',
       admin: {
         readOnly: true,
-        condition: () => true, // Luôn hiển thị nếu có
       },
       access: {
-        read: () => true,
-        update: () => false,
+        read: ({req}) => {
+          const user = req.user 
+          if(user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong' || user?.chucvu === 'ketoan') {
+            return true
+          }  
+          return false
+        },
       }
     },    
     {
@@ -358,9 +378,8 @@ export const Orders: CollectionConfig = {
     }
   ],
   hooks: {
-    beforeChange: [hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
-      hookCheckOrderDate,hookValidateOrderFields,autoStaff],
+    beforeChange: [autoStaff,hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
+      hookCheckOrderDate,hookValidateOrderFields,afterReadOrdersCustomerLabel,afterReadOrdersStaffLabel],
     afterChange: [hookTruThuocQuay],
-    afterRead:[afterReadOrdersCustomerLabel,afterReadOrdersStaffLabel]
   },
 }

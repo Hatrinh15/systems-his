@@ -7,6 +7,7 @@ import {
   canUpdateUser,
   canReadUsersField,
   removeUserFromClass,
+  BeforeLoginUser,
 } from '@/hooks/checkvalueusers'
 import { updateBoPhanDisplay } from '@/hooks/checkvalueusers'
 import { v4 as uuidv4 } from 'uuid'
@@ -347,6 +348,6 @@ export const Users: CollectionConfig = {
     ],
     beforeChange: [checkvalueuser],
     afterChange: [removeUserFromDepartments,removeUserFromClass],
-    // beforeLogin:[checkLoginStatus]
+    beforeLogin:[BeforeLoginUser]
   },
 }

@@ -496,41 +496,41 @@ export const autoStaff: CollectionBeforeChangeHook = async ({ req, data, operati
   return data;
 };
 
-export const afterReadOrdersCustomerLabel: CollectionAfterReadHook = async ({ doc, req }) => {
-  if (doc.customer && typeof doc.customer === 'string') {
+export const afterReadOrdersCustomerLabel: CollectionBeforeChangeHook = async ({ data, req }) => {
+  if (data.customer && typeof data.customer === 'string') {
     try {
       const patient = await req.payload.findByID({
         collection: 'patients',
-        id: doc.customer,
+        id: data.customer,
       });
-      doc.customerLabel = patient?.ten || '[Không xác định]';
+      data.customerLabel = patient?.ten || '[Không xác định]';
     } catch (err) {
-      doc.customerLabel = '[Ẩn]';
+      data.customerLabel = '[Ẩn]';
     }
   } else {
-    doc.customerLabel = '[Chưa chọn]';
+    data.customerLabel = '[Chưa chọn]';
   }
 
-  return doc;
+  return data;
 };
 
-export const afterReadOrdersStaffLabel: CollectionAfterReadHook = async ({ doc, req }) => {
+export const afterReadOrdersStaffLabel: CollectionBeforeChangeHook = async ({ data,req }) => {
   if (req.user?.taikhoan !== 'admin') {
     // Nếu không phải admin, tạo label hiển thị tên nhân viên
-    const staff = doc?.staff
+    const staff = data?.staff
     if (staff) {
       if (typeof staff === 'object') {
-        doc.staffLabel = staff.name || ''
+        data.staffLabel = staff.name || ''
       } else {
         // Trường hợp staff chỉ là ID -> fetch thêm
         const staffUser = await req.payload.findByID({
           collection: 'users',
           id: staff,
         })
-        doc.staffLabel = staffUser?.name || ''
+        data.staffLabel = staffUser?.name || ''
       }
     }
   }
-  return doc
+  return data
 }
 

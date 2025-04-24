@@ -27,7 +27,7 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'boPhanDisplay', 'email'],
     useAsTitle: 'name',
-    group: 'Khoa & Nhân sự ',
+    group: 'Khoa & Nhân Sự',
   },
   auth: true,
   fields: [
@@ -44,8 +44,7 @@ export const Users: CollectionConfig = {
         read: ({ req }) => req.user?.taikhoan === 'admin',
         update: ({ req }) => req.user?.taikhoan === 'admin',
       },
-  },
-
+    },
 
     {
       name: 'IDnhansu',
@@ -266,7 +265,6 @@ export const Users: CollectionConfig = {
                 { label: 'Nghỉ việc', value: 'nghiviec' },
               ],
             },
-            
           ],
         },
         {
@@ -347,7 +345,9 @@ export const Users: CollectionConfig = {
       hookBoPhanHienThi,
     ],
     beforeChange: [checkvalueuser],
+
     afterChange: [removeUserFromDepartments,removeUserFromClass],
     beforeLogin:[BeforeLoginUser]
+
   },
 }

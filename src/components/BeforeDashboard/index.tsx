@@ -12,15 +12,13 @@ const BeforeDashboard: React.FC = () => {
       <Banner className={`${baseClass}__banner`} type="success">
         <h1>Chào mừng bạn đến với hệ thống!</h1>
       </Banner>
-      <ul className={`${baseClass}__instructions`}>
-        <li>
-          <SeedButton />
-          {' Muốn quay trở lại trang chính,'}
-          <a href="/" target="_blank">
-            🏠nhấn vào đây!!!
-          </a>
-        </li>
-      </ul>
+      <div className={`${baseClass}__instructions`}>
+        <SeedButton />
+        {' Muốn quay trở lại trang chính, '}
+        <a href="/" target="_blank">
+          🏠nhấn vào đây!!!
+        </a>
+      </div>
     </div>
   )
 }

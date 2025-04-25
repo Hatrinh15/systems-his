@@ -25,7 +25,7 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'boPhanDisplay', 'email'],
     useAsTitle: 'name',
-    group: 'Khoa & Nhân sự ',
+    group: 'Khoa & Nhân sự',
   },
   auth: true,
   fields: [
@@ -44,9 +44,8 @@ export const Users: CollectionConfig = {
       },
       admin: {
         condition: ({ user }) => user?.taikhoan === 'admin',
-      }
-      
-  },
+      },
+    },
 
     {
       name: 'IDnhansu',

@@ -1,8 +1,14 @@
 import { CollectionConfig } from 'payload'
-import { hookSupplier } from '@/hooks/HookSuppliers'
-
+import { hookSupplier ,canReadSuppliers} from '@/hooks/HookSuppliers'
+import { isAdmin ,isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
 export const Suppliers: CollectionConfig = {
   slug: 'suppliers',
+  access: {
+        create: (args) => isAdmin(args),
+        delete:  (args) => isAdmin(args) ,
+        update:  (args) => isAdmin(args) ,
+        read:  (args) => canReadSuppliers(args),
+      },
   labels: {
     singular: 'Nhà Cung Cấp',
     plural: 'Nhà Cung Cấp',

@@ -2,8 +2,15 @@ import { CollectionConfig } from 'payload'
 import { lichkham } from '@/fields/sky/look'
 import { checkvalue } from '@/hooks/checkvaluepatients'
 import { v4 as uuidv4 } from 'uuid'
+import { isAdmin,isBacSiYTaTruongKhoa ,isAdminDuocSi} from '@/hooks/AccessAdmin'
 export const Patients: CollectionConfig = {
   slug: 'patients',
+  access: {
+    create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    delete:  (args) => isAdmin(args) ,
+    update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    read: (args) => isAdminDuocSi(args) || isBacSiYTaTruongKhoa(args),
+  },
   labels: {
     singular: 'Bệnh Nhân',
     plural: 'Bệnh Nhân',

@@ -3,7 +3,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig, CollectionConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -31,9 +31,14 @@ import { medicalUsages } from './collections/MedicalUsages'
 import { Orders } from './collections/Orders'
 import { PhieuXuat } from './collections/ExportTransactions'
 import { baoGia } from './collections/Baogia'
-import { test } from './collections/test'
+
 import { Pharmacies } from './collections/Pharmacies'
 import { InventoryTransactions } from './collections/InventoryTransactions'
+
+import { FormsOverride } from './plugins/override.ts/formOverride'
+import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOverride'
+import { RedirectsOverride } from './plugins/override.ts/redirectsOverride'
+import { SearchResultsOverride } from './plugins/override.ts/searchResultsOverride'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

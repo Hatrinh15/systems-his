@@ -46,7 +46,7 @@ export const hookCheckInfo: CollectionBeforeChangeHook = async ({ data, req, ope
     quantity: 'Số lượng tồn kho',
     stockstatus: 'Tình trạng hàng hóa',
     reorderlevel: 'Mức cảnh báo tồn kho',
-    supplier: 'Nhà cung cấp',
+    // supplier: 'Nhà cung cấp',
   }
 
   // ✅ 3. Kiểm tra các trường bắt buộc

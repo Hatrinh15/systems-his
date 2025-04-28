@@ -1,6 +1,14 @@
-import { beforeChangeclass, checkclass, notChangeNameClass, showTitle } from '@/hooks/Hookclass'
+import {
+  beforeChangeclass,
+  checkclass,
+  notChangeNameClass,
+  showTitle,
+  readClassAccess,
+} from '@/hooks/Hookclass'
 import { CollectionConfig } from 'payload'
-import { isAdmin, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
+
+import { isAdmin, isTruongPhongNhanVien } from '@/hooks/AccessAdmin'
+
 const Class: CollectionConfig = {
   slug: 'class',
   labels: {
@@ -8,12 +16,15 @@ const Class: CollectionConfig = {
     plural: 'Phòng ',
   },
   access: {
-    create: (args) => isAdmin(args),
-    read: (args) => isAdmin(args),
-    update: (args) => isAdmin(args),
-    delete: (args) => isAdmin(args),
+
+    create: isAdmin,
+    read: readClassAccess,
+    update: isAdmin,
+    delete: isAdmin,
   },
+
   admin: { group: 'Khoa & Nhân sự' },
+
   fields: [
     {
       type: 'tabs',

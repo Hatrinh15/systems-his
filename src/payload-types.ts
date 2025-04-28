@@ -830,8 +830,6 @@ export interface MedicalRecod {
               tenthuoc?: (string | null) | Medication;
               quantity?: number | null;
               donvi?: ('hop' | 'vien' | 'lo' | 'chai' | 'ong') | null;
-              unitprice?: string | null;
-              totalprice?: string | null;
               id?: string | null;
             }[]
           | null;
@@ -840,8 +838,6 @@ export interface MedicalRecod {
               supply?: (string | null) | MedicalSupply;
               quantity?: number | null;
               donvi?: ('hop' | 'chai' | 'goi' | 'cuon' | 'mieng') | null;
-              unitprice?: string | null;
-              totalprice?: string | null;
               id?: string | null;
             }[]
           | null;
@@ -1174,6 +1170,7 @@ export interface MedicalUsage {
 export interface Order {
   id: string;
   customer?: (string | null) | Patient;
+  customerLabel?: string | null;
   baohiemyte?: ('yes' | 'no') | null;
   bhyt?: {
     loai?: ('tamtram' | 'chinlam' | 'mottram') | null;
@@ -1204,6 +1201,7 @@ export interface Order {
   totalprice?: string | null;
   orderdate?: string | null;
   staff?: (string | null) | User;
+  staffLabel?: string | null;
   paymentmethod?: ('cash' | 'card' | 'insurance') | null;
   ghichu?: string | null;
   updatedAt: string;
@@ -1269,6 +1267,7 @@ export interface Inventory {
 export interface Inventorytransaction {
   id: string;
   transactiondate?: string | null;
+  receiverorsender?: (string | null) | User;
   giaodich?:
     | {
         nhacungcap?: (string | null) | Supplier;
@@ -1276,7 +1275,6 @@ export interface Inventorytransaction {
           gio?: number | null;
           phut?: number | null;
         };
-        receiverorsender?: (string | null) | User;
         thuoc?:
           | {
               tenthuoc?: (string | null) | Medication;
@@ -2196,6 +2194,7 @@ export interface MedicalUsagesSelect<T extends boolean = true> {
  */
 export interface OrdersSelect<T extends boolean = true> {
   customer?: T;
+  customerLabel?: T;
   baohiemyte?: T;
   bhyt?:
     | T
@@ -2230,6 +2229,7 @@ export interface OrdersSelect<T extends boolean = true> {
   totalprice?: T;
   orderdate?: T;
   staff?: T;
+  staffLabel?: T;
   paymentmethod?: T;
   ghichu?: T;
   updatedAt?: T;
@@ -2281,8 +2281,6 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
               tenthuoc?: T;
               quantity?: T;
               donvi?: T;
-              unitprice?: T;
-              totalprice?: T;
               id?: T;
             };
         vattutieuhao?:
@@ -2291,8 +2289,6 @@ export interface MedicalRecodsSelect<T extends boolean = true> {
               supply?: T;
               quantity?: T;
               donvi?: T;
-              unitprice?: T;
-              totalprice?: T;
               id?: T;
             };
         dienBienBenh?:
@@ -2479,6 +2475,7 @@ export interface InventorySelect<T extends boolean = true> {
  */
 export interface InventorytransactionsSelect<T extends boolean = true> {
   transactiondate?: T;
+  receiverorsender?: T;
   giaodich?:
     | T
     | {
@@ -2489,7 +2486,6 @@ export interface InventorytransactionsSelect<T extends boolean = true> {
               gio?: T;
               phut?: T;
             };
-        receiverorsender?: T;
         thuoc?:
           | T
           | {
@@ -2997,6 +2993,13 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface Header {
   id: string;
+  banner?:
+    | {
+        image: string | Media;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   navItems?:
     | {
         link: {
@@ -3054,6 +3057,13 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
+  banner?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
   navItems?:
     | T
     | {

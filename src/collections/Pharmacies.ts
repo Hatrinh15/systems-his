@@ -1,7 +1,14 @@
 import { CollectionConfig } from 'payload'
-import { hookcheck, hookQuayThuoc, hookTinhTrangHang } from '@/hooks/Hookpharmacies'
+import { hookcheck, hookQuayThuoc, hookTinhTrangHang ,accessRead} from '@/hooks/Hookpharmacies'
+import { isAdminDuocSi } from '@/hooks/AccessAdmin'
 export const Pharmacies: CollectionConfig = {
   slug: 'pharmacies',
+access: { 
+  create: isAdminDuocSi,
+  read: accessRead,  
+  update: isAdminDuocSi,
+  delete: isAdminDuocSi,
+},
   labels: {
     singular: 'Quầy Thuốc',
     plural: 'Quầy Thuốc',
@@ -9,7 +16,16 @@ export const Pharmacies: CollectionConfig = {
   admin: {
     useAsTitle: 'sanpham',
     defaultColumns: ['sanpham', 'quantity', 'batchnumber', 'expirydate', 'price', 'unit'],
-    group: 'Dược & Vật Tư Y Tế',
+    group: 'Dược & Vật Tư Y Tế', 
+    hidden: ({ user }) => {
+      if(user?.taikhoan === 'admin') {
+        return false
+      }
+      if(user?.khoa === 'khoaduoc' && user?.chucvu === 'duocsi' || user?.chucvu === 'truongkhoa') {
+        return false
+      }
+      return true
+    }
   },
   fields: [
     {

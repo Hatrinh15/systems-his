@@ -1,8 +1,14 @@
 import { CollectionConfig } from 'payload'
-import { hookPriceQuayThuoc, priceAfterRead, thongBao, updateProductName } from '@/hooks/HookBaoGia'
-
+import { hookPriceQuayThuoc, priceAfterRead, thongBao, updateProductName,canReadBangGia} from '@/hooks/HookBaoGia'
+import { isAdminKeToan } from '@/hooks/AccessAdmin'
 export const baoGia: CollectionConfig = {
   slug: 'baogia',
+  access: {
+    create: (args) => isAdminKeToan(args),
+    delete: (args) => isAdminKeToan(args),
+    update: (args) => isAdminKeToan(args),
+    read: (args) => canReadBangGia(args)||isAdminKeToan(args),
+  },
   labels: {
     singular: 'Bảng Giá',
     plural: 'Bảng Giá',

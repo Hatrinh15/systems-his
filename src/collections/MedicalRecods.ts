@@ -9,10 +9,18 @@ import {
   removePatientFromRoom,
   validatePatientRoom,
   validateSoHoSoNoiSoi,
+  validateSoHoSo,
+  autoDepartment
 } from '@/hooks/Hookmedicalrecord'
-
+import { isAdmin, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
 const MedicalRecods: CollectionConfig = {
   slug: 'MedicalRecods',
+  access: {
+      create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+      delete:  (args) => isAdmin(args) ,
+      update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+      read:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    },
   labels: {
     singular: 'Hồ Sơ Bệnh Án',
     plural: 'Hồ Sơ Bệnh Án',
@@ -77,7 +85,7 @@ const MedicalRecods: CollectionConfig = {
                   label: 'Khoa',
                   type: 'relationship',
                   relationTo: 'departments',
-                  admin: { allowCreate: false },
+                  admin: { allowCreate: false,readOnly: true },
                 },
                 {
                   name: 'bacsi',
@@ -86,7 +94,8 @@ const MedicalRecods: CollectionConfig = {
                   relationTo: 'users',
                   admin: { allowCreate: false },
                   filterOptions: async ({ req, siblingData }) => {
-                    try {
+                    try {                    
+                     const user = req.user;
                       // Kiểm tra nếu siblingData không tồn tại hoặc không có khoa thì trả về danh sách rỗng
                       if (
                         !siblingData ||
@@ -96,12 +105,22 @@ const MedicalRecods: CollectionConfig = {
                         return { id: { in: [] } }
                       }
 
-                      const khoaID = siblingData.khoa as string // Ép kiểu để TypeScript hiểu
+                      const find = await req.payload.find({
+                        collection: 'departments',
+                        where: {
+                          tenkhoa: {
+                            equals: user?.khoa,
+                          },
+                        },
+                      });
+                    
+                      const khoaID= find.docs[0]?.id;
 
                       if (!khoaID) {
                         return { id: { in: [] } }
                       }
 
+                      
                       // Truy vấn thông tin khoa từ collection `departments`
                       const department = await req.payload.findByID({
                         collection: 'departments',
@@ -204,13 +223,6 @@ const MedicalRecods: CollectionConfig = {
                                   ],
                                   defaultValue: 'hop',
                                 },
-                                { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
-                                {
-                                  name: 'totalprice',
-                                  label: 'Tổng giá trị',
-                                  type: 'text',
-                                  admin: { readOnly: true },
-                                },
                               ],
                             },
                           ],
@@ -250,13 +262,6 @@ const MedicalRecods: CollectionConfig = {
                                     { label: 'Miếng', value: 'mieng' },
                                   ],
                                   defaultValue: 'hop',
-                                },
-                                { name: 'unitprice', label: 'Đơn giá(VNĐ)', type: 'text' },
-                                {
-                                  name: 'totalprice',
-                                  label: 'Tổng giá trị',
-                                  type: 'text',
-                                  admin: { readOnly: true },
                                 },
                               ],
                             },
@@ -410,6 +415,8 @@ const MedicalRecods: CollectionConfig = {
       generateMedicalRecordID,
       validatePatientRoom,
       validateSoHoSoNoiSoi,
+      autoDepartment,
+      validateSoHoSo
     ],
     afterChange: [removePatientFromRoom],
   },

@@ -4,7 +4,8 @@ import {
   APIError,
   CollectionAfterChangeHook,
 } from 'payload'
-
+import { Access } from 'payload'
+import { User } from '@/payload-types'
 export const updateProductName: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (data?.category === 'medications' && data?.item) {
     // Tìm thuốc theo ID
@@ -183,4 +184,23 @@ export const hookPriceQuayThuoc: CollectionAfterChangeHook = async ({ doc, req }
   } catch (error) {
     console.error('🚨 Lỗi khi cập nhật quầy thuốc từ bảng giá:', error)
   }
+}
+export const canReadBangGia: Access = ({ req }) => {
+  const user = req.user as User
+
+  if (!user) return false
+
+  const { chucvu, phong, khoa } = user
+
+  // Người trong phòng hành chính - quản trị
+  const isHanhChinhQuanTri =
+    phong === 'hanhchinhquantri' &&
+    ['truongphong', 'nhanvienkho'].includes(chucvu ?? '')
+
+  // Người trong khoa Dược
+  const isKhoaDuoc =
+    khoa === 'khoaduoc' &&
+    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+
+  return isHanhChinhQuanTri || isKhoaDuoc
 }

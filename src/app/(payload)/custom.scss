@@ -230,6 +230,7 @@ textarea {
   background-repeat: no-repeat;
   margin-right: 8px;
 }
+
 #nav-group-Khoa\ \&\ Nhân\ sự .nav-group__label::before {
   content: '';
   display: inline-block;
@@ -362,7 +363,9 @@ html[data-theme='dark'] {
 .app-header__account {
   width: 25px;
   height: 25px;
+
   background-image: url('/icons/avt.svg');
+
   background-size: cover;
   background-position: center;
   border-radius: 50%;

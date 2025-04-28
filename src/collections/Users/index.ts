@@ -6,6 +6,8 @@ import {
   canReadUsers,
   canUpdateUser,
   canReadUsersField,
+  removeUserFromClass,
+  BeforeLoginUser,
 } from '@/hooks/checkvalueusers'
 import { updateBoPhanDisplay } from '@/hooks/checkvalueusers'
 import { v4 as uuidv4 } from 'uuid'
@@ -25,6 +27,7 @@ export const Users: CollectionConfig = {
   admin: {
     defaultColumns: ['name', 'boPhanDisplay', 'email'],
     useAsTitle: 'name',
+
     group: 'Khoa & Nhân sự',
   },
   auth: true,
@@ -42,9 +45,7 @@ export const Users: CollectionConfig = {
         read: ({ req }) => req.user?.taikhoan === 'admin',
         update: ({ req }) => req.user?.taikhoan === 'admin',
       },
-      admin: {
-        condition: ({ user }) => user?.taikhoan === 'admin',
-      },
+
     },
 
     {
@@ -346,6 +347,9 @@ export const Users: CollectionConfig = {
       hookBoPhanHienThi,
     ],
     beforeChange: [checkvalueuser],
-    afterChange: [removeUserFromDepartments],
+
+    afterChange: [removeUserFromDepartments,removeUserFromClass],
+    beforeLogin:[BeforeLoginUser]
+
   },
 }

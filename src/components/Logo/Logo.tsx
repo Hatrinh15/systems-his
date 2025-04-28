@@ -17,7 +17,7 @@ export const Logo = (props: Props) => {
     /* eslint-disable @next/next/no-img-element */
     <img
       alt="Payload Logo"
-      width={300}
+      width={200}
       height={100}
       loading={loading}
       fetchPriority={priority}

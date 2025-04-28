@@ -1,5 +1,6 @@
 import { APIError, CollectionBeforeValidateHook } from "payload";
-
+import { Access } from "payload";
+import { User } from "@/payload-types";
 export const hookSupplier: CollectionBeforeValidateHook = async ({ data, req, originalDoc }) => {
   if (!data) return;
   const { payload } = req;
@@ -95,4 +96,17 @@ if (!originalDoc || originalDoc.email !== data.email) {
   }
 
   return data;
+};
+export const canReadSuppliers: Access = ({ req }) => {
+  const user = req.user as User;
+  const chucvuChoPhep = [
+    'truongphong', 'nhanvienkho',
+    'ketoan', 'duocsi',
+    'truongkhoa', 'bacsi', 'yta',
+  ];
+
+  return (
+    user?.taikhoan === 'admin' ||
+    chucvuChoPhep.includes(user?.chucvu ?? '')
+  );
 };

@@ -1,28 +1,31 @@
-import { APIError, type CollectionConfig } from 'payload';
+import { APIError, type CollectionConfig } from 'payload'
 
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
   lexicalEditor,
-} from '@payloadcms/richtext-lexical';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import crypto from 'crypto';
+} from '@payloadcms/richtext-lexical'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import crypto from 'crypto'
 
-import { anyone } from '../access/anyone';
-import { authenticated } from '../access/authenticated';
-
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+import { anyone } from '../access/anyone'
+import { authenticated } from '../access/authenticated'
+import { isAdmin } from '@/hooks/AccessAdmin'
+import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: anyone,
-    update: authenticated,
+    create: isAdmin,
+    delete: isAdmin,
+    read: authenticatedOrPublished,
+    update:  isAdmin,
   },
+  admin: {
+    hidden: ({ user }) => user?.taikhoan !== 'admin'},
   fields: [
     {
       name: 'alt',
@@ -33,7 +36,7 @@ export const Media: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()];
+          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
     },
@@ -62,26 +65,25 @@ export const Media: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ data, req, operation }) => {
-        if ((operation === 'create' || operation === 'update') && req.file) {
-          const buffer = req.file.data; 
-          const hash = crypto.createHash('md5').update(buffer).digest('hex'); // Tạo hash MD5 của file
+        if ((operation === 'create' || operation === 'update') && req?.file?.data) {
+          const buffer = req.file.data
+          const hash = crypto.createHash('md5').update(buffer).digest('hex')
 
-          // Kiểm tra hash có tồn tại trong database không
           const existingMedia = await req.payload.find({
             collection: 'media',
             where: { hash: { equals: hash } },
-          });
+          })
 
           if (existingMedia.docs.length > 0) {
-            throw new APIError('File đã tồn tại trong hệ thống! Vui lòng chọn một file khác.',400);
+            throw new APIError('File đã tồn tại trong hệ thống! Vui lòng chọn một file khác.', 400)
           }
 
-          // Gán giá trị hash cho tệp mới
-          data.hash = hash;
+          data.hash = hash
         }
 
-        return data;
+        console.log('✅ Dữ liệu sau khi xử lý hook:', data) // 👈 Log dữ liệu
+        return data
       },
     ],
   },
-};
+}

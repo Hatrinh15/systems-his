@@ -1,10 +1,20 @@
 import { CollectionConfig } from 'payload';
 import { hookxuatKhoKhoa,hookPhieuSuDung, autoFillUnitPrice,
-   autoCalculateTotalPrice, calculateTotalValues, hookcheckvalue, checkInventoryBeforeUsage, 
-   lockLoaiPhieu} from '@/hooks/HookMedicalUsages';
+   autoCalculateTotalPrice, calculateTotalValues, hookcheckvalue, checkInventoryBeforeUsage, canReadMedical,
+   lockLoaiPhieu,
+   autoAssignStaff,
+   } from '@/hooks/HookMedicalUsages';
+import { isAdmin ,isBacSiYTaTruongKhoaDuocSi } from '@/hooks/AccessAdmin';
+import { User } from '@/payload-types';
 
 export const medicalUsages: CollectionConfig = {
   slug: 'medicalUsages',
+  access:{
+    create: (args) => isAdmin(args)|| isBacSiYTaTruongKhoaDuocSi(args),
+    delete: (args) => isAdmin(args),
+    read: (args) => canReadMedical(args),
+    update: (args) => isAdmin(args)|| isBacSiYTaTruongKhoaDuocSi(args),
+  },
   labels: {
     singular: 'Phiếu Sử Dụng Kho Khoa',
     plural: 'Phiếu Sử Dụng Kho Khoa',
@@ -55,6 +65,20 @@ export const medicalUsages: CollectionConfig = {
               label: 'Nhân viên thực hiện',
               type: 'relationship',
               relationTo: 'users',
+              access:{
+                create: ({req}) => {
+                  if(req.user?.taikhoan === 'admin') {
+                    return true
+                  }
+                  return false
+                },
+                update: ({req}) => {
+                  if(req.user?.taikhoan === 'admin') {
+                    return true
+                  }
+                  return false
+                }
+              },
               admin: {
                 allowCreate: false,
               },
@@ -401,7 +425,7 @@ export const medicalUsages: CollectionConfig = {
   ],
   hooks:{
     beforeChange:[hookPhieuSuDung,hookxuatKhoKhoa ,autoFillUnitPrice,
-      autoCalculateTotalPrice,calculateTotalValues,hookcheckvalue,checkInventoryBeforeUsage],
+      autoCalculateTotalPrice,calculateTotalValues,hookcheckvalue,checkInventoryBeforeUsage,autoAssignStaff],
       beforeValidate:[lockLoaiPhieu]
   }
 };

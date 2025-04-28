@@ -1,5 +1,6 @@
-import { CollectionBeforeChangeHook,APIError } from 'payload'
-
+import { CollectionBeforeChangeHook,APIError, Access } from 'payload'
+import { headers } from "next/headers";
+import { User } from "@/payload-types";
 export const hookQuayThuoc: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (data.category === 'medications' && data.item) {
     const medication = await req.payload.findByID({
@@ -59,4 +60,23 @@ export const hookTinhTrangHang: CollectionBeforeChangeHook = async ({ data }) =>
   }
 
   return data
+}
+
+export const accessRead : Access = async ({req}) => {
+  const referer = (await headers()).get('referer');
+const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/orders') || false;
+if (isFromMedicalRecodsAdmin) {
+  return true;
+}
+  const user = req.user as User
+
+  if (!user) return false
+
+  const isAdminAccount = user.taikhoan === 'admin'
+
+  const isDuocFullAccess =
+    user.khoa === 'khoaduoc' &&
+    ['duocsi', 'truongkhoa'].includes(user.chucvu ?? '')
+
+  return isAdminAccount || isDuocFullAccess
 }

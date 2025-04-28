@@ -1,7 +1,9 @@
-import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from "payload";
+import { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook, CollectionBeforeLoginHook,AuthenticationError } from "payload";
 import { APIError } from "payload";
 import { Access ,AccessArgs } from "payload";
 import { User } from "@/payload-types";
+import { headers } from "next/headers";
+
 
 export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === "create") {
@@ -66,7 +68,7 @@ export const checkvalueuser: CollectionBeforeChangeHook = async ({ data, req, op
   }
 };
 
-//điều kiện xóa nhân viên khỏi khoa chưa có điều kiện xóa nhân viên khỏi phòng 
+//điều kiện xóa nhân viên khỏi khoa 
 export const removeUserFromDepartments: CollectionAfterChangeHook = async ({ req, doc }) => {
   const { id, tinhtranglamviec } = doc
 
@@ -89,15 +91,15 @@ export const removeUserFromDepartments: CollectionAfterChangeHook = async ({ req
   })
 
   for (const department of departmentsWithUser.docs) {
-    const newDoctors = (department.doctors || []).filter((user: any) =>
+    const newDoctors = (department.doctors || []).filter((user: User) =>
       typeof user === 'string' ? user !== id : user?.id !== id
     )
 
-    const newTruongkhoa = (department.truongkhoa || []).filter((user: any) =>
+    const newTruongkhoa = (department.truongkhoa || []).filter((user: User) =>
       typeof user === 'string' ? user !== id : user?.id !== id
     )
 
-    const newNurses = (department.nures || []).filter((user: any) =>
+    const newNurses = (department.nures || []).filter((user: User) =>
       typeof user === 'string' ? user !== id : user?.id !== id
     )
 
@@ -112,6 +114,49 @@ export const removeUserFromDepartments: CollectionAfterChangeHook = async ({ req
     })
   }
 }
+
+// Hook kiểm tra trạng thái nghỉ việc và loại bỏ người khỏi phòng
+export const removeUserFromClass: CollectionAfterChangeHook = async ({ req, doc, operation }) => {
+  const { id, tinhtranglamviec } = doc;
+
+  // Nếu trạng thái không phải là nghỉ việc thì bỏ qua
+  if (tinhtranglamviec !== 'nghiviec') return;
+
+  const payload = req.payload;
+
+  // Tìm các phòng chứa người dùng này trong trường truongphong và nhanvien
+  const roomsWithUser = await payload.find({
+    collection: 'class',  // Sử dụng đúng collection phòng
+    where: {
+      or: [
+        { truongphong: { contains: id } }, // Trưởng phòng
+        { nhanvien: { contains: id } },    // Nhân viên
+      ],
+    },
+    limit: 999,
+  });
+
+  for (const room of roomsWithUser.docs) {
+    const newTruongPhong = (room.truongphong || []).filter((user: User) =>
+      typeof user === 'string' ? user !== id : user?.id !== id
+    );
+
+    const newNhanVien = (room.nhanvien || []).filter((user: User) =>
+      typeof user === 'string' ? user !== id : user?.id !== id
+    );
+
+    // Cập nhật lại thông tin phòng sau khi xóa nhân viên
+    await payload.update({
+      collection: 'class',
+      id: room.id,
+      data: {
+        truongphong: newTruongPhong,
+        nhanvien: newNhanVien,
+      },
+    });
+  }
+};
+
 export const updateBoPhanDisplay: CollectionBeforeValidateHook = ({ data }) => {
   if (!data) return data // kiểm tra nếu không có data thì return luôn
 
@@ -173,8 +218,23 @@ export const hookBoPhanHienThi: CollectionBeforeValidateHook = async ({ data }) 
   }
 }
 // ✅ Trưởng khoa hoặc trưởng phòng chỉ xem được nhân sự cùng khoa hoặc cùng phòng
-export const canReadUsers: Access = ({ req,id }): any => {
+export const canReadUsers: Access = async ({ req,id }): Promise<any> => {
+  const referer = (await headers()).get('referer');
+const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRecods') || false;
 
+if (isFromMedicalRecodsAdmin) {
+  return true;
+}
+const isFromMedicalRecodsAdminExport = referer?.includes('/admin/collections/phieuxuat') || false;
+
+if (isFromMedicalRecodsAdminExport) {
+  return true;
+}
+const isFromMedicalRecodsAdminInport = referer?.includes('/admin/collections/inventorytransactions') || false;
+
+if (isFromMedicalRecodsAdminInport) {
+  return true;
+}
   const user = req.user;
   if(id !== undefined) {
     if(user && id === user.id) {
@@ -228,4 +288,10 @@ export const canReadUsersField: Access = ({ req,id })  => {
     }
   }
   return true
+}
+
+export const BeforeLoginUser: CollectionBeforeLoginHook = async ({ user }) => {
+  if (user.tinhtranglamviec === 'nghiviec') {
+    throw new AuthenticationError(() => 'Tài khoản của bạn đã bị khóa.')
+  }
 }

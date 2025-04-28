@@ -1,6 +1,7 @@
 import { APIError, CollectionBeforeChangeHook, Where } from 'payload'
 import { Access } from 'payload'
 import { User } from '@/payload-types'
+import { headers } from 'next/headers'
 
 export const beforeChange: CollectionBeforeChangeHook = async ({ data, req, operation }) => {
   if (operation === 'create') {
@@ -211,39 +212,43 @@ export const hookCheckKhoa: CollectionBeforeChangeHook = async ({
 }
 
 export const readDepartmentAccess: Access = async ({ req }) => {
-  const user = req.user
+  const referer = (await headers()).get('referer')
+  const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRecods') || false
 
-
-  if (!user) return false
-
-  if (user.taikhoan === 'admin') {
+  // Admin thì truy cập toàn quyền
+  if (req?.user?.taikhoan === 'admin') {
     return true
   }
 
-  if (user.chucvu && ['bacsi', 'yta', 'truongkhoa', 'duocsi'].includes(user.chucvu)) {
-    const conditions: Where[] = []
-
-    if (user.chucvu === 'bacsi') {
-      conditions.push({ doctors: { contains: user.id } })
-    }
-
-    if (user.chucvu === 'yta') {
-      conditions.push({ nures: { contains: user.id } })
-    }
-
-    if (user.chucvu === 'truongkhoa') {
-      conditions.push({ truongkhoa: { contains: user.id } })
-    }
-
-    if (user.chucvu === 'duocsi') {
-      // Nếu dược sĩ cũng được liên kết với khoa qua trường khác, thêm ở đây
-      // Ví dụ: { pharmacists: { contains: user.id } }
-    }
-
-    return {
-      or: conditions,
-    }
+  // Chỉ cho truy cập từ MedicalRecods nếu có
+  if (isFromMedicalRecodsAdmin) {
+    return true
   }
 
-  return false
+  const chucvu = req?.user?.chucvu
+
+  // Nếu không phải bác sĩ, y tá, trưởng khoa => không thấy gì cả
+  const allowedRoles = ['bacsi', 'yta', 'truongkhoa','duocsi']
+  if (!chucvu || !allowedRoles.includes(chucvu)) {
+    return false
+  }
+
+  // Nếu user có khoa, thì trả về khoa tương ứng
+  const find = await req.payload.find({
+    collection: 'departments',
+    where: {
+      tenkhoa: { equals: req?.user?.khoa },
+    },
+  })
+
+  const id = find.docs[0]?.id
+
+  // Nếu không tìm thấy khoa thì không trả về gì cả
+  if (!id) return false
+
+  return {
+    id: {
+      equals: id,
+    },
+  }
 }

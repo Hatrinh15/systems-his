@@ -1,5 +1,6 @@
 import { APIError, CollectionBeforeValidateHook} from "payload";
-
+import { Access } from "payload";
+import { User } from "@/payload-types";
 export const hookMedicalSupplies: CollectionBeforeValidateHook = async ({ data, req, originalDoc }) => {
   if (!data) return;
   const { payload } = req;
@@ -63,4 +64,39 @@ export const notChangeLoaiVatTu: CollectionBeforeValidateHook = async ({ data, o
   }
 
   return data;
+};
+export const accessMedicalSupplies: Access = ({ req }) => {
+  const user = req.user as User
+
+  if (!user) return false
+
+  // Admin toàn quyền
+  if (user.taikhoan === 'admin') return true
+
+  const { chucvu, phong, khoa } = user
+
+  // Người trong phòng hành chính - quản trị
+  const isHanhChinhQuanTri =
+    phong === 'hanhchinhquantri' &&
+    ['truongphong', 'nhanvienkho'].includes(chucvu ?? '')
+
+  // Người trong khoa Dược
+  const isKhoaDuoc =
+    khoa === 'khoaduoc' &&
+    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+
+  return isHanhChinhQuanTri || isKhoaDuoc
+}
+export const canReadMedicalSupplies: Access = ({ req }) => {
+  const user = req.user as User;
+  const chucvuChoPhep = [
+    'truongphong', 'nhanvienkho',
+    'ketoan', 'duocsi',
+    'truongkhoa', 'bacsi', 'yta',
+  ];
+
+  return (
+    user?.taikhoan === 'admin' ||
+    chucvuChoPhep.includes(user?.chucvu ?? '')
+  );
 };

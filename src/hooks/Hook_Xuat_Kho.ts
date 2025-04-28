@@ -7,6 +7,7 @@ import {
 } from 'payload'
 import { APIError } from 'payload'
 import { PayloadRequest } from 'payload'
+import { User } from '@/payload-types'
 
 export const hookBaoGia: CollectionBeforeChangeHook = async ({ data, req, originalDoc }) => {
   const now = new Date()
@@ -79,9 +80,9 @@ export const hookCheckinfo: CollectionBeforeChangeHook = async ({ data, req }) =
   if (!data.transactiondate) {
     errors.push('Ngày tạo phiếu không được để trống.');
   }
-  if (!data.receiverorsender) {
-    errors.push('Người lập phiếu không được để trống.');
-  }
+  // if (!data.receiverorsender) {
+  //   errors.push('Người lập phiếu không được để trống.');
+  // }
   if (!data.exports || data.exports.length === 0) {
     errors.push('Danh sách xuất hàng không được để trống.');
   }
@@ -801,3 +802,23 @@ export const checkInventoryBeforeExport: CollectionBeforeChangeHook = async ({
   return data
 }
 
+export const autoAssignNguoiLapPhieu: CollectionBeforeChangeHook = async ({ req, data }) => {
+  if (!data) return
+
+  const user = req.user
+
+  if (!user) return
+
+  // Nếu là bác sĩ hoặc trưởng khoa
+  if (user.chucvu === 'nhanvienkho' || user.chucvu === 'truongphong') {
+    // Nếu chưa có người được gán vào trường bác sĩ
+    if (!data.receiverorsender) {
+      return {
+        ...data,
+        receiverorsender: user.id, // Gán user hiện tại làm bác sĩ
+      }
+    }
+  }
+
+  return data
+}

@@ -1,8 +1,15 @@
-import { beforeChangeRooms, checkTenPhong } from '@/hooks/HookRooms'
+import { beforeChangeRooms, checkTenPhong ,checkKhoaRead, themOrXoaRoom} from '@/hooks/HookRooms'
 import { CollectionConfig } from 'payload'
-
+import { isAdmin ,isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
+import { User } from 'payload'
 const Rooms: CollectionConfig = {
   slug: 'Rooms',
+  access: {
+      create: (args) => isAdmin(args),
+      delete:  (args) => isAdmin(args) ,
+      update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+      read: checkKhoaRead,
+    },
   labels: {
     singular: 'Phòng Bệnh',
     plural: 'Phòng Bệnh',
@@ -24,6 +31,12 @@ const Rooms: CollectionConfig = {
       label: 'Tổng số phòng',
       min: 1,
       max: 100,
+      access: {
+        update: ({ req }) => {
+          const user = req.user as User
+          return user?.taikhoan === 'admin'
+        },
+      },
     },
     {
       name: 'Phong',
@@ -33,7 +46,13 @@ const Rooms: CollectionConfig = {
         {
           name: 'tenphongbenh',
           label: 'Tên phòng',
-          type: 'text'
+          type: 'text',
+          access: {
+            update: ({ req }) => {
+              const user = req.user as User
+              return user?.taikhoan === 'admin'
+            },
+          },
         },
         {
           type: 'row',
@@ -44,6 +63,12 @@ const Rooms: CollectionConfig = {
               label: 'Tổng số giường',
               min: 1,
               max: 100,
+              access: {
+                update: ({ req }) => {
+                  const user = req.user as User
+                  return user?.taikhoan === 'admin'
+                },
+              },
             },
 
             {
@@ -172,6 +197,6 @@ const Rooms: CollectionConfig = {
       ],
     },
   ],
-  hooks: { beforeChange: [beforeChangeRooms,checkTenPhong] },
+  hooks: { beforeChange: [beforeChangeRooms,checkTenPhong,themOrXoaRoom] },
 }
 export default Rooms

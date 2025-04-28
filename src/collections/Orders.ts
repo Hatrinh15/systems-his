@@ -4,12 +4,22 @@ import {
   hookTinhGiaThuocSanpham,
   hookTinhTongDonThuoc,
   hookTruThuocQuay,
-  hookValidateOrderFields,
+  hookValidateOrderFields, canReadOrders,
+  autoStaff,
+  afterReadOrdersCustomerLabel,
+  afterReadOrdersStaffLabel
 } from '@/hooks/HookOrders'
 import { CollectionConfig } from 'payload'
+import { isAdminDuocSi } from '@/hooks/AccessAdmin'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
+  access: { 
+    create: isAdminDuocSi,
+    read: canReadOrders,  
+    update: isAdminDuocSi,
+    delete: isAdminDuocSi,
+  },
   labels: {
     singular: 'Tạo Đơn Thuốc',
     plural: 'Tạo Đơn Thuốc',
@@ -25,7 +35,38 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'patients',
       admin: {
-        allowCreate: false}
+        allowCreate: false,
+      },
+      access: {
+        read: ({req}) =>{
+          const user = req.user
+          if(user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong' || user?.chucvu === 'duocsi') {
+            return true
+          }
+          if(user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        }
+      }
+    },
+    {
+      name: 'customerLabel',
+      label: 'Tên bệnh nhân',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        condition: () => true, // luôn hiển thị
+      },
+      // access: {
+      //   read: ({req}) => {
+      //     const user = req.user 
+      //     if(user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong' || user?.chucvu === 'ketoan') {
+      //       return true
+      //     }  
+      //     return false
+      //   },
+      // }
     },
     {
       name: 'baohiemyte',
@@ -256,6 +297,18 @@ export const Orders: CollectionConfig = {
       label: 'Nhân viên bán hàng',
       type: 'relationship',
       relationTo: 'users',
+      access: {
+        read: ({req}) =>{
+          const user = req.user
+          if(user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong' || user?.chucvu === 'duocsi') {
+            return true
+          }
+          if(user?.taikhoan === 'admin') {
+            return true
+          }
+          return false
+        }
+      },
       admin: {allowCreate: false},
       filterOptions: async ({ data, req }) => {
         try {
@@ -292,6 +345,23 @@ export const Orders: CollectionConfig = {
       },
     },
     {
+      name: 'staffLabel',
+      label: 'Tên nhân viên',
+      type: 'text',
+      admin: {
+        readOnly: true,
+      },
+      access: {
+        read: ({req}) => {
+          const user = req.user 
+          if(user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong' || user?.chucvu === 'ketoan') {
+            return true
+          }  
+          return false
+        },
+      }
+    },    
+    {
       name: 'paymentmethod',
       label: 'Hình thức thanh toán',
       type: 'select',
@@ -308,8 +378,8 @@ export const Orders: CollectionConfig = {
     }
   ],
   hooks: {
-    beforeChange: [hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
-      hookCheckOrderDate,hookValidateOrderFields],
+    beforeChange: [autoStaff,hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
+      hookCheckOrderDate,hookValidateOrderFields,afterReadOrdersCustomerLabel,afterReadOrdersStaffLabel],
     afterChange: [hookTruThuocQuay],
   },
 }

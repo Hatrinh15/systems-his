@@ -23,7 +23,7 @@ export const Logo = (props: Props) => {
       fetchPriority={priority}
       decoding="async"
       className={clsx('w-[300px] h-[100px]', className)} // 👈 Sửa chỗ này
-      src="/logowweb.png"
+      src="/logowweb.jpg"
     />
   )
 }

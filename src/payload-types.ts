@@ -6,10 +6,66 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     pages: Page;
     posts: Post;
@@ -32,7 +88,6 @@ export interface Config {
     phieuxuat: Phieuxuat;
     departments: Department;
     class: Class;
-    baogia: Baogia;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -77,7 +132,6 @@ export interface Config {
     phieuxuat: PhieuxuatSelect<false> | PhieuxuatSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     class: ClassSelect<false> | ClassSelect<true>;
-    baogia: BaogiaSelect<false> | BaogiaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -666,6 +720,7 @@ export interface Form {
             label?: string | null;
             width?: number | null;
             defaultValue?: string | null;
+            placeholder?: string | null;
             options?:
               | {
                   label: string;
@@ -930,9 +985,10 @@ export interface MedicalRecod {
       }[]
     | null;
   ylenh?: {
-    docs?: (string | Medicalorder)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Medicalorder)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -954,13 +1010,15 @@ export interface Patient {
   sdt?: string | null;
   email?: string | null;
   benhan?: {
-    docs?: (string | Appointment)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Appointment)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   hosobenhan?: {
-    docs?: (string | MedicalRecod)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | MedicalRecod)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1069,13 +1127,15 @@ export interface Supplier {
   businessLicense?: string | null;
   businessLicenseFile?: (string | null) | Media;
   medications?: {
-    docs?: (string | Medication)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Medication)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   medicalsupplies?: {
-    docs?: (string | MedicalSupply)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | MedicalSupply)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1416,43 +1476,6 @@ export interface Class {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "baogia".
- */
-export interface Baogia {
-  id: string;
-  category: 'medications' | 'medicalSupplies';
-  item?: (string | null) | Medication;
-  items?: (string | null) | MedicalSupply;
-  sanpham?: string | null;
-  gianhapnhacungcap?:
-    | {
-        nhacungcap?: (string | null) | Supplier;
-        gianhap?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  gianhaptrungbinh?: string | null;
-  thue?: number | null;
-  loinhuan?: number | null;
-  don?: string | null;
-  giaban?: string | null;
-  tam?: string | null;
-  chin?: string | null;
-  mot?: string | null;
-  donvi?: ('vien' | 'ong' | 'lo' | 'goi') | null;
-  donvis?: ('vien' | 'cuon' | 'mieng' | 'goi') | null;
-  quychuan?: number | null;
-  phantram?: number | null;
-  tien?: string | null;
-  tammuoi?: string | null;
-  chinlam?: string | null;
-  mottram?: string | null;
-  bhyt?: ('co' | 'khong') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1706,10 +1729,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'class';
         value: string | Class;
-      } | null)
-    | ({
-        relationTo: 'baogia';
-        value: string | Baogia;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2700,42 +2719,6 @@ export interface ClassSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "baogia_select".
- */
-export interface BaogiaSelect<T extends boolean = true> {
-  category?: T;
-  item?: T;
-  items?: T;
-  sanpham?: T;
-  gianhapnhacungcap?:
-    | T
-    | {
-        nhacungcap?: T;
-        gianhap?: T;
-        id?: T;
-      };
-  gianhaptrungbinh?: T;
-  thue?: T;
-  loinhuan?: T;
-  don?: T;
-  giaban?: T;
-  tam?: T;
-  chin?: T;
-  mot?: T;
-  donvi?: T;
-  donvis?: T;
-  quychuan?: T;
-  phantram?: T;
-  tien?: T;
-  tammuoi?: T;
-  chinlam?: T;
-  mottram?: T;
-  bhyt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -2815,6 +2798,7 @@ export interface FormsSelect<T extends boolean = true> {
               label?: T;
               width?: T;
               defaultValue?: T;
+              placeholder?: T;
               options?:
                 | T
                 | {

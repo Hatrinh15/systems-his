@@ -21,7 +21,7 @@ export default async function HomePage() {
       title: true,
       slug: true,
       meta: true,
-      heroImage: true,
+      // heroImage: true,
     },
   })
   return (
@@ -87,18 +87,7 @@ export default async function HomePage() {
                 key={post.slug}
                 className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
               >
-                {/* Hiển thị ảnh nếu có metaImage */}
-                {post.heroImage && typeof post.heroImage === 'object' && (
-                  <div className="relative w-full h-48 mb-4 rounded-md overflow-hidden">
-                    <Image
-                      src={post.heroImage.url || '/placeholder-image.jpg'}
-                      alt={post.title}
-                      fill
-                      className="object-cover rounded-md"
-                    />
-                  </div>
-                )}
-
+                {/* Hiển thị ảnh nếu có metaImage */}/
                 <h3 className="text-2xl font-semibold text-blue-800 mb-4">{post.title}</h3>
                 <p className="text-gray-600 mb-4">{post.meta?.description || 'Không có mô tả.'}</p>
                 <Link href={`/posts/${post.slug}`}>

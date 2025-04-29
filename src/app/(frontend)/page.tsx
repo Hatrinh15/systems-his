@@ -17,21 +17,14 @@ export default async function HomePage() {
     limit: 3,
     sort: '-createdAt',
     overrideAccess: false,
-    select: {
-      title: true,
-      slug: true,
-      meta: true,
-      // heroImage: true,
-    },
   })
+
   return (
     <div className="flex flex-col">
       {/* Hero Banner */}
       <section className="relative h-[70vh] bg-blue-100 flex items-center justify-center text-center">
         <Image
-
           src="/yta.jpg"
-
           alt="Bệnh viện Tai Mũi Họng"
           fill
           className="object-cover opacity-50"
@@ -83,21 +76,38 @@ export default async function HomePage() {
             Tin tức mới nhất
           </Link>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {posts.docs.map((post) => (
-              <div
-                key={post.slug}
-                className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
-              >
-                {/* Hiển thị ảnh nếu có metaImage */}/
-                <h3 className="text-2xl font-semibold text-blue-800 mb-4">{post.title}</h3>
-                <p className="text-gray-600 mb-4">{post.meta?.description || 'Không có mô tả.'}</p>
-                <Link href={`/posts/${post.slug}`}>
-                  <span className="text-blue-600 font-semibold hover:underline">Xem thêm</span>
-                </Link>
-              </div>
-            ))}
-          </div>
+          {/* Kiểm tra xem posts có hợp lệ và chứa docs hay không */}
+          {posts && Array.isArray(posts.docs) && posts.docs.length > 0 ? (
+            <div className="grid gap-8 md:grid-cols-3">
+              {posts.docs.map((post) => (
+                <div
+                  key={post.slug}
+                  className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
+                >
+                  {/* Hiển thị ảnh nếu có metaImage */}
+                  {typeof post.heroImage === 'object' && post.heroImage?.url && (
+                    <Image
+                      src={post.heroImage.url}
+                      alt={post.title}
+                      width={400}
+                      height={200}
+                      className="w-full h-[200px] object-cover rounded-lg mb-4"
+                    />
+                  )}
+
+                  <h3 className="text-2xl font-semibold text-blue-800 mb-4">{post.title}</h3>
+                  <p className="text-gray-600 mb-4">
+                    {post.meta?.description || 'Không có mô tả.'}
+                  </p>
+                  <Link href={`/posts/${post.slug}`}>
+                    <span className="text-blue-600 font-semibold hover:underline">Xem thêm</span>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-600">Không có tin tức mới nhất để hiển thị.</p>
+          )}
         </div>
       </section>
 

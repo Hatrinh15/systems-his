@@ -1,18 +1,26 @@
-import { Field } from "payload";
-export const Hoso: Field[]=[
+
+import { APIError, Field } from "payload";
+export const Hoso: Field=
    
-      {
-        name: 'ketqua',
-        label: 'Kết quả',
-        type: 'array',
+  {
+    name: 'ketqua',
+    label: 'Kết quả',
+    type: 'array',
         fields: [
           {
             name: 'infomation',
             label: 'THÔNG TIN NỘI SOI',
             type: 'group',
             fields: [
-              { name: 'ngay', label: 'Ngày thực hiện', type: 'date' },
-              { name: 'bacsi', label: 'Bác sĩ thực hiện', type: 'text' },
+              {name: 'sohoso',label: 'Số hồ sơ bệnh án', type: 'text'  },
+              { name: 'ngay', label: 'Ngày thực hiện', type: 'date',
+                admin: {
+                  date: {
+                    pickerAppearance: 'dayOnly',
+                    displayFormat: 'dd-MM-yyy',
+                  },
+                },
+               },
               {
                 name: 'lydo',
                 label: 'Lý do nội soi',
@@ -30,8 +38,9 @@ export const Hoso: Field[]=[
             ],
           },
           {
-            name: 'ketqua',
+            name: 'ketquanoisoi',
             label: 'KẾT QUẢ NỘI SOI ',
+           
             type: 'blocks',
             blocks: [
               {
@@ -46,7 +55,7 @@ export const Hoso: Field[]=[
               },
               {
                 slug: 'secondaryHero',
-                labels: { singular: 'MŨI', plural: 'MŨI' },
+                labels: { singular: 'MŨI XOANG', plural: 'MŨI XOANG' },
                 fields: [
                   { name: 'binhthuong', label: 'Bình thường', type: 'checkbox' },
                   { name: 'viemmuidiung', label: 'Viêm mũi dị ứng', type: 'checkbox' },
@@ -72,6 +81,7 @@ export const Hoso: Field[]=[
             name: 'hinhanh',
             label: 'HÌNH ẢNH NỘI SOI',
             type: 'upload',
+           
             relationTo: 'media',
           },
           {
@@ -80,7 +90,7 @@ export const Hoso: Field[]=[
               {
                 label: 'Chẩn đoán',
                 fields: [
-                  { name: 'chandoan', label: ' Chẩn đoán', type: 'text' },
+                  { name: 'chandoan', label: ' Chẩn đoán', type: 'textarea' },
                   {
                     name: 'mucdo',
                     label: 'Mức độ tổn thương',
@@ -99,7 +109,7 @@ export const Hoso: Field[]=[
               {
                 label: 'Kết luận và hướng điều trị',
                 fields: [
-                    { name: 'huongdieutri', label: 'Hướng điều trị', type: 'text' },
+                    { name: 'huongdieutri', label: 'Hướng điều trị', type: 'textarea' },
                   {
                     name: 'sosanh',
                     label: 'So sánh',
@@ -115,5 +125,5 @@ export const Hoso: Field[]=[
             ],
           },
         ],
-      },
-    ]
+      }
+

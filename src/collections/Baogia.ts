@@ -2,6 +2,7 @@ import { CollectionConfig } from 'payload'
 import { updateProductName } from '@/hooks/HookBaoGia'
 export const baoGia: CollectionConfig = {
   slug: 'baogia',
+
   labels: {
     singular: 'Báo Giá',
     plural: 'Báo Giá',

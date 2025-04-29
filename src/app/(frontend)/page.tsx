@@ -10,7 +10,9 @@ export default function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-[70vh] bg-blue-100 flex items-center justify-center text-center">
         <Image
+
           src="/web.webp"
+
           alt="Bệnh viện Tai Mũi Họng"
           layout="fill"
           objectFit="cover"

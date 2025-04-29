@@ -75,7 +75,7 @@ export default function HomePage({ posts }: { posts: Post[] }) {
                 key={posts.id}
                 className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
               >
-                {posts.heroImage?.url && (
+                {/* {posts.heroImage?.url && (
                   <div className="relative w-full h-48 mb-4 rounded-md overflow-hidden">
                     <Image
                       src={posts.heroImage.url}
@@ -84,7 +84,7 @@ export default function HomePage({ posts }: { posts: Post[] }) {
                       objectFit="cover"
                     />
                   </div>
-                )}
+                )} */}
                 <h3 className="text-2xl font-semibold text-blue-800 mb-4">{posts.title}</h3>
                 <p className="text-gray-600 mb-4">{posts.excerpt || posts.summary}</p>
                 <Link href={`/tin-tuc/${posts.slug}`}>

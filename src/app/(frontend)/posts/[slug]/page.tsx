@@ -16,15 +16,9 @@ export default async function Page() {
 
   const posts = await payload.find({
     collection: 'posts',
-    depth: 1,
+    depth: 2, // lấy chi tiết media đầy đủ
     limit: 12,
     overrideAccess: false,
-    select: {
-      title: true,
-      slug: true,
-      categories: true,
-      meta: true,
-    },
   })
 
   return (

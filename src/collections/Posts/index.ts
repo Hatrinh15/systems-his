@@ -9,7 +9,6 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
@@ -31,11 +30,11 @@ import { isAdmin } from '@/hooks/AccessAdmin'
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-      create: isAdmin,
-      delete: isAdmin,
-      read: authenticatedOrPublished,
-      update:  isAdmin,
-    },
+    create: isAdmin,
+    delete: isAdmin,
+    read: authenticatedOrPublished,
+    update: isAdmin,
+  },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
   // Type safe if the collection slug generic is passed to `CollectionConfig` - `CollectionConfig<'posts'>
@@ -43,6 +42,7 @@ export const Posts: CollectionConfig<'posts'> = {
     title: true,
     slug: true,
     categories: true,
+    heroImage: true, // ✅ THÊM DÒNG NÀY
     meta: {
       image: true,
       description: true,

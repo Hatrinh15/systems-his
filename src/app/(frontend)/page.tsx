@@ -29,9 +29,7 @@ export default async function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-[70vh] bg-blue-100 flex items-center justify-center text-center">
         <Image
-
           src="/yta.jpg"
-
           alt="Bệnh viện Tai Mũi Họng"
           fill
           className="object-cover opacity-50"
@@ -89,7 +87,7 @@ export default async function HomePage() {
                 key={post.slug}
                 className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
               >
-                {/* Hiển thị ảnh nếu có metaImage */}/
+                {/* Hiển thị ảnh nếu có metaImage */}
                 <h3 className="text-2xl font-semibold text-blue-800 mb-4">{post.title}</h3>
                 <p className="text-gray-600 mb-4">{post.meta?.description || 'Không có mô tả.'}</p>
                 <Link href={`/posts/${post.slug}`}>

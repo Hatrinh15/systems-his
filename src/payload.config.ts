@@ -107,7 +107,7 @@ export default buildConfig({
     PhieuXuat,
     Departments,
     Class,
-    // baoGia,
+    baoGia,
   ],
 
   cors: [getServerSideURL()].filter(Boolean),

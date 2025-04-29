@@ -1,29 +1,22 @@
-// src/app/home/page.tsx
-
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPayload } from 'payload'
-import configPromise from '@payload-config'
+import Post from './posts/[slug]/page'
 
-// Import getPayload function
+interface Post {
+  id: string
+  title: string
+  excerpt?: string
+  summary?: string
+  slug: string
+  heroImage?: MediaImage
+}
+interface MediaImage {
+  url: string
+  alt?: string
+}
 
-export default async function HomePage() {
-  const payload = await getPayload({ config: configPromise })
-
-  const posts = await payload.find({
-    collection: 'posts',
-    depth: 1,
-    limit: 3,
-    sort: '-createdAt',
-    overrideAccess: false,
-    select: {
-      title: true,
-      slug: true,
-      meta: true,
-      heroImage: true,
-    },
-  })
+export default function HomePage({ posts }: { posts: Post[] }) {
   return (
     <div className="flex flex-col">
       {/* Hero Banner */}
@@ -31,19 +24,18 @@ export default async function HomePage() {
         <Image
           src="/yta.jpg"
           alt="Bệnh viện Tai Mũi Họng"
-          fill
-          className="object-cover opacity-50"
+          layout="fill"
+          objectFit="cover"
+          className="opacity-50"
         />
         <div className="relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold text-blue-900 mb-4">
             Chăm sóc sức khỏe toàn diện
           </h1>
-          <p className="text-xl md:text-2xl text-blue-800 mb-8">
-            Y khoa tiên tiến, dịch vụ tận tâm
-          </p>
-          <Link href="/admin/login">
+          <p className="text-xl md:text-2xl text-blue-800 mb-8">Bệnh viện Tai-Mũi-Họng Thái Bình</p>
+          <Link href="/dat-lich">
             <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-              ĐĂNG NHẬP
+              Đặt lịch khám
             </button>
           </Link>
         </div>
@@ -71,37 +63,31 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* News Section */}
       {/* News Section */}
       <section className="py-16 bg-blue-50">
         <div className="container mx-auto px-4">
-          <Link
-            href="/posts"
-            className="text-3xl font-bold text-center text-blue-900 mb-12 block hover:underline"
-          >
-            Tin tức mới nhất
-          </Link>
-
+          <h2 className="text-3xl font-bold text-center text-blue-900 mb-12">Tin tức mới nhất</h2>
           <div className="grid gap-8 md:grid-cols-3">
-            {posts.docs.map((post) => (
+            {posts.map((posts) => (
               <div
-                key={post.slug}
+                key={posts.id}
                 className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
               >
-                {/* Hiển thị ảnh nếu có metaImage */}
-                {post.heroImage && typeof post.heroImage === 'object' && (
+                {posts.heroImage?.url && (
                   <div className="relative w-full h-48 mb-4 rounded-md overflow-hidden">
                     <Image
-                      src={post.heroImage.url || '/placeholder-image.jpg'}
-                      alt={post.title}
-                      fill
-                      className="object-cover rounded-md"
+                      src={posts.heroImage.url}
+                      alt={posts.heroImage.alt || posts.title}
+                      layout="fill"
+                      objectFit="cover"
                     />
                   </div>
                 )}
-
-                <h3 className="text-2xl font-semibold text-blue-800 mb-4">{post.title}</h3>
-                <p className="text-gray-600 mb-4">{post.meta?.description || 'Không có mô tả.'}</p>
-                <Link href={`/posts/${post.slug}`}>
+                <h3 className="text-2xl font-semibold text-blue-800 mb-4">{posts.title}</h3>
+                <p className="text-gray-600 mb-4">{posts.excerpt || posts.summary}</p>
+                <Link href={`/tin-tuc/${posts.slug}`}>
                   <span className="text-blue-600 font-semibold hover:underline">Xem thêm</span>
                 </Link>
               </div>
@@ -111,11 +97,11 @@ export default async function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer>
+      <footer className="bg-blue-900 text-white py-8">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <h3 className="text-xl font-bold">Hospital Thai Binh</h3>
-            {/* <p>© 2025 All rights reserved.</p> */}
+            <p>© 2025 All rights reserved.</p>
           </div>
           <div className="flex gap-6">
             <Link href="https://facebook.com" target="_blank">

@@ -1,5 +1,11 @@
 import { CollectionConfig } from 'payload'
-import { hookPriceQuayThuoc, priceAfterRead, thongBao, updateProductName,canReadBangGia} from '@/hooks/HookBaoGia'
+import {
+  hookPriceQuayThuoc,
+  priceAfterRead,
+  thongBao,
+  updateProductName,
+  canReadBangGia,
+} from '@/hooks/HookBaoGia'
 import { isAdminKeToan } from '@/hooks/AccessAdmin'
 export const baoGia: CollectionConfig = {
   slug: 'baogia',
@@ -7,7 +13,7 @@ export const baoGia: CollectionConfig = {
     create: (args) => isAdminKeToan(args),
     delete: (args) => isAdminKeToan(args),
     update: (args) => isAdminKeToan(args),
-    read: (args) => canReadBangGia(args)||isAdminKeToan(args),
+    read: (args) => canReadBangGia(args) || isAdminKeToan(args),
   },
   labels: {
     singular: 'Bảng Giá',
@@ -132,7 +138,7 @@ export const baoGia: CollectionConfig = {
           label: 'Nhà cung cấp',
           type: 'relationship',
           relationTo: 'suppliers',
-          admin: {allowCreate:false},
+          admin: { allowCreate: false },
           filterOptions: async ({ req, data }) => {
             try {
               // 1️ Xác định sản phẩm đã chọn

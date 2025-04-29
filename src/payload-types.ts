@@ -88,6 +88,7 @@ export interface Config {
     phieuxuat: Phieuxuat;
     departments: Department;
     class: Class;
+    baogia: Baogia;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -132,6 +133,7 @@ export interface Config {
     phieuxuat: PhieuxuatSelect<false> | PhieuxuatSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     class: ClassSelect<false> | ClassSelect<true>;
+    baogia: BaogiaSelect<false> | BaogiaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1476,6 +1478,43 @@ export interface Class {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "baogia".
+ */
+export interface Baogia {
+  id: string;
+  category: 'medications' | 'medicalSupplies';
+  item?: (string | null) | Medication;
+  items?: (string | null) | MedicalSupply;
+  sanpham?: string | null;
+  gianhapnhacungcap?:
+    | {
+        nhacungcap?: (string | null) | Supplier;
+        gianhap?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  gianhaptrungbinh?: string | null;
+  thue?: number | null;
+  loinhuan?: number | null;
+  don?: string | null;
+  giaban?: string | null;
+  tam?: string | null;
+  chin?: string | null;
+  mot?: string | null;
+  donvi?: ('vien' | 'ong' | 'lo' | 'goi') | null;
+  donvis?: ('vien' | 'cuon' | 'mieng' | 'goi') | null;
+  quychuan?: number | null;
+  phantram?: number | null;
+  tien?: string | null;
+  tammuoi?: string | null;
+  chinlam?: string | null;
+  mottram?: string | null;
+  bhyt?: ('co' | 'khong') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1729,6 +1768,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'class';
         value: string | Class;
+      } | null)
+    | ({
+        relationTo: 'baogia';
+        value: string | Baogia;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2714,6 +2757,42 @@ export interface ClassSelect<T extends boolean = true> {
         mota?: T;
         ngaythanhlap?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "baogia_select".
+ */
+export interface BaogiaSelect<T extends boolean = true> {
+  category?: T;
+  item?: T;
+  items?: T;
+  sanpham?: T;
+  gianhapnhacungcap?:
+    | T
+    | {
+        nhacungcap?: T;
+        gianhap?: T;
+        id?: T;
+      };
+  gianhaptrungbinh?: T;
+  thue?: T;
+  loinhuan?: T;
+  don?: T;
+  giaban?: T;
+  tam?: T;
+  chin?: T;
+  mot?: T;
+  donvi?: T;
+  donvis?: T;
+  quychuan?: T;
+  phantram?: T;
+  tien?: T;
+  tammuoi?: T;
+  chinlam?: T;
+  mottram?: T;
+  bhyt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

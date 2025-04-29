@@ -29,7 +29,9 @@ export default async function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-[70vh] bg-blue-100 flex items-center justify-center text-center">
         <Image
+
           src="/yta.jpg"
+
           alt="Bệnh viện Tai Mũi Họng"
           fill
           className="object-cover opacity-50"

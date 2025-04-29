@@ -17,13 +17,17 @@ export const Logo = (props: Props) => {
     /* eslint-disable @next/next/no-img-element */
     <img
       alt="Payload Logo"
-      width={300}
+
+      width={200}
+
       height={100}
       loading={loading}
       fetchPriority={priority}
       decoding="async"
-      className={clsx('max-w-[300px] w-full h-[100px]', className)}
-      src="/logowweb.jpg"
+
+      className={clsx('w-[200px] h-[100px]', className)} // 👈 Sửa chỗ này
+      src="/logowweb.png"
+
     />
   )
 }

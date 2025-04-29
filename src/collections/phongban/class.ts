@@ -6,7 +6,9 @@ import {
   readClassAccess,
 } from '@/hooks/Hookclass'
 import { CollectionConfig } from 'payload'
+
 import { isAdmin, isTruongPhongNhanVien } from '@/hooks/AccessAdmin'
+
 const Class: CollectionConfig = {
   slug: 'class',
   labels: {
@@ -14,12 +16,15 @@ const Class: CollectionConfig = {
     plural: 'Phòng ',
   },
   access: {
+
     create: isAdmin,
     read: readClassAccess,
     update: isAdmin,
     delete: isAdmin,
   },
-  admin: { group: 'Khoa & Nhân Sự' },
+
+  admin: { group: 'Khoa & Nhân sự' },
+
   fields: [
     {
       type: 'tabs',

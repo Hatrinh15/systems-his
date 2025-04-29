@@ -20,7 +20,9 @@ const Departments: CollectionConfig = {
     delete: (args) => isAdmin(args),
   },
   admin: {
-    group: 'Khoa & Nhân Sự',
+
+    group: 'Khoa & Nhân sự',
+
     useAsTitle: 'title',
   },
   fields: [

@@ -20,14 +20,15 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
+import { isAdmin } from '@/hooks/AccessAdmin'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: isAdmin,
+    delete: isAdmin,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update:  isAdmin,
   },
   // This config controls what's populated by default when a page is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -37,6 +38,7 @@ export const Pages: CollectionConfig<'pages'> = {
     slug: true,
   },
   admin: {
+    hidden: ({ user }) => user?.taikhoan !== 'admin', // Ẩn nếu không phải admin
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {

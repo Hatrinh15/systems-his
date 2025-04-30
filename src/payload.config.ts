@@ -3,7 +3,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig, CollectionConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -16,11 +16,29 @@ import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
+import { Medicalorders } from './collections/Users/Medicalorders'
+import { Suppliers } from './collections/Suppliers'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { Medications } from './collections/Medications'
+import { medicalSupplies } from './collections/Medicalsupplies'
+import { Inventory } from './collections/Inventory'
+import Class from './collections/phongban/class'
+import { medicalUsages } from './collections/MedicalUsages'
+import { Orders } from './collections/Orders'
+import { PhieuXuat } from './collections/ExportTransactions'
+import { baoGia } from './collections/Baogia'
+
+import { Pharmacies } from './collections/Pharmacies'
+import { InventoryTransactions } from './collections/InventoryTransactions'
+
+import { FormsOverride } from './plugins/override.ts/formOverride'
+import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOverride'
+import { RedirectsOverride } from './plugins/override.ts/redirectsOverride'
+import { SearchResultsOverride } from './plugins/override.ts/searchResultsOverride'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -71,13 +89,25 @@ export default buildConfig({
     Pages,
     Posts,
     Categories,
+    Medicalorders,
     Media,
-    { ...Users, admin: { group: 'Quản lý nội dung' } },
-    { ...Patients, admin: { group: 'Quản lý nội dung' } },
-    { ...MedicalRecods, admin: { group: 'Quản lý nội dung' } },
-    { ...Appointments, admin: { group: 'Quản lý nội dung' } },
-    { ...Rooms, admin: { group: 'Phòng ban' } },
-    { ...Departments, admin: { group: 'Phòng ban' } },
+    Users,
+    medicalUsages,
+    Orders,
+    Patients,
+    MedicalRecods,
+    Suppliers,
+    Medications,
+    medicalSupplies,
+    Inventory,
+    InventoryTransactions,
+    Pharmacies,
+    Appointments,
+    Rooms,
+    PhieuXuat,
+    Departments,
+    Class,
+    baoGia,
   ],
 
   cors: [getServerSideURL()].filter(Boolean),

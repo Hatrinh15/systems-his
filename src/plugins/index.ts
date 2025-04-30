@@ -14,6 +14,11 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 
+import { FormsOverride } from './override.ts/formOverride'
+import { FormSubmissionsOverride } from './override.ts/formSubmissionsOverride'
+import { RedirectsOverride } from './override.ts/redirectsOverride'
+import { SearchResultsOverride } from './override.ts/searchResultsOverride'
+
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
 }
@@ -60,6 +65,7 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formOverrides: {
+      // Removed invalid 'collections' property
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
           if ('name' in field && field.name === 'confirmationMessage') {

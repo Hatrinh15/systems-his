@@ -34,6 +34,7 @@ import { baoGia } from './collections/Baogia'
 
 import { Pharmacies } from './collections/Pharmacies'
 import { InventoryTransactions } from './collections/InventoryTransactions'
+import { vienPhi } from './collections/VienPhi'
 
 import { FormsOverride } from './plugins/override.ts/formOverride'
 import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOverride'
@@ -108,14 +109,15 @@ export default buildConfig({
     Departments,
     Class,
     baoGia,
+    vienPhi
   ],
 
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
-  plugins: [
-    ...plugins,
-    // storage-adapter-placeholder
-  ],
+  // plugins: [
+  //   ...plugins,
+  //   // storage-adapter-placeholder
+  // ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

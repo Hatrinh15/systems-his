@@ -18,12 +18,6 @@ const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
-  access: {
-    create: isAdmin,
-    delete: isAdmin,
-    read: authenticatedOrPublished,
-    update:  isAdmin,
-  },
   admin: {
     hidden: ({ user }) => user?.taikhoan !== 'admin'},
   fields: [

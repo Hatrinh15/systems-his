@@ -1,4 +1,4 @@
-import { APIError, CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook } from 'payload'
+import { Access, APIError, CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeValidateHook, User } from 'payload'
 
 import isEqual from 'lodash/isEqual';
 
@@ -49,8 +49,7 @@ export const valuemedicalrecord: CollectionBeforeValidateHook = ({ data }) => {
   if (error.length > 0) {
     throw new APIError(error.join('\n'), 400)
   }
-}
-
+};
 export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) => {
 
 
@@ -82,8 +81,7 @@ export const valueho_so: CollectionBeforeValidateHook = ({ data, originalDoc }) 
   if (error.length > 0) {
     throw new APIError(error.map((err) => `, ${err}`).join('\n'), 400)
   }
-}
-
+};
 export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async ({
   data,
   req,
@@ -104,8 +102,7 @@ export const preventDuplicateMedicalRecord: CollectionBeforeChangeHook = async (
       throw new APIError('Bệnh nhân này đã có hồ sơ bệnh án, không thể tạo thêm!', 400)
     }
   }
-}
-
+};
 export const validateNhapVienOnlyOnce: CollectionBeforeValidateHook = async ({ data, originalDoc }) => {
   // Nếu tình trạng hiện tại vẫn là "Nhập viện"
   if (data?.tinhtrang === 'no') {
@@ -120,7 +117,6 @@ export const validateNhapVienOnlyOnce: CollectionBeforeValidateHook = async ({ d
 
   return data;
 };
-
 export const namePatient = async ({ data, req }) => {
   if (data.thongtinbenhnhan) {
     // Lấy thông tin bệnh nhân từ database
@@ -133,8 +129,7 @@ export const namePatient = async ({ data, req }) => {
       data.tenBenhNhan = patient.ten // Cập nhật tên bệnh nhân
     }
   }
-}
-
+};
 export const generateMedicalRecordID: CollectionBeforeValidateHook = async ({ data, req }) => {
   if (!data) return;
 
@@ -172,7 +167,6 @@ export const generateMedicalRecordID: CollectionBeforeValidateHook = async ({ da
 
   return data; 
 };
-
 export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
   try {
     const hoSoCu = previousDoc?.hoso || []
@@ -231,8 +225,7 @@ export const removePatientFromRoom: CollectionAfterChangeHook = async ({ doc, pr
   } catch (err) {
     console.error('❌ Lỗi khi xóa bệnh nhân khỏi phòng bệnh:', err)
   }
-}
-
+};
 export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, req, operation }) => {
   if (operation !== 'create' && operation !== 'update') return data;
 
@@ -290,7 +283,6 @@ export const validatePatientRoom: CollectionBeforeValidateHook = async ({ data, 
 
   return data;
 };
-
 export const validateSoHoSoNoiSoi: CollectionBeforeValidateHook = async ({ data }) => {
   const danhSachHoSo = data?.hoso || []
   const ketQuaNoiSoi = data?.ketqua || []
@@ -326,8 +318,7 @@ export const validateSoHoSoNoiSoi: CollectionBeforeValidateHook = async ({ data 
   }
 
   return data
-}
-
+};
 export const validateSoHoSo: CollectionBeforeValidateHook = async ({ data, req, originalDoc, operation }) => {
   if (!data || !req.user || !originalDoc || operation !== 'update') return data;
 
@@ -368,8 +359,7 @@ export const validateSoHoSo: CollectionBeforeValidateHook = async ({ data, req, 
   }
 
   return data;
-}
-
+};
 export const autoDepartment: CollectionBeforeValidateHook = async ({ data, req }) => { 
   if(!data || !req.user) return data
   if (req.user.taikhoan === 'admin') return data;
@@ -404,4 +394,14 @@ export const autoDepartment: CollectionBeforeValidateHook = async ({ data, req }
   }
 
   return data; // Trả về dữ liệu đã chỉnh sửa
-}
+};
+export const canReadMedicals : Access = async ({req}) => {
+  const user = req.user as User
+  const referer = req.headers?.get('referer') || ''
+  const isFromMedicalRecodsAdmin = referer.includes('/admin/collections/vienphi')
+  if (isFromMedicalRecodsAdmin) {
+    return true
+  }
+  if(!user) return false
+return true
+    }

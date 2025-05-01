@@ -1,4 +1,4 @@
-import { beforeChangeRooms, checkTenPhong ,checkKhoaRead, themOrXoaRoom} from '@/hooks/HookRooms'
+import { beforeChangeRooms, checkTenPhong ,checkKhoaRead, themOrXoaRoom, formatGiaPhong} from '@/hooks/HookRooms'
 import { CollectionConfig } from 'payload'
 import { isAdmin ,isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
 import { User } from 'payload'
@@ -31,6 +31,17 @@ const Rooms: CollectionConfig = {
       label: 'Tổng số phòng',
       min: 1,
       max: 100,
+      access: {
+        update: ({ req }) => {
+          const user = req.user as User
+          return user?.taikhoan === 'admin'
+        },
+      },
+    },
+    {
+      name: 'giaphong',
+      type: 'text',
+      label: 'Giá phòng/ngày',
       access: {
         update: ({ req }) => {
           const user = req.user as User
@@ -197,6 +208,7 @@ const Rooms: CollectionConfig = {
       ],
     },
   ],
-  hooks: { beforeChange: [beforeChangeRooms,checkTenPhong,themOrXoaRoom] },
+  hooks: { beforeChange: [beforeChangeRooms,checkTenPhong,themOrXoaRoom,formatGiaPhong],
+   },
 }
 export default Rooms

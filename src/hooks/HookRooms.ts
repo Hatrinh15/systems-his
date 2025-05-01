@@ -1,4 +1,4 @@
-import { APIError, CollectionBeforeChangeHook } from 'payload'
+import { APIError, CollectionAfterReadHook, CollectionBeforeChangeHook } from 'payload'
 import { Access } from 'payload'
 import { User } from '@/payload-types'
 export const beforeChangeRooms: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
@@ -145,4 +145,18 @@ export const themOrXoaRoom: CollectionBeforeChangeHook = async ({ data, req, ori
   }
 
   return data
+}
+
+export const formatGiaPhong: CollectionBeforeChangeHook= async ({ data }) => {
+  if (data.giaphong && typeof data.giaphong === 'string') {
+    // Xóa các dấu chấm cũ nếu có
+    const cleaned = data.giaphong.replace(/\./g, '');
+    const number = parseInt(cleaned);
+
+    if (!isNaN(number)) {
+      data.giaphong = number.toLocaleString('vi-VN'); // → 100000 → "100.000"
+    }
+  }
+
+  return data;
 }

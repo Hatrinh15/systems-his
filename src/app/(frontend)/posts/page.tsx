@@ -7,6 +7,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from '../[slug]/page.client'
+import Link from 'next/link'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -18,7 +19,7 @@ export default async function Page() {
     collection: 'posts',
     depth: 1,
     limit: 12,
-    overrideAccess: false,
+    overrideAccess: true,
     select: {
       title: true,
       slug: true,
@@ -28,11 +29,15 @@ export default async function Page() {
   })
 
   return (
-    <div className="pt-24 pb-24">
+    //custom cho trang tin tức khi ấn vào mục tin tức mới nhất
+    <div className="pb-24 ">
       <PageClient />
-      <div className="container mb-16">
-        <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+      <div className="container mb-16 ">
+        <div className=" max-w-none text-[25px] font-bold text-gray-500 mb-4">
+          <Link href="/" className="text-blue-600 hover:underline font-bold">
+            Trang chủ
+          </Link>{' '}
+          &nbsp;&rsaquo;&nbsp; Tin tức
         </div>
       </div>
 

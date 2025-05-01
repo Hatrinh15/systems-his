@@ -9,6 +9,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
@@ -25,15 +26,15 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from '@/fields/slug'
-import { isAdmin } from '@/hooks/AccessAdmin'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: isAdmin,
-    delete: isAdmin,
-    read: authenticatedOrPublished,
-    update: isAdmin,
+    create: authenticated,
+    delete: authenticated,
+    read: () => true,
+
+    update: authenticated,
   },
   // This config controls what's populated by default when a post is referenced
   // https://payloadcms.com/docs/queries/select#defaultpopulate-collection-config-property
@@ -42,14 +43,13 @@ export const Posts: CollectionConfig<'posts'> = {
     title: true,
     slug: true,
     categories: true,
-    heroImage: true, // ✅ THÊM DÒNG NÀY
     meta: {
       image: true,
       description: true,
     },
   },
   admin: {
-    hidden: ({ user }) => user?.taikhoan !== 'admin',
+    hidden: ({ user }) => user?.taikhoan !== 'admin', // Ẩn nếu không phải admin
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {

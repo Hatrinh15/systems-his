@@ -36,12 +36,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
     >
       {/* Dòng chữ chính giữa */}
       <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none z-0">
-        <div className="text-teal-400 font-bold text-[20px] sm:text-[28px] md:text-[32px] lg:text-[40px] text-center hidden sm:block">
+        <div className="text-blue-900  font-bold text-[20px] sm:text-[28px] md:text-[32px] lg:text-[40px] text-center hidden sm:block">
           Bệnh viện Tai-Mũi-Họng Thái Bình
         </div>
 
         {/* Dòng chữ chất lượng đã được khẳng định */}
-        <div className="text-teal-400 font-cursive text-[22px] mt-2 text-center">
+        <div className="text-blue-900 font-cursive text-[22px] mt-2 text-center hidden sm:block">
           Chất lượng đã được khẳng định
         </div>
       </div>

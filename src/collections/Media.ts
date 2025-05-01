@@ -1,5 +1,6 @@
 import { APIError, type CollectionConfig } from 'payload'
-
+import { authenticated } from '../access/authenticated'
+import { anyone } from '../access/anyone'
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,
@@ -14,7 +15,12 @@ const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
-
+  access: {
+    create: authenticated,
+    delete: authenticated,
+    read: () => true,
+    update: authenticated,
+  },
   admin: {
     hidden: ({ user }) => user?.taikhoan !== 'admin',
   },

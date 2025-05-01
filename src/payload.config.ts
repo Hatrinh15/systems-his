@@ -30,7 +30,6 @@ import Class from './collections/phongban/class'
 import { medicalUsages } from './collections/MedicalUsages'
 import { Orders } from './collections/Orders'
 import { PhieuXuat } from './collections/ExportTransactions'
-import { baoGia } from './collections/Baogia'
 
 import { Pharmacies } from './collections/Pharmacies'
 import { InventoryTransactions } from './collections/InventoryTransactions'
@@ -40,6 +39,7 @@ import { FormsOverride } from './plugins/override.ts/formOverride'
 import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOverride'
 import { RedirectsOverride } from './plugins/override.ts/redirectsOverride'
 import { SearchResultsOverride } from './plugins/override.ts/searchResultsOverride'
+import { baoGia } from './collections/BaoGia'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

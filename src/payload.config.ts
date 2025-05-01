@@ -40,7 +40,8 @@ import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOv
 import { RedirectsOverride } from './plugins/override.ts/redirectsOverride'
 import { SearchResultsOverride } from './plugins/override.ts/searchResultsOverride'
 import { baoGia } from './collections/BaoGia'
-
+import { en } from 'payload/i18n/en'
+import { vi } from 'payload/i18n/vi'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -81,6 +82,7 @@ export default buildConfig({
       ],
     },
   },
+ i18n: {supportedLanguages: { vi, en }},
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: mongooseAdapter({

@@ -141,7 +141,16 @@ export const notChangeHinhThucĐT: CollectionBeforeChangeHook = async ({ data, r
   return data
 }
 
-export const checkKhoaRead: Access= async ({req,data})=> {
+export const checkKhoaRead: Access= async ({req})=> {
+  const referer = req.headers?.get('referer') || ''
+  const isFromVienPhi = referer.includes('/admin/collections/vienphi')
+  const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRecods') || false;
+  if (isFromMedicalRecodsAdmin) {
+    return true
+  }
+  if( isFromVienPhi) {
+  return true
+  }
   const user = req.user as User;
   // Kiểm tra nếu là admin hoặc bác sĩ/y tá/trưởng khoa
   if (user?.taikhoan === 'admin') {
@@ -166,7 +175,7 @@ const id = find.docs[0]?.id
   }
 }
 
-  return false;
+  return true;
 }
   // Nếu không thỏa mãn, không cho phép xem
 export const checkAutoKhoa: CollectionBeforeChangeHook = async ({ req, data, originalDoc }) => {

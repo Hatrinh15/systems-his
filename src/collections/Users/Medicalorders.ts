@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { authenticated } from '@/access/authenticated'
 import { hookcheck, hookSoHoSo, notChangeHinhThucĐT, valuemedicalorder ,checkKhoaRead, checkAutoKhoa,BacSiyTa} from '@/hooks/Hookmedicalorder'
-import { isAdmin , isBacSiYTaTruongKhoa} from '@/hooks/AccessAdmin'
+import { isAdmin , isBacSiYTaTruongKhoa,} from '@/hooks/AccessAdmin'
 export const Medicalorders: CollectionConfig = {
   slug: 'medicalorders',
   access: {
@@ -18,6 +18,15 @@ export const Medicalorders: CollectionConfig = {
     defaultColumns: ['hosobenhan', 'bacsi', 'ngayLap'],
     useAsTitle: 'hosobenhan',
     group:'Bệnh Nhân & Điều Trị',
+    hidden: ({user}) => {
+      if (user?.taikhoan === 'admin') {
+        return false;
+      }
+      if (user?.chucvu === 'bacsi' ||user?.chucvu === 'truongkhoa' || user?.chucvu === 'yta') {
+         return false
+      }
+return true
+    }
   },
   fields: [
     {

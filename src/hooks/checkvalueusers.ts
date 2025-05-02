@@ -231,6 +231,10 @@ if (isFromMedicalRecodsAdminExport) {
   return true;
 }
 const isFromMedicalRecodsAdminInport = referer?.includes('/admin/collections/inventorytransactions') || false;
+  const isFromVienPhi = referer?.includes('/admin/collections/vienphi') || false;
+  if (isFromVienPhi) {
+    return true
+  }
 
 if (isFromMedicalRecodsAdminInport) {
   return true;

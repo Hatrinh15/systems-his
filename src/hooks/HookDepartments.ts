@@ -214,6 +214,10 @@ export const hookCheckKhoa: CollectionBeforeChangeHook = async ({
 export const readDepartmentAccess: Access = async ({ req }) => {
   const referer = (await headers()).get('referer')
   const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRecods') || false
+  const isFromVienPhi = referer?.includes('/admin/collections/vienphi') || false
+  if (isFromVienPhi) {
+    return true
+  }
 
   // Admin thì truy cập toàn quyền
   if (req?.user?.taikhoan === 'admin') {

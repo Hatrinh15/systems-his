@@ -10,7 +10,8 @@ import {
   validatePatientRoom,
   validateSoHoSoNoiSoi,
   validateSoHoSo,
-  autoDepartment
+  autoDepartment,
+  canReadMedicals
 } from '@/hooks/Hookmedicalrecord'
 import { isAdmin, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
 const MedicalRecods: CollectionConfig = {
@@ -19,13 +20,41 @@ const MedicalRecods: CollectionConfig = {
       create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
       delete:  (args) => isAdmin(args) ,
       update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
-      read:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+      read:  canReadMedicals,
     },
   labels: {
     singular: 'Hồ Sơ Bệnh Án',
     plural: 'Hồ Sơ Bệnh Án',
   },
-  admin: { group: 'Bệnh Nhân & Điều Trị', useAsTitle: 'tenBenhNhan' },
+  admin: { group: 'Bệnh Nhân & Điều Trị', useAsTitle: 'tenBenhNhan', 
+    hidden: ({user}) => {
+      if(!user) return true
+      if (user?.taikhoan === 'admin') return false
+
+  const { chucvu, phong, khoa } = user
+
+  // Người trong phòng hành chính - quản trị
+  const isTaiChinhKeToan =
+    phong === 'taichinhketoan' &&
+    ['truongphong', 'ketoan'].includes(chucvu ?? '')
+    const isKhoFullAccess =
+    user.phong === 'hanhchinhquantri' &&
+    ['nhanvienkho', 'truongphong'].includes(user.chucvu ?? '')
+  const isKhoaDuoc =
+    khoa === 'khoaduoc' &&
+    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+    if(isKhoFullAccess ) {
+      return true
+    }
+    if(isTaiChinhKeToan) {
+      return true
+    }
+    if(isKhoaDuoc) {
+      return true
+    }
+    return false
+    }
+  },
   fields: [
     {
       type: 'tabs',
@@ -85,7 +114,7 @@ const MedicalRecods: CollectionConfig = {
                   label: 'Khoa',
                   type: 'relationship',
                   relationTo: 'departments',
-                  admin: { allowCreate: false,readOnly: true },
+                  admin: { allowCreate: false },
                 },
                 {
                   name: 'bacsi',
@@ -129,7 +158,7 @@ const MedicalRecods: CollectionConfig = {
 
                       // Nếu không tìm thấy khoa hoặc không có nhân sự, trả về danh sách rỗng
                       if (!department || (!department.truongkhoa && !department.doctors)) {
-                        return { id: { in: [] } }
+                        return { id: { in: null } }
                       }
 
                       // Đảm bảo `truongkhoa` và `doctors` luôn là mảng trước khi map
@@ -147,7 +176,7 @@ const MedicalRecods: CollectionConfig = {
                       }
                     } catch (error) {
                       console.error('Lỗi khi lọc nhân sự theo khoa:', error)
-                      return { id: { in: [] } }
+                      return { id: { in: null } }
                     }
                   },
                 },

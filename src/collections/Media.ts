@@ -15,12 +15,14 @@ const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   slug: 'media',
+
   access: {
     create: authenticated,
     delete: authenticated,
     read: () => true,
     update: authenticated,
   },
+
   admin: {
     hidden: ({ user }) => user?.taikhoan !== 'admin',
   },

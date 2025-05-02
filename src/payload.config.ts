@@ -33,13 +33,15 @@ import { PhieuXuat } from './collections/ExportTransactions'
 
 import { Pharmacies } from './collections/Pharmacies'
 import { InventoryTransactions } from './collections/InventoryTransactions'
+import { vienPhi } from './collections/VienPhi'
 
 import { FormsOverride } from './plugins/override.ts/formOverride'
 import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOverride'
 import { RedirectsOverride } from './plugins/override.ts/redirectsOverride'
 import { SearchResultsOverride } from './plugins/override.ts/searchResultsOverride'
 import { baoGia } from './collections/BaoGia'
-
+import { en } from 'payload/i18n/en'
+import { vi } from 'payload/i18n/vi'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -80,6 +82,7 @@ export default buildConfig({
       ],
     },
   },
+ i18n: {supportedLanguages: { vi, en }},
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: mongooseAdapter({
@@ -108,14 +111,15 @@ export default buildConfig({
     Departments,
     Class,
     baoGia,
+    vienPhi
   ],
 
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
-  plugins: [
-    ...plugins,
-    // storage-adapter-placeholder
-  ],
+  // plugins: [
+  //   ...plugins,
+  //   // storage-adapter-placeholder
+  // ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

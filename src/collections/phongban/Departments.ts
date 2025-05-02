@@ -308,7 +308,7 @@ const Departments: CollectionConfig = {
                           const findId = availableMedications.filter((dt) => !show.includes(dt))
                           // Nếu không có thuốc nào trong kho, trả về false để ẩn tất cả
                           if (availableMedications.length === 0) return false
-                          console.log(findId)
+                          // console.log(findId)
                           return {
                             or: [
                               { id: { in: findId !== undefined ? findId : null } },
@@ -417,3 +417,4 @@ const Departments: CollectionConfig = {
   },
 }
 export default Departments
+// hic hic

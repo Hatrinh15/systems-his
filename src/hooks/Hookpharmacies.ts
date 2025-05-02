@@ -63,6 +63,8 @@ export const hookTinhTrangHang: CollectionBeforeChangeHook = async ({ data }) =>
 }
 
 export const accessRead : Access = async ({req}) => {
+  console.log('Referer:', req.headers?.get('referer'))
+
   const referer = (await headers()).get('referer');
 const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/orders') || false;
 if (isFromMedicalRecodsAdmin) {

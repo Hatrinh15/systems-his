@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
-// Import getPayload function
-
 export default async function HomePage() {
   const payload = await getPayload({ config: configPromise })
 
@@ -21,7 +19,7 @@ export default async function HomePage() {
       title: true,
       slug: true,
       meta: true,
-      // heroImage: true,
+      heroImage: true,
     },
   })
   return (
@@ -29,9 +27,7 @@ export default async function HomePage() {
       {/* Hero Banner */}
       <section className="relative h-[70vh] bg-blue-100 flex items-center justify-center text-center">
         <Image
-
           src="/yta.jpg"
-
           alt="Bệnh viện Tai Mũi Họng"
           fill
           className="object-cover opacity-50"
@@ -74,6 +70,7 @@ export default async function HomePage() {
         </div>
       </section>
       {/* News Section */}
+      {/* News Section */}
       <section className="py-16 bg-blue-50">
         <div className="container mx-auto px-4">
           <Link
@@ -89,7 +86,18 @@ export default async function HomePage() {
                 key={post.slug}
                 className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition"
               >
-                {/* Hiển thị ảnh nếu có metaImage */}/
+                {/* Hiển thị ảnh nếu có metaImage */}
+                {post.heroImage && typeof post.heroImage === 'object' && (
+                  <div className="relative w-full h-48 mb-4 rounded-md overflow-hidden">
+                    <Image
+                      src={post.heroImage.url || '/placeholder-image.jpg'}
+                      alt={post.title}
+                      fill
+                      className="object-cover rounded-md"
+                    />
+                  </div>
+                )}
+
                 <h3 className="text-2xl font-semibold text-blue-800 mb-4">{post.title}</h3>
                 <p className="text-gray-600 mb-4">{post.meta?.description || 'Không có mô tả.'}</p>
                 <Link href={`/posts/${post.slug}`}>

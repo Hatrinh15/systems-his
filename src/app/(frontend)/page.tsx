@@ -117,13 +117,23 @@ export default async function HomePage() {
             {/* <p>© 2025 All rights reserved.</p> */}
           </div>
           <div className="flex gap-6">
-            <Link href="https://facebook.com" target="_blank">
+            <Link href="/lien-he">Liên hệ</Link>
+            <Link
+              href="https://facebook.com"
+              target="_blank"
+              className="flex items-center gap-2 hover:underline"
+            >
+              <Image src="/fb.svg" alt="Facebook" width={20} height={20} />
               Facebook
             </Link>
-            <Link href="https://zalo.me" target="_blank">
-              Zalo
+            <Link
+              href="https://youtube.com"
+              target="_blank"
+              className="flex items-center gap-2 hover:underline"
+            >
+              <Image src="/ytb.svg" alt="Youtube" width={20} height={20} />
+              Youtube
             </Link>
-            <Link href="/lien-he">Liên hệ</Link>
           </div>
         </div>
       </footer>

@@ -11,49 +11,48 @@ import {
   validateSoHoSoNoiSoi,
   validateSoHoSo,
   autoDepartment,
-  canReadMedicals
+  canReadMedicals,
 } from '@/hooks/Hookmedicalrecord'
 import { isAdmin, isBacSiYTaTruongKhoa } from '@/hooks/AccessAdmin'
 const MedicalRecods: CollectionConfig = {
   slug: 'MedicalRecods',
   access: {
-      create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
-      delete:  (args) => isAdmin(args) ,
-      update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
-      read:  canReadMedicals,
-    },
+    create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    delete: (args) => isAdmin(args),
+    update: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    read: canReadMedicals,
+  },
   labels: {
     singular: 'Hồ Sơ Bệnh Án',
     plural: 'Hồ Sơ Bệnh Án',
   },
-  admin: { group: 'Bệnh Nhân & Điều Trị', useAsTitle: 'tenBenhNhan', 
-    hidden: ({user}) => {
-      if(!user) return true
+  admin: {
+    group: 'Bệnh Nhân & Điều Trị',
+    useAsTitle: 'tenBenhNhan',
+    hidden: ({ user }) => {
+      if (!user) return true
       if (user?.taikhoan === 'admin') return false
 
-  const { chucvu, phong, khoa } = user
+      const { chucvu, phong, khoa } = user
 
-  // Người trong phòng hành chính - quản trị
-  const isTaiChinhKeToan =
-    phong === 'taichinhketoan' &&
-    ['truongphong', 'ketoan'].includes(chucvu ?? '')
-    const isKhoFullAccess =
-    user.phong === 'hanhchinhquantri' &&
-    ['nhanvienkho', 'truongphong'].includes(user.chucvu ?? '')
-  const isKhoaDuoc =
-    khoa === 'khoaduoc' &&
-    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
-    if(isKhoFullAccess ) {
-      return true
-    }
-    if(isTaiChinhKeToan) {
-      return true
-    }
-    if(isKhoaDuoc) {
-      return true
-    }
-    return false
-    }
+      // Người trong phòng hành chính - quản trị
+      const isTaiChinhKeToan =
+        phong === 'taichinhketoan' && ['truongphong', 'ketoan'].includes(chucvu ?? '')
+      const isKhoFullAccess =
+        user.phong === 'hanhchinhquantri' &&
+        ['nhanvienkho', 'truongphong'].includes(user.chucvu ?? '')
+      const isKhoaDuoc = khoa === 'khoaduoc' && ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+      if (isKhoFullAccess) {
+        return true
+      }
+      if (isTaiChinhKeToan) {
+        return true
+      }
+      if (isKhoaDuoc) {
+        return true
+      }
+      return false
+    },
   },
   fields: [
     {
@@ -123,8 +122,8 @@ const MedicalRecods: CollectionConfig = {
                   relationTo: 'users',
                   admin: { allowCreate: false },
                   filterOptions: async ({ req, siblingData }) => {
-                    try {                    
-                     const user = req.user;
+                    try {
+                      const user = req.user
                       // Kiểm tra nếu siblingData không tồn tại hoặc không có khoa thì trả về danh sách rỗng
                       if (
                         !siblingData ||
@@ -141,15 +140,14 @@ const MedicalRecods: CollectionConfig = {
                             equals: user?.khoa,
                           },
                         },
-                      });
-                    
-                      const khoaID= find.docs[0]?.id;
+                      })
+
+                      const khoaID = find.docs[0]?.id
 
                       if (!khoaID) {
                         return { id: { in: [] } }
                       }
 
-                      
                       // Truy vấn thông tin khoa từ collection `departments`
                       const department = await req.payload.findByID({
                         collection: 'departments',
@@ -445,7 +443,7 @@ const MedicalRecods: CollectionConfig = {
       validatePatientRoom,
       validateSoHoSoNoiSoi,
       autoDepartment,
-      validateSoHoSo
+      validateSoHoSo,
     ],
     afterChange: [removePatientFromRoom],
   },

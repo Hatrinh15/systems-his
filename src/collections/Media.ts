@@ -1,6 +1,6 @@
 import { APIError, type CollectionConfig } from 'payload'
 import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
+
 import {
   FixedToolbarFeature,
   InlineToolbarFeature,

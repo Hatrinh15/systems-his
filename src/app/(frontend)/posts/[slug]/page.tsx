@@ -69,7 +69,7 @@ export default async function PostPage({ params }: Props) {
         </div>
       )}
       {/* ✅ Breadcrumb, custom nút ấn cho một màn detail về tin tức */}
-      <div className="max-w-6xl mx-auto px-4 mt-4 text-sm text-[28px] font-bold  text-gray-500">
+      <div className="max-w-6xl mx-auto px-4 mt-4 text-[25px] font-bold  text-gray-500">
         <Link href="/" className="text-blue-600 hover:underline">
           Trang chủ
         </Link>{' '}

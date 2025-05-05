@@ -1,5 +1,5 @@
 import { APIError, CollectionConfig } from "payload";
-import { validateAppointment } from "@/hooks/hookappointment";
+import { validateAppointment,patientName } from "@/hooks/hookappointment";
 import { isAdmin, isBacSiYTaTruongKhoa } from "@/hooks/AccessAdmin";
 
 export const Appointments: CollectionConfig = {
@@ -14,13 +14,23 @@ labels: {
     singular: 'Đặt Lịch Khám',
     plural: 'Đặt Lịch Khám',
 },
-admin: {  group: 'Bệnh Nhân & Điều Trị' },
+admin: {  group: 'Bệnh Nhân & Điều Trị',
+  useAsTitle: 'patientName'
+ },
 fields:[
     {
       name: 'patients',
       label: 'Bệnh nhân',
       type: 'relationship',
       relationTo: 'patients',  // Tham chiếu tới collection 'patients'
+    },
+    {
+      name: 'patientName',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        hidden: true,
+      },
     },
       {
         name: 'bacsi',
@@ -89,6 +99,6 @@ fields:[
       },
     ],
     hooks: {
-      beforeChange: [validateAppointment],
+      beforeChange: [validateAppointment,patientName],
   },
 }

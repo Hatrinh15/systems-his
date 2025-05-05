@@ -283,11 +283,16 @@ const Departments: CollectionConfig = {
                       relationTo: 'medications',
                       admin: {
                         allowCreate: false,
-                        condition: (_, siblingData) => siblingData?.category === 'medications',
+                        condition: (_, siblingData) =>
+                          (siblingData as { category?: string })?.category === 'medications',
                       },
                       filterOptions: async ({ req, data, siblingData }) => {
                         try {
-                          // Lấy danh sách thuốc có trong kho hàng với số lượng > 0
+                          const category = (siblingData as { category?: string })?.category;
+                          if (category !== 'medications') return false;
+                    
+                          const currentItem = (siblingData as { item?: string })?.item;
+                    
                           const inventoryData = await req.payload.find({
                             collection: 'inventory',
                             where: {
@@ -295,32 +300,45 @@ const Departments: CollectionConfig = {
                               quantity: { greater_than: 0 },
                             },
                             limit: 1000,
-                          })
-                          const id = siblingData as { item?: string }
-
-                          // Lấy danh sách ID của thuốc có trong kho
-                          const availableMedications = inventoryData.docs
+                          });
+                    
+                          const availableIds = inventoryData.docs
                             .map((doc) =>
-                              doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item,
+                              typeof doc.item === 'object' && doc.item !== null ? doc.item.id : doc.item,
                             )
-                            .filter((id) => typeof id === 'string' && id.trim() !== '') // Lọc bỏ null/undefined
-                          const show = data.departmentInventory.map((dt) => dt.item)
-                          const findId = availableMedications.filter((dt) => !show.includes(dt))
-                          // Nếu không có thuốc nào trong kho, trả về false để ẩn tất cả
-                          if (availableMedications.length === 0) return false
-                          // console.log(findId)
-                          return {
-                            or: [
-                              { id: { in: findId !== undefined ? findId : null } },
-                              { id: { equals: id.item } },
-                            ],
+                            .filter((id): id is string => typeof id === 'string' && id.trim() !== '');
+                    
+                          const selectedItems = Array.isArray(data?.departmentInventory)
+                            ? data.departmentInventory
+                                .map((entry) => entry.item)
+                                .filter((id): id is string => typeof id === 'string' && id !== currentItem)
+                            : [];
+                    
+                          const filteredIds = availableIds.filter((id) => !selectedItems.includes(id));
+                    
+                          // Chỉ thêm điều kiện `equals` nếu có currentItem
+                          const orConditions: any[] = [];
+                    
+                          if (filteredIds.length > 0) {
+                            orConditions.push({ id: { in: filteredIds } });
                           }
+                    
+                          if (currentItem) {
+                            orConditions.push({ id: { equals: currentItem } });
+                          }
+                    
+                          if (orConditions.length === 0) return false;
+                    
+                          return {
+                            or: orConditions,
+                          };
                         } catch (error) {
-                          console.error('Lỗi khi lọc danh sách thuốc:', error)
-                          return false // Trả về false trong trường hợp lỗi
+                          console.error('Lỗi khi lọc danh sách thuốc:', error);
+                          return false;
                         }
                       },
                     },
+                    
                     {
                       name: 'items',
                       label: 'Sản phẩm',

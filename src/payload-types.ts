@@ -841,6 +841,7 @@ export interface Patient {
 export interface Appointment {
   id: string;
   patients?: (string | null) | Patient;
+  patientName?: string | null;
   bacsi?: (string | null) | User;
   ngaykham?: string | null;
   giokham?: ('08:00' | '09:00' | '10:00' | '13:00' | '14:00' | '15:00') | null;
@@ -2378,6 +2379,7 @@ export interface PharmaciesSelect<T extends boolean = true> {
  */
 export interface AppointmentsSelect<T extends boolean = true> {
   patients?: T;
+  patientName?: T;
   bacsi?: T;
   ngaykham?: T;
   giokham?: T;

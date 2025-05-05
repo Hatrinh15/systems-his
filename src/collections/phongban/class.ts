@@ -23,7 +23,9 @@ const Class: CollectionConfig = {
     delete: isAdmin,
   },
 
-  admin: { group: 'Khoa & Nhân sự' },
+  admin: { group: 'Khoa & Nhân sự',
+    useAsTitle: 'title'
+   },
 
   fields: [
     {

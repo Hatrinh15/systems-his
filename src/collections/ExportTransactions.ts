@@ -170,8 +170,7 @@ export const PhieuXuat: CollectionConfig = {
                               const thuocKhoa = new Map<string, string[]>();
                               // Kiểm tra nếu data.exports không phải là mảng
                               if (!Array.isArray(data.exports)) {
-                                console.error("data.exports không phải là mảng!");
-                                return { id: { in: [] } };
+                                return { id: { in: null } };
                               }
                           
                               // Lấy ID của siblingData (nếu có)
@@ -187,7 +186,7 @@ export const PhieuXuat: CollectionConfig = {
                           
                               if (!parentExport) {
                                 console.error("Không tìm thấy parentExport, kiểm tra lại dữ liệu.");
-                                return { id: { in: [] } };
+                                return { id: { in: null } };
                               }
                           
                               // Lấy danh sách thuốc trong kho có số lượng > 0
@@ -270,7 +269,7 @@ export const PhieuXuat: CollectionConfig = {
                               return { id: { in: availableMedications } };
                             } catch (error) {
                               console.error("Lỗi khi lọc thuốc trong kho:", error);
-                              return { id: { in: [] } };
+                              return { id: { in: null } };
                             }
                           },
                           admin:{
@@ -324,15 +323,14 @@ export const PhieuXuat: CollectionConfig = {
                               const ids = siblingData as {supply: string}
                               // Kiểm tra nếu data.exports không phải là mảng
                               if (!Array.isArray(data.exports)) {
-                                console.error("data.exports không phải là mảng!");
-                                return { id: { in: [] } };
+                                return { id: { in: null } };
                               }
                           
                               // Lấy ID của siblingData (nếu có)
                               const id = siblingData && typeof siblingData === "object" && "id" in siblingData ? siblingData.id : null;
                               if (!id) {
                                 console.error("ID của siblingData không hợp lệ!");
-                                return { id: { in: [] } };
+                                return { id: { in: null } };
                               }
                           
                               // Tìm parentExport trong danh sách exports
@@ -342,7 +340,7 @@ export const PhieuXuat: CollectionConfig = {
                           
                               if (!parentExport) {
                                 console.error("Không tìm thấy parentExport, kiểm tra lại dữ liệu.");
-                                return { id: { in: [] } };
+                                return { id: { in: null } };
                               }
                           
                               // Lấy danh sách vật tư tiêu hao có số lượng > 0 từ kho hàng (inventory)
@@ -426,7 +424,7 @@ export const PhieuXuat: CollectionConfig = {
                               return { id: { in: availableSupplies } };
                             } catch (error) {
                               console.error("❌ Lỗi khi lọc vật tư tiêu hao trong kho:", error);
-                              return { id: { in: [] } };
+                              return { id: { in: null } };
                             }
                           },
                           
@@ -479,7 +477,6 @@ export const PhieuXuat: CollectionConfig = {
                               const ids = siblingData as {equipment: string}
                               // Kiểm tra nếu data.exports không phải là mảng
                               if (!Array.isArray(data.exports)) {
-                                console.error("❌ data.exports không phải là mảng!");
                                 return { id: { in: [] } };
                               }
                           
@@ -487,7 +484,7 @@ export const PhieuXuat: CollectionConfig = {
                               const id = siblingData && typeof siblingData === "object" && "id" in siblingData ? siblingData.id : null;
                               if (!id) {
                                 console.error("❌ ID của siblingData không hợp lệ!");
-                                return { id: { in: [] } };
+                                return { id: { in: null } };
                               }
                           
                               // Tìm parentExport trong danh sách exports
@@ -559,7 +556,7 @@ export const PhieuXuat: CollectionConfig = {
                               return { id: { in: availableMachines } };
                             } catch (error) {
                               console.error("❌ Lỗi khi lọc máy móc thiết bị trong kho:", error);
-                              return { id: { in: [] } };
+                              return { id: { in: null } };
                             }
                           },
                           

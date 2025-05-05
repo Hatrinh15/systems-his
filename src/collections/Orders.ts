@@ -118,7 +118,7 @@ export const Orders: CollectionConfig = {
                       },
                       limit: 1000,
                     })
-                    const medicationIds = data?.bhyt.items.map((dt) => dt.medication) || []
+                    const medicationIds = data?.bhyt?.items.map((dt) => dt.medication) || []
                     const ids = products.docs
                       .map((doc) => doc.id)
                       .filter((id) => !medicationIds.includes(id))
@@ -195,8 +195,8 @@ export const Orders: CollectionConfig = {
                       },
                       limit: 1000,
                     })
-
-                    const medicationIds = data?.dichvu.item.map((dt) => dt.medications) || []
+                  if(!data ) return false
+                    const medicationIds = data?.dichvu?.item.map((dt) => dt.medications) || []
                     const ids = products.docs
                       .map((doc) => doc.id)
                       .filter((id) => !medicationIds.includes(id))
@@ -225,7 +225,7 @@ export const Orders: CollectionConfig = {
                       limit: 1000,
                     })
 
-                    const medicationIds = data?.dichvu.item.map((dt) => dt.sanpham) || []
+                    const medicationIds = data?.dichvu?.item.map((dt) => dt.sanpham) || []
                     const ids = products.docs
                       .map((doc) => doc.id)
                       .filter((id) => !medicationIds.includes(id))

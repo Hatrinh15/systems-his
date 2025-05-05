@@ -1,4 +1,4 @@
-import { CollectionBeforeChangeHook } from "payload";
+import { CollectionAfterReadHook, CollectionBeforeChangeHook } from "payload";
 import { APIError } from "payload";
 
 export const validateAppointment: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
@@ -74,4 +74,23 @@ export const validateAppointment: CollectionBeforeChangeHook = async ({ data, op
       throw new APIError(`Khung giờ này đã đủ số lượng bệnh nhân đặt lịch! Vui lòng chọn khung giờ khác.`, 400);
     }
   }
+};
+export const patientName:CollectionBeforeChangeHook = async ({ data, req }) => {
+  try {
+    if (data?.patients) {
+      const patientID = typeof data.patients === 'string' ? data.patients : data.patients.id;
+      const patientDoc = await req.payload.findByID({
+        collection: 'patients',
+        id: patientID,
+      });
+
+      if (patientDoc?.ten) {
+        data.patientName = patientDoc.ten;
+      }
+    }
+  } catch (err) {
+    console.error('Không thể lấy tên bệnh nhân:', err);
+  }
+
+  return data;
 };

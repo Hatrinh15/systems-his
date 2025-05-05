@@ -1,4 +1,4 @@
-import { APIError, CollectionBeforeValidateHook, CollectionBeforeChangeHook } from 'payload'
+import { APIError, CollectionBeforeValidateHook, CollectionBeforeChangeHook ,CollectionAfterReadHook} from 'payload'
 import { PayloadRequest } from 'payload'
 import { Access } from 'payload'
 import { User } from '@/payload-types'

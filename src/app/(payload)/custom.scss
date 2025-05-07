@@ -370,3 +370,32 @@ html[data-theme='dark'] {
   background-position: center;
   border-radius: 50%;
 }
+//tạo viền cho các group trong collection
+.group-field__wrap {
+  border: 1px solid #ccc;
+  padding: 16px;
+  border-radius: 8px; // tuỳ chọn
+  margin-bottom: 16px; // tạo khoảng cách giữa các group
+}
+.group-field__header {
+  font-weight: bold; // in đậm chữ trong group đứng đầu
+}
+//tạo khung cho các array
+.collapsible__content {
+  border: 1px solid #ccc;
+  padding: 16px;
+  border-radius: 8px; // tuỳ chọn
+  margin-bottom: 16px; // tạo khoảng cách giữa các array
+}
+//tạo khung cho table owrw list
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  border: 1px solid #ffffff; /* viền ngoài */
+}
+//custom nút chọn có màu nền màu trắng
+.column-selector__column--active {
+  background-color: white !important;
+  color: black !important; /* tuỳ chỉnh màu chữ nếu cần */
+  border: 1px solid #ccc; /* thêm đường viền nếu muốn nổi bật */
+}

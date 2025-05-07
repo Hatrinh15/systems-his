@@ -45,7 +45,6 @@ export const Users: CollectionConfig = {
         read: ({ req }) => req.user?.taikhoan === 'admin',
         update: ({ req }) => req.user?.taikhoan === 'admin',
       },
-
     },
 
     {
@@ -348,8 +347,7 @@ export const Users: CollectionConfig = {
     ],
     beforeChange: [checkvalueuser],
 
-    afterChange: [removeUserFromDepartments,removeUserFromClass],
-    beforeLogin:[BeforeLoginUser]
-
+    afterChange: [removeUserFromDepartments, removeUserFromClass],
+    beforeLogin: [BeforeLoginUser],
   },
 }

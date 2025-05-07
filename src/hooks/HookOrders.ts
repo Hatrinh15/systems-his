@@ -1,4 +1,10 @@
-import { CollectionBeforeChangeHook, CollectionAfterChangeHook ,APIError,PayloadRequest,CollectionAfterReadHook} from 'payload'
+import {
+  CollectionBeforeChangeHook,
+  CollectionAfterChangeHook,
+  APIError,
+  PayloadRequest,
+  CollectionAfterReadHook,
+} from 'payload'
 import { Access } from 'payload'
 import { User } from '@/payload-types'
 
@@ -372,7 +378,12 @@ export const hookTruThuocQuay: CollectionAfterChangeHook = async ({
   }
 }
 
-export const hookCheckOrderDate: CollectionBeforeChangeHook = async ({ req, data, originalDoc, operation }) => {
+export const hookCheckOrderDate: CollectionBeforeChangeHook = async ({
+  req,
+  data,
+  originalDoc,
+  operation,
+}) => {
   const isCreating = operation === 'create'
 
   // Điều kiện 1: Không được chọn ngày trong tương lai
@@ -439,17 +450,17 @@ export const hookValidateOrderFields: CollectionBeforeChangeHook = async ({ data
   }
 
   // 7. Danh sách thuốc dịch vụ (nếu không BHYT hoặc dịch vụ)
-  const dvItems = data?.dichvu?.item
-  if (!dvItems || dvItems.length === 0) {
-    errors.push('Danh sách thuốc dịch vụ không được để trống.')
-  } else {
-    dvItems.forEach((item, index) => {
-      const hasMed = item?.medications || item?.sanpham
-      if (!hasMed) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa chọn sản phẩm.`)
-      if (!item.quantitys) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa nhập số lượng.`)
-      if (!item.donvi) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa chọn đơn vị.`)
-    })
-  }
+  // const dvItems = data?.dichvu?.item
+  // if (!dvItems || dvItems.length === 0) {
+  //   errors.push('Danh sách thuốc dịch vụ không được để trống.')
+  // } else {
+  //   dvItems.forEach((item, index) => {
+  //     const hasMed = item?.medications || item?.sanpham
+  //     if (!hasMed) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa chọn sản phẩm.`)
+  //     if (!item.quantitys) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa nhập số lượng.`)
+  //     if (!item.donvi) errors.push(`Thuốc dịch vụ hàng ${index + 1} chưa chọn đơn vị.`)
+  //   })
+  // }
 
   // 8. Nếu có lỗi, ném lỗi về
   if (errors.length > 0) {
@@ -471,30 +482,27 @@ export const canReadOrders: Access = ({ req }) => {
 
   // Người trong phòng hành chính - quản trị
   const isTaiChinhKeToan =
-    phong === 'taichinhketoan' &&
-    ['truongphong', 'ketoan'].includes(chucvu ?? '')
+    phong === 'taichinhketoan' && ['truongphong', 'ketoan'].includes(chucvu ?? '')
 
   // Người trong khoa Dược
-  const isKhoaDuoc =
-    khoa === 'khoaduoc' &&
-    ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
+  const isKhoaDuoc = khoa === 'khoaduoc' && ['truongkhoa', 'duocsi'].includes(chucvu ?? '')
 
   return isTaiChinhKeToan || isKhoaDuoc
 }
 
 export const autoStaff: CollectionBeforeChangeHook = async ({ req, data, operation }) => {
   if (operation === 'create' && req.user) {
-    const user = req.user as User;
+    const user = req.user as User
 
     // Nếu chưa có sẵn giá trị từ client, sẽ tự động gán
     return {
       ...data,
-      staff: data?.staff || user.id,             // Gán luôn ID người dùng đang đăng nhập
-    };
+      staff: data?.staff || user.id, // Gán luôn ID người dùng đang đăng nhập
+    }
   }
 
-  return data;
-};
+  return data
+}
 
 export const afterReadOrdersCustomerLabel: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (data.customer && typeof data.customer === 'string') {
@@ -502,19 +510,19 @@ export const afterReadOrdersCustomerLabel: CollectionBeforeChangeHook = async ({
       const patient = await req.payload.findByID({
         collection: 'patients',
         id: data.customer,
-      });
-      data.customerLabel = patient?.ten || '[Không xác định]';
+      })
+      data.customerLabel = patient?.ten || '[Không xác định]'
     } catch (err) {
-      data.customerLabel = '[Ẩn]';
+      data.customerLabel = '[Ẩn]'
     }
   } else {
-    data.customerLabel = '[Chưa chọn]';
+    data.customerLabel = '[Chưa chọn]'
   }
 
-  return data;
-};
+  return data
+}
 
-export const afterReadOrdersStaffLabel: CollectionBeforeChangeHook = async ({ data,req }) => {
+export const afterReadOrdersStaffLabel: CollectionBeforeChangeHook = async ({ data, req }) => {
   if (req.user?.taikhoan !== 'admin') {
     // Nếu không phải admin, tạo label hiển thị tên nhân viên
     const staff = data?.staff
@@ -533,4 +541,3 @@ export const afterReadOrdersStaffLabel: CollectionBeforeChangeHook = async ({ da
   }
   return data
 }
-

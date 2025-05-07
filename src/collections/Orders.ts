@@ -4,19 +4,20 @@ import {
   hookTinhGiaThuocSanpham,
   hookTinhTongDonThuoc,
   hookTruThuocQuay,
-  hookValidateOrderFields, canReadOrders,
+  hookValidateOrderFields,
+  canReadOrders,
   autoStaff,
   afterReadOrdersCustomerLabel,
-  afterReadOrdersStaffLabel
+  afterReadOrdersStaffLabel,
 } from '@/hooks/HookOrders'
 import { CollectionConfig } from 'payload'
 import { isAdminDuocSi } from '@/hooks/AccessAdmin'
 
 export const Orders: CollectionConfig = {
   slug: 'orders',
-  access: { 
+  access: {
     create: isAdminDuocSi,
-    read: canReadOrders,  
+    read: canReadOrders,
     update: isAdminDuocSi,
     delete: isAdminDuocSi,
   },
@@ -38,17 +39,20 @@ export const Orders: CollectionConfig = {
         allowCreate: false,
       },
       access: {
-        read: ({req}) =>{
+        read: ({ req }) => {
           const user = req.user
-          if(user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong' || user?.chucvu === 'duocsi') {
+          if (
+            (user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong') ||
+            user?.chucvu === 'duocsi'
+          ) {
             return true
           }
-          if(user?.taikhoan === 'admin') {
+          if (user?.taikhoan === 'admin') {
             return true
           }
           return false
-        }
-      }
+        },
+      },
     },
     {
       name: 'customerLabel',
@@ -60,10 +64,10 @@ export const Orders: CollectionConfig = {
       },
       // access: {
       //   read: ({req}) => {
-      //     const user = req.user 
+      //     const user = req.user
       //     if(user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong' || user?.chucvu === 'ketoan') {
       //       return true
-      //     }  
+      //     }
       //     return false
       //   },
       // }
@@ -106,8 +110,8 @@ export const Orders: CollectionConfig = {
                   label: 'Sản phẩm',
                   type: 'relationship',
                   relationTo: 'pharmacies',
-          
-                  admin:{allowCreate: false},
+
+                  admin: { allowCreate: false },
                   filterOptions: async ({ req, data, siblingData }) => {
                     if (!data) return false
                     const id = siblingData as { medication?: string }
@@ -182,10 +186,8 @@ export const Orders: CollectionConfig = {
                   label: 'Sản phẩm',
                   type: 'relationship',
                   relationTo: 'pharmacies',
-          
-                  admin: { condition: (data) => data?.baohiemyte === 'yes',
-                    allowCreate: false 
-                   },
+
+                  admin: { condition: (data) => data?.baohiemyte === 'yes', allowCreate: false },
                   filterOptions: async ({ req, data, siblingData }) => {
                     const id = siblingData as { medications?: string }
                     const products = await req.payload.find({
@@ -195,7 +197,7 @@ export const Orders: CollectionConfig = {
                       },
                       limit: 1000,
                     })
-                  if(!data ) return false
+                    if (!data) return false
                     const medicationIds = data?.dichvu?.item.map((dt) => dt.medications) || []
                     const ids = products.docs
                       .map((doc) => doc.id)
@@ -213,10 +215,8 @@ export const Orders: CollectionConfig = {
                   label: 'Sản phẩm',
                   type: 'relationship',
                   relationTo: 'pharmacies',
-          
-                  admin: { condition: (data) => data?.baohiemyte === 'no',
-                    allowCreate: false
-                   },
+
+                  admin: { condition: (data) => data?.baohiemyte === 'no', allowCreate: false },
                   filterOptions: async ({ req, data, siblingData }) => {
                     const id = siblingData as { sanpham?: string }
                     const products = await req.payload.find({
@@ -298,18 +298,21 @@ export const Orders: CollectionConfig = {
       type: 'relationship',
       relationTo: 'users',
       access: {
-        read: ({req}) =>{
+        read: ({ req }) => {
           const user = req.user
-          if(user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong' || user?.chucvu === 'duocsi') {
+          if (
+            (user?.khoa === 'khoaduoc' && user.chucvu === 'truongphong') ||
+            user?.chucvu === 'duocsi'
+          ) {
             return true
           }
-          if(user?.taikhoan === 'admin') {
+          if (user?.taikhoan === 'admin') {
             return true
           }
           return false
-        }
+        },
       },
-      admin: {allowCreate: false},
+      admin: { allowCreate: false },
       filterOptions: async ({ data, req }) => {
         try {
           // Lấy danh sách bác sĩ thuộc Khoa Dược
@@ -352,15 +355,18 @@ export const Orders: CollectionConfig = {
         readOnly: true,
       },
       access: {
-        read: ({req}) => {
-          const user = req.user 
-          if(user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong' || user?.chucvu === 'ketoan') {
+        read: ({ req }) => {
+          const user = req.user
+          if (
+            (user?.phong === 'taichinhketoan' && user.chucvu === 'truongphong') ||
+            user?.chucvu === 'ketoan'
+          ) {
             return true
-          }  
+          }
           return false
         },
-      }
-    },    
+      },
+    },
     {
       name: 'paymentmethod',
       label: 'Hình thức thanh toán',
@@ -375,11 +381,19 @@ export const Orders: CollectionConfig = {
       name: 'ghichu',
       label: 'Ghi chú',
       type: 'textarea',
-    }
+    },
   ],
   hooks: {
-    beforeChange: [autoStaff,hookTinhGiaThuoc, hookTinhGiaThuocSanpham, hookTinhTongDonThuoc,
-      hookCheckOrderDate,hookValidateOrderFields,afterReadOrdersCustomerLabel,afterReadOrdersStaffLabel],
+    beforeChange: [
+      autoStaff,
+      hookTinhGiaThuoc,
+      hookTinhGiaThuocSanpham,
+      hookTinhTongDonThuoc,
+      hookCheckOrderDate,
+      hookValidateOrderFields,
+      afterReadOrdersCustomerLabel,
+      afterReadOrdersStaffLabel,
+    ],
     afterChange: [hookTruThuocQuay],
   },
 }

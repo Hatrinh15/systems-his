@@ -74,23 +74,26 @@ const MedicalRecods: CollectionConfig = {
               relationTo: 'patients',
               hasMany: false,
               admin: {
-                allowCreate: false, // Không cho phép tạo mới bệnh nhân từ đây
-                // condition: (data) => {
-                //   return !data?.id // Nếu đang tạo mới thì hiển thị, nếu cập nhật thì ẩn
-                // },
+                allowCreate: false,
               },
               filterOptions: async ({ req }) => {
                 const existingRecords = await req.payload.find({
                   collection: 'MedicalRecods',
                   where: {},
                 })
-                // Lấy danh sách bệnh nhân đã có hồ sơ bệnh án
+
                 const usedPatientIDs = new Set(
-                  existingRecords.docs.map((record) => record.thongtinbenhnhan),
+                  existingRecords.docs
+                    .map((record) => {
+                      const value = record.thongtinbenhnhan
+                      return typeof value === 'object' ? value?.id : value
+                    })
+                    .filter(Boolean),
                 )
+
                 return {
                   id: {
-                    not_in: Array.from(usedPatientIDs), // Chỉ lấy bệnh nhân chưa có hồ sơ bệnh án
+                    not_in: Array.from(usedPatientIDs),
                   },
                 }
               },

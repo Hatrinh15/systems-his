@@ -75,9 +75,9 @@ const MedicalRecods: CollectionConfig = {
               hasMany: false,
               admin: {
                 allowCreate: false, // Không cho phép tạo mới bệnh nhân từ đây
-                condition: (data) => {
-                  return !data?.id // Nếu đang tạo mới thì hiển thị, nếu cập nhật thì ẩn
-                },
+                // condition: (data) => {
+                //   return !data?.id // Nếu đang tạo mới thì hiển thị, nếu cập nhật thì ẩn
+                // },
               },
               filterOptions: async ({ req }) => {
                 const existingRecords = await req.payload.find({

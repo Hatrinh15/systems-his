@@ -399,3 +399,20 @@ html[data-theme='dark'] {
   color: black !important; /* tuỳ chỉnh màu chữ nếu cần */
   border: 1px solid #ccc; /* thêm đường viền nếu muốn nổi bật */
 }
+// custom các số phân trang đứng thẳng hàng
+.paginator__page,
+.clickable-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: large;
+}
+//custom cho ten collection owrw list
+.list-header {
+  font-size: 20px;
+  font-weight: bold;
+}
+//custom các nút bên cạnh tên collection
+.btn__content {
+  font-size: 16px;
+}

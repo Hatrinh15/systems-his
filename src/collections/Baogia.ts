@@ -74,51 +74,24 @@ export const baoGia: CollectionConfig = {
         allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
-        //  Lấy danh sách vật tư tiêu hao trong kho
         const existingInventory = await req.payload.find({
-          collection: 'inventory',
-          where: { category: { equals: 'vattutieuhao' } },
-          limit: 1000,
-        })
-
-        const medicationIdsInInventory = existingInventory.docs
-          .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
-          .filter(Boolean) // Xóa undefined/null
-
-        //  Lấy danh sách vật tư đã có trong quầy thuốc
-        const existingPharmacies = await req.payload.find({
           collection: 'baogia',
           where: {},
           limit: 1000,
         })
 
-        const medicationIdsInPharmacies = existingPharmacies.docs
+        // Lấy danh sách thuốc đã có trong kho
+        const usedMedications = existingInventory.docs
           .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
           .filter(Boolean)
 
-        //  Giữ lại sản phẩm đã chọn nếu có
-        if (data?.items && !medicationIdsInInventory.includes(data.items)) {
-          medicationIdsInInventory.push(data.items)
+        // 🛠 Giữ lại thuốc đã lưu trước đó để không bị lỗi khi cập nhật
+        if (data?.items) {
+          usedMedications.splice(usedMedications.indexOf(data.items), 1)
         }
 
-        //  Lọc danh sách vật tư chưa có trong quầy thuốc
-        const availableMedicationIds = medicationIdsInInventory.filter(
-          (id) => !medicationIdsInPharmacies.includes(id),
-        )
-
-        //  Giữ lại sản phẩm đang chọn (nếu có)
-        if (data?.items && !availableMedicationIds.includes(data.items)) {
-          availableMedicationIds.push(data.items)
-        }
-
-        //  Kiểm tra nếu danh sách trống, trả về điều kiện không có thuốc
-        if (!availableMedicationIds.length) {
-          return false // Hoàn toàn không có lựa chọn nào
-        }
-
-        //  Trả về danh sách vật tư có thể chọn
         return {
-          id: { in: availableMedicationIds },
+          id: { not_in: usedMedications },
         }
       },
     },

@@ -181,6 +181,9 @@ export const Users: CollectionConfig = {
                 { label: 'Nhân viên kho', value: 'nhanvienkho' },
                 { label: 'Khác', value: 'khac' },
               ],
+              access: {
+                update: ({ req }) => req.user?.taikhoan === 'admin',
+              },
             },
             {
               name: 'vitri',

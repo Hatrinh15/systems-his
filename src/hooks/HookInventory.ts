@@ -1,38 +1,40 @@
-import { CollectionBeforeChangeHook } from 'payload';
-import { APIError } from 'payload';
+import { CollectionBeforeChangeHook } from 'payload'
+import { APIError } from 'payload'
 
 export const inventoryHook: CollectionBeforeChangeHook = async ({ data, req }) => {
-  if (!data) return data;
+  if (!data) return data
 
-  let productName = '';
+  let productName = ''
 
   // Xử lý cập nhật tên sản phẩm cho trường 'sanpham'
   if (data.category === 'medications' && data.item) {
     const medication = await req.payload.findByID({
       collection: 'medications',
       id: data.item,
-    });
-    productName = medication?.name || '';
+    })
+    productName = medication?.name || ''
   }
 
-  if (
-    (data.category === 'vattutieuhao' || data.category === 'maymocthietbi') &&
-    data.items
-  ) {
+  if ((data.category === 'vattutieuhao' || data.category === 'maymocthietbi') && data.items) {
     const medicalSupply = await req.payload.findByID({
       collection: 'medicalSupplies',
       id: data.items,
-    });
-    productName = medicalSupply?.name || '';
+    })
+    productName = medicalSupply?.name || ''
   }
 
   return {
     ...data,
     sanpham: productName, // Cập nhật giá trị cho 'sanpham'
-  };
-};
+  }
+}
 
-export const hookCheckInfo: CollectionBeforeChangeHook = async ({ data, req, operation, originalDoc }) => {
+export const hookCheckInfo: CollectionBeforeChangeHook = async ({
+  data,
+  req,
+  operation,
+  originalDoc,
+}) => {
   // 📌 1. Không cho thay đổi danh mục khi cập nhật
   if (operation === 'update') {
     if (originalDoc?.category && data?.category && originalDoc.category !== data.category) {
@@ -62,10 +64,7 @@ export const hookCheckInfo: CollectionBeforeChangeHook = async ({ data, req, ope
     throw new APIError('Vui lòng chọn Sản phẩm thuốc.', 400)
   }
 
-  if (
-    (data.category === 'vattutieuhao' || data.category === 'maymocthietbi') &&
-    !data.items
-  ) {
+  if ((data.category === 'vattutieuhao' || data.category === 'maymocthietbi') && !data.items) {
     throw new APIError('Vui lòng chọn Sản phẩm vật tư hoặc thiết bị.', 400)
   }
 

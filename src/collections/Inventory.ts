@@ -5,7 +5,7 @@ export const Inventory: CollectionConfig = {
   slug: 'inventory',
   access: {
     create: isAdminNhanVienKho,
-    read: isAdminNhanVienKho, 
+    read: isAdminNhanVienKho,
     update: isAdminNhanVienKho,
     delete: isAdminNhanVienKho,
   },
@@ -16,7 +16,7 @@ export const Inventory: CollectionConfig = {
   admin: {
     useAsTitle: 'sanpham',
     defaultColumns: ['sanpham', 'quantity', 'stockstatus', 'reorderlevel'],
-    group:'Dược & Vật Tư Y Tế'
+    group: 'Dược & Vật Tư Y Tế',
   },
   fields: [
     {
@@ -34,7 +34,7 @@ export const Inventory: CollectionConfig = {
       label: 'Sản phẩm',
       type: 'relationship',
       relationTo: 'medications',
-      admin: { condition: (data) => data?.category === 'medications' , allowCreate: false },
+      admin: { condition: (data) => data?.category === 'medications', allowCreate: false },
       filterOptions: async ({ req, data }) => {
         const existingInventory = await req.payload.find({
           collection: 'inventory',
@@ -68,8 +68,8 @@ export const Inventory: CollectionConfig = {
         allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
-        if (!data?.category) return false; // Nếu chưa chọn danh mục, không hiển thị gì cả
-      
+        if (!data?.category) return false // Nếu chưa chọn danh mục, không hiển thị gì cả
+
         try {
           // 🔍 Lấy danh sách sản phẩm đã có trong kho thuộc danh mục được chọn
           const existingInventory = await req.payload.find({
@@ -78,18 +78,18 @@ export const Inventory: CollectionConfig = {
               category: { equals: data.category }, // Lọc theo danh mục đã chọn
             },
             limit: 1000,
-          });
-      
+          })
+
           // Lấy danh sách ID của các sản phẩm đã có trong kho
           const usedItems = existingInventory.docs
             .map((doc) => (doc.items && typeof doc.items === 'object' ? doc.items.id : doc.items))
-            .filter(Boolean); // Lọc bỏ giá trị null/undefined
-      
+            .filter(Boolean) // Lọc bỏ giá trị null/undefined
+
           // 🛠 Giữ lại sản phẩm đã lưu trước đó để không bị lỗi khi cập nhật
           if (data?.items) {
-            usedItems.splice(usedItems.indexOf(data.items), 1);
+            usedItems.splice(usedItems.indexOf(data.items), 1)
           }
-      
+
           // 🔍 Lấy danh sách sản phẩm thuộc danh mục từ `medicalSupplies`
           const medicalSuppliesData = await req.payload.find({
             collection: 'medicalSupplies',
@@ -97,31 +97,30 @@ export const Inventory: CollectionConfig = {
               loaivattu: { equals: data.category }, // Chỉ lấy vật tư thuộc danh mục
             },
             limit: 1000,
-          });
-      
-          const medicalSuppliesIds = medicalSuppliesData.docs.map((doc) => doc.id);
-      
+          })
+
+          const medicalSuppliesIds = medicalSuppliesData.docs.map((doc) => doc.id)
+
           // ❌ Loại bỏ các sản phẩm đã có trong kho
-          const filteredItems = medicalSuppliesIds.filter((id) => !usedItems.includes(id));
-      
+          const filteredItems = medicalSuppliesIds.filter((id) => !usedItems.includes(id))
+
           // Nếu không còn sản phẩm hợp lệ, không hiển thị gì
-          if (filteredItems.length === 0) return false;
-      
+          if (filteredItems.length === 0) return false
+
           return {
             id: { in: filteredItems },
-          };
+          }
         } catch (error) {
-          console.error('Lỗi khi lọc danh sách vật tư:', error);
-          return false; // Tránh lỗi hệ thống
+          console.error('Lỗi khi lọc danh sách vật tư:', error)
+          return false // Tránh lỗi hệ thống
         }
-      },      
+      },
     },
     {
       name: 'sanpham',
       label: 'Sản phẩm',
       type: 'text',
-      admin: { readOnly: true,
-        hidden: true },
+      admin: { readOnly: true, hidden: true },
     },
     {
       name: 'unit',
@@ -131,8 +130,9 @@ export const Inventory: CollectionConfig = {
         { label: 'Hộp', value: 'hop' },
         { label: 'Thùng', value: 'thung' },
         { label: 'Cái', value: 'cai' },
-        {label: 'Bộ', value: 'bo'},
+        { label: 'Bộ', value: 'bo' },
       ],
+      defaultValue: 'hop',
     },
     {
       name: 'quantity',
@@ -141,7 +141,8 @@ export const Inventory: CollectionConfig = {
       min: 0,
       defaultValue: 0,
       admin: {
-        description: 'Nếu số lượng bằng 0 hệ thống sẽ tự động đặt tình trạng là "Hết hàng". Nếu nhỏ hơn mức cảnh báo sẽ đặt là "Sắp hết".',
+        description:
+          'Nếu số lượng bằng 0 hệ thống sẽ tự động đặt tình trạng là "Hết hàng". Nếu nhỏ hơn mức cảnh báo sẽ đặt là "Sắp hết".',
       }, // Số lượng tối thiểu
     },
     {
@@ -225,6 +226,6 @@ export const Inventory: CollectionConfig = {
   ],
   timestamps: true,
   hooks: {
-    beforeChange: [inventoryHook,hookCheckInfo,hookQuantity]
-  }
+    beforeChange: [inventoryHook, hookCheckInfo, hookQuantity],
+  },
 }

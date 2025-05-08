@@ -586,7 +586,7 @@ export const thongBaotrong: CollectionBeforeChangeHook = async ({ data }) => {
   const errors: string[] = []
 
   if (!data.giaodich || data.giaodich.length === 0) {
-    errors.push(' Phiếu xuất phải có ít nhất một mặt hàng!')
+    errors.push(' Phiếu nhập phải có ít nhất một mặt hàng!')
   }
   // Kiểm tra từng mặt hàng trong phiếu xuất
   data.giaodich?.forEach((giaodich, giaodichIndex) => {

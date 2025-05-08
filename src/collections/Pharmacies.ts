@@ -50,7 +50,7 @@ export const Pharmacies: CollectionConfig = {
         allowCreate: false,
       },
       filterOptions: async ({ req, data }) => {
-        // 🏥 Lấy danh sách vật tư tiêu hao trong kho
+        // Lấy danh sách vật tư tiêu hao trong kho
         const existingInventory = await req.payload.find({
           collection: 'inventory',
           where: { category: { equals: 'medications' } },
@@ -61,7 +61,7 @@ export const Pharmacies: CollectionConfig = {
           .map((doc) => (doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item))
           .filter(Boolean) // Xóa undefined/null
 
-        // 🏪 Lấy danh sách vật tư đã có trong quầy thuốc
+        //  Lấy danh sách vật tư đã có trong quầy thuốc
         const existingPharmacies = await req.payload.find({
           collection: 'pharmacies',
           where: {},
@@ -72,27 +72,27 @@ export const Pharmacies: CollectionConfig = {
           .map((doc) => (doc.item && typeof doc.item === 'object' ? doc.item.id : doc.item))
           .filter(Boolean)
 
-        // ✅ Giữ lại sản phẩm đã chọn nếu có
+        //  Giữ lại sản phẩm đã chọn nếu có
         if (data?.item && !medicationIdsInInventory.includes(data.item)) {
           medicationIdsInInventory.push(data.item)
         }
 
-        // 🔍 Lọc danh sách vật tư chưa có trong quầy thuốc
+        //  Lọc danh sách vật tư chưa có trong quầy thuốc
         const availableMedicationIds = medicationIdsInInventory.filter(
           (id) => !medicationIdsInPharmacies.includes(id),
         )
 
-        // ✅ Giữ lại sản phẩm đang chọn (nếu có)
+        //  Giữ lại sản phẩm đang chọn (nếu có)
         if (data?.item && !availableMedicationIds.includes(data.item)) {
           availableMedicationIds.push(data.item)
         }
 
-        // 🚨 Kiểm tra nếu danh sách trống, trả về điều kiện không có thuốc
+        //  Kiểm tra nếu danh sách trống, trả về điều kiện không có thuốc
         if (!availableMedicationIds.length) {
           return false // Hoàn toàn không có lựa chọn nào
         }
 
-        // ✅ Trả về danh sách vật tư có thể chọn
+        //  Trả về danh sách vật tư có thể chọn
         return {
           id: { in: availableMedicationIds },
         }

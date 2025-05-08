@@ -215,6 +215,10 @@ export const readDepartmentAccess: Access = async ({ req }) => {
   const referer = (await headers()).get('referer')
   const isFromMedicalRecodsAdmin = referer?.includes('/admin/collections/MedicalRecods') || false
   const isFromVienPhi = referer?.includes('/admin/collections/vienphi') || false
+  const isFromPhieuXuat = referer?.includes('/admin/collections/phieuxuat') || false
+  if(isFromPhieuXuat) {
+    return true
+  }
   if (isFromVienPhi) {
     return true
   }

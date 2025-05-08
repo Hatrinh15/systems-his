@@ -118,7 +118,7 @@ export const PhieuXuat: CollectionConfig = {
                       }
 
                       const staffList = [
-                        ...(department.truongkhoa || []),
+                        (department.truongkhoa || []),
                         ...(department.doctors || []),
                         ...(department.nures || []),
                       ]
@@ -126,7 +126,7 @@ export const PhieuXuat: CollectionConfig = {
                       return {
                         id: {
                           in: staffList.map((staff) =>
-                            typeof staff === 'object' && staff != null ? staff.id : staff,
+                            typeof staff === 'object' && staff != null && 'id' in staff ? staff.id : staff,
                           ),
                         },
                       }

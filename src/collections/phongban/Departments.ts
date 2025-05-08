@@ -24,6 +24,16 @@ const Departments: CollectionConfig = {
     group: 'Khoa & Nhân sự',
 
     useAsTitle: 'title',
+    hidden: ({user}) => {
+      const chucvu = user?.chucvu
+      console.log('chucvu', chucvu)
+      // Nếu không phải bác sĩ, y tá, trưởng khoa => không thấy gì cả
+      const allowedRoles = ['nhanvienkho', 'ketoan', 'truongphong']
+      if (allowedRoles.includes(chucvu)) { 
+        return true
+      }
+      return false
+    }
   },
   fields: [
     {

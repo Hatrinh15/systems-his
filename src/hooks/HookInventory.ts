@@ -43,7 +43,7 @@ export const hookCheckInfo: CollectionBeforeChangeHook = async ({ data, req, ope
   // 🔁 2. Mapping tên field sang label tiếng Việt
   const fieldLabels: Record<string, string> = {
     unit: 'Đơn vị tính',
-    quantity: 'Số lượng tồn kho',
+    // quantity: 'Số lượng tồn kho',
     stockstatus: 'Tình trạng hàng hóa',
     reorderlevel: 'Mức cảnh báo tồn kho',
     // supplier: 'Nhà cung cấp',

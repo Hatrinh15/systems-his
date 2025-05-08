@@ -94,7 +94,7 @@ export const Medications: CollectionConfig = {
     {
       name: 'activeIngredient',
       label: 'Hoạt chất chính',
-      type: 'text',
+      type: 'textarea',
     },
     {
       name: 'sideEffects',

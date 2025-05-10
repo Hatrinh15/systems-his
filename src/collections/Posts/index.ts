@@ -32,7 +32,8 @@ export const Posts: CollectionConfig<'posts'> = {
   access: {
     create: authenticated,
     delete: authenticated,
-    read: authenticatedOrPublished,
+    read: () => true,
+
     update: authenticated,
   },
   // This config controls what's populated by default when a post is referenced
@@ -48,6 +49,7 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
+    hidden: ({ user }) => user?.taikhoan !== 'admin', // Ẩn nếu không phải admin
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {

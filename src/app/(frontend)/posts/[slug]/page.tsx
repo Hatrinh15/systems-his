@@ -1,104 +1,86 @@
 import type { Metadata } from 'next'
-
-import { RelatedPosts } from '@/blocks/RelatedPosts/Component'
-import { PayloadRedirects } from '@/components/PayloadRedirects'
+import { notFound } from 'next/navigation'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import { draftMode } from 'next/headers'
-import React, { cache } from 'react'
+import React from 'react'
 import RichText from '@/components/RichText'
+import Image from 'next/image'
+import Link from 'next/link'
 
-import type { Post } from '@/payload-types'
+type Props = {
+  params: {
+    slug: string
+  }
+}
 
-import { PostHero } from '@/heros/PostHero'
-import { generateMeta } from '@/utilities/generateMeta'
-import PageClient from './page.client'
-import { LivePreviewListener } from '@/components/LivePreviewListener'
-
-export async function generateStaticParams() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const payload = await getPayload({ config: configPromise })
   const posts = await payload.find({
     collection: 'posts',
-    draft: false,
-    limit: 1000,
-    overrideAccess: false,
-    pagination: false,
-    select: {
-      slug: true,
-    },
-  })
-
-  const params = posts.docs.map(({ slug }) => {
-    return { slug }
-  })
-
-  return params
-}
-
-type Args = {
-  params: Promise<{
-    slug?: string
-  }>
-}
-
-export default async function Post({ params: paramsPromise }: Args) {
-  const { isEnabled: draft } = await draftMode()
-  const { slug = '' } = await paramsPromise
-  const url = '/posts/' + slug
-  const post = await queryPostBySlug({ slug })
-
-  if (!post) return <PayloadRedirects url={url} />
-
-  return (
-    <article className="pt-16 pb-16">
-      <PageClient />
-
-      {/* Allows redirects for valid pages too */}
-      <PayloadRedirects disableNotFound url={url} />
-
-      {draft && <LivePreviewListener />}
-
-      <PostHero post={post} />
-
-      <div className="flex flex-col items-center gap-4 pt-8">
-        <div className="container">
-          <RichText className="max-w-[48rem] mx-auto" data={post.content} enableGutter={false} />
-          {post.relatedPosts && post.relatedPosts.length > 0 && (
-            <RelatedPosts
-              className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
-              docs={post.relatedPosts.filter((post) => typeof post === 'object')}
-            />
-          )}
-        </div>
-      </div>
-    </article>
-  )
-}
-
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { slug = '' } = await paramsPromise
-  const post = await queryPostBySlug({ slug })
-
-  return generateMeta({ doc: post })
-}
-
-const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
-  const { isEnabled: draft } = await draftMode()
-
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'posts',
-    draft,
-    limit: 1,
-    overrideAccess: draft,
-    pagination: false,
     where: {
       slug: {
-        equals: slug,
+        equals: params.slug,
       },
     },
+    limit: 1,
   })
 
-  return result.docs?.[0] || null
-})
+  const post = posts.docs[0]
+
+  if (!post) return { title: 'Bài viết không tồn tại' }
+
+  return {
+    title: post.title || 'Chi tiết bài viết',
+    description: post.meta?.description,
+  }
+}
+
+export default async function PostPage({ params }: Props) {
+  const payload = await getPayload({ config: configPromise })
+
+  const posts = await payload.find({
+    collection: 'posts',
+    where: {
+      slug: {
+        equals: params.slug,
+      },
+    },
+    limit: 1,
+  })
+
+  const post = posts.docs[0]
+
+  if (!post) return notFound()
+
+  return (
+    //custom hình ảnh hiện lên trên màn detail sau header
+    <div className="pb-24">
+      {typeof post.heroImage === 'object' && post.heroImage?.url && (
+        <div className="relative w-full h-[500px]">
+          <Image src={post.heroImage.url} alt={post.title} fill className="object-cover" />
+          <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-8 text-white">
+            <h1 className="text-4xl font-bold mb-2">{post.title}</h1>
+            {post.publishedAt && (
+              <p className="text-sm text-white/70">
+                Ngày đăng: {new Date(post.publishedAt).toLocaleDateString('vi-VN')}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+      {/* ✅ Breadcrumb, custom nút ấn cho một màn detail về tin tức */}
+      <div className="max-w-6xl mx-auto px-4 mt-4 text-[25px] font-bold  text-gray-500">
+        <Link href="/" className="text-blue-600 hover:underline">
+          Trang chủ
+        </Link>{' '}
+        &nbsp;&rsaquo;&nbsp;{' '}
+        <Link href="/posts" className="text-blue-600 hover:underline font-bold">
+          Tin tức
+        </Link>{' '}
+      </div>
+      <div className="prose dark:prose-invert max-w-3xl mx-auto mt-12 px-4">
+        {post.content && <RichText data={post.content} />}
+      </div>
+    </div>
+  )
+}

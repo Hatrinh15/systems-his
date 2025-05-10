@@ -1,0 +1,372 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  /* Variables */
+  --theme-bg: #ffffff;
+  --theme-input-bg: #ffffff;
+  --theme-text: #0b2751;
+  --theme-overlay: #93b8b4;
+  --font-body: 'Slabo 27px', serif;
+  --font-mono: 'Droid Sans Mono', monospace;
+  --font-serif: Georgia, serif;
+  --style-radius-s: 19px;
+  --style-radius-m: 8px;
+  --style-radius-l: 17px;
+  --nav-width: 250px;
+}
+//cá mục trong màn hình chính
+.dashboard__label {
+  fontfamily: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 18px;
+  background-color: #ffffff;
+  border: 1px ridge #ffffff;
+  border-radius: 1px;
+  color: #0e0101;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+//nav là điều chỉnh khung sidebar
+.nav {
+  background-color: #cbe5ec;
+  font-size: 15px;
+  font-family: Times New Roman;
+  font-weight: normal;
+  border-radius: 14px;
+  color: #0a416b;
+}
+.nav-group__label {
+  color: var(--theme-elevation-700);
+  font-size: 14px;
+  border-radius: 10px;
+  // padding-left: 5px;
+  // padding-right: 5px;
+  font-family: Times New Roman;
+  font-weight: bold;
+}
+//thanhdropdown
+.nav-group__indicator svg .stroke {
+  stroke: #041114;
+  padding-left: 19px;
+  padding-right: 19px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+:root {
+  --theme-elevation-100: #cedde3;
+  --theme-elevation-200: #accfda;
+  --theme-elevation-300: #65a1bf;
+
+  --sidebar-bg: #ccdae4;
+  --card-bg: #e9f4f7; // màu sáng hơn nếu muốn trắng nhẹ
+
+  --text-color: #0e0101;
+}
+
+// Override sidebar
+.sidebar {
+  background-color: var(--sidebar-bg) !important;
+  color: white;
+}
+
+// Override card
+.card {
+  background-color: var(--card-bg) !important;
+  border: 3px solid var(--theme-elevation-200);
+  border-radius: 0.5rem;
+  color: var(--text-color);
+  border-radius: 50px;
+  padding-left: 21px;
+  padding-right: 21px;
+}
+
+.tab-panel {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+//custom nút ấn save
+.btn--style-primary {
+  background-color: #accfda;
+  font-size: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border-radius: 15px;
+  font-weight: bold;
+}
+//custom useastitle
+.doc-header__title {
+  font-family: Helvetica;
+  font-size: 37px;
+  font-weight: normal;
+  border-radius: 15px;
+
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+// khoảng cách giữa các tabs trong cùng một collection
+.tabs-field__tabs {
+  display: flex;
+  gap: 12px; /* chỉnh số này để giãn nhiều hay ít */
+  margin-bottom: 12px; /* nếu muốn cách phía dưới */
+}
+
+.tabs-fields_tab-button {
+  margin-right: 12px; /* tạo khoảng cách giữa các tab */
+  border-radius: 10px;
+  padding: 8px 16px;
+  background-color: #e1edf0; /* nền nhẹ nhàng, có thể tùy chỉnh */
+  color: #0b2751;
+  font-family: Times New Roman;
+  font-weight: bold;
+}
+// ẩn chữ togger và vẫn giữ nguyên chức năng click
+.collapsible__toggle-wrap .collapsible__toggle {
+  color: transparent; /* Ẩn chữ mà vẫn giữ kích thước */
+  pointer-events: auto; /* Đảm bảo click vẫn hoạt động */
+}
+//tạo viền cho các collection
+.field-type__wrap:not(.field--radio) {
+  border: 1px solid #cedde3;
+  border-radius: 21px;
+  font-size: 14px;
+  font-family: Times New Roman;
+  font-weight: normal;
+  color: #0b2751;
+}
+.field-type__wrap:has(input[type='radio']) {
+  border: none !important;
+  padding: 0 !important;
+}
+
+//để bên trong khớp với viền được bao bọc
+.field-type__wrap input,
+.field-type__wrap select,
+.field-type__wrap textarea {
+  // padding: 6px 10px;
+  padding-left: 10px;
+  box-shadow: none;
+}
+/* Radio gốc nằm giữa */
+.radio-input input[type='radio'] {
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  transform: translateY(-50%);
+  margin: 0;
+  width: 25px;
+  height: 25px;
+  accent-color: navy;
+  z-index: 2;
+  opacity: 1; /* hoặc 0 nếu bạn muốn ẩn radio */
+}
+
+// tạo các nút ấn trong các collection như mục use là change passwword
+button,
+input:not([type='date']),
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+//chỉnh chữ "chào mừng đến với hệ thống"
+.banner__content {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 26px;
+  font-weight: normal;
+  color: #0b2751;
+  text-align: center;
+}
+.before-dashboard__instructions {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 20px;
+  padding-top: 20px;
+  font-weight: normal;
+  color: #0b2751;
+  // text-align: center;
+}
+#nav-group-Collections .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/collection.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Globals .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/global.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Bệnh\ Nhân\ \&\ Điều\ Trị .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/doctor.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+
+#nav-group-Khoa\ \&\ Nhân\ sự .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/khoa.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+#nav-group-Quản\ Lý\ Phiếu\ \&\ Bảng\ Giá .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/medical.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+#nav-group-Dược\ \&\ Vật\ Tư\ Y\ Tế .nav-group__label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('/icons/thuoc.svg'); /* file SVG đơn sắc của bạn */
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 8px;
+}
+// Theme mặc định (light)
+:root {
+  --theme-bg: #ffffff;
+  --theme-text: #0b2751;
+}
+
+// Khi ở chế độ dark mode
+html[data-theme='dark'] {
+  // Màu nền toàn hệ thống
+  --theme-bg: #121212;
+  --theme-text: #ffffff;
+
+  body {
+    background-color: var(--theme-bg);
+    color: var(--theme-text);
+  }
+
+  .nav {
+    background-color: #1e1e1e;
+    color: white;
+  }
+
+  .nav-group__label {
+    color: white;
+  }
+
+  .sidebar {
+    background-color: #1a1a1a !important;
+    color: white;
+  }
+
+  .card {
+    background-color: #2a2a2a !important;
+    color: white;
+    border-color: #3a3a3a;
+  }
+
+  .dashboard__label,
+  .doc-header__title,
+  .banner__content,
+  .before-dashboard__instructions {
+    background-color: #000000 !important;
+    color: white;
+  }
+
+  .tab-panel,
+  .tabs-field__tabs,
+  .tabs-fields_tab-button,
+  .field-type__wrap {
+    background-color: #1f1f1f;
+    color: white;
+  }
+
+  // Nút Save
+  .btn--style-primary {
+    background-color: #37474f;
+    color: white;
+  }
+
+  // Field input
+  input,
+  select,
+  textarea {
+    background-color: #2e2e2e;
+    color: white;
+    border-color: #444;
+  }
+
+  // Radio
+  .radio-input input[type='radio'] {
+    accent-color: white;
+  }
+}
+//chèn icon thay thế icon trên đầu thay thế icon payload
+.step-nav__home {
+  position: relative;
+
+  svg {
+    display: none; // Ẩn icon SVG mặc định
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 25px;
+    background-image: url('/icons/xe.svg'); // đường dẫn tới icon mới
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+}
+//thay đổi icon người dùng
+.app-header__account img {
+  display: none; // Ẩn ảnh mặc định
+}
+
+.app-header__account {
+  width: 25px;
+  height: 25px;
+
+  background-image: url('/icons/avt.svg');
+
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+}

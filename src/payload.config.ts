@@ -3,34 +3,49 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig, CollectionConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
-import  {Patients}  from'./collections/Patients'
+import { Patients } from './collections/Patients'
 import MedicalRecods from './collections/MedicalRecods'
 import { Appointments } from './collections/Appointments'
 import Rooms from './collections/Rooms'
 import Departments from './collections/phongban/Departments'
 import { Users } from './collections/Users'
+import { Medicalorders } from './collections/Users/Medicalorders'
+import { Suppliers } from './collections/Suppliers'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { Medications } from './collections/Medications'
+import { medicalSupplies } from './collections/Medicalsupplies'
+import { Inventory } from './collections/Inventory'
+import Class from './collections/phongban/class'
+import { medicalUsages } from './collections/MedicalUsages'
+import { Orders } from './collections/Orders'
+import { PhieuXuat } from './collections/ExportTransactions'
+import { baoGia } from './collections/Baogia'
+
+import { Pharmacies } from './collections/Pharmacies'
+import { InventoryTransactions } from './collections/InventoryTransactions'
+
+import { FormsOverride } from './plugins/override.ts/formOverride'
+import { FormSubmissionsOverride } from './plugins/override.ts/formSubmissionsOverride'
+import { RedirectsOverride } from './plugins/override.ts/redirectsOverride'
+import { SearchResultsOverride } from './plugins/override.ts/searchResultsOverride'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
- 
-  admin:{
-  
+  admin: {
     components: {
-      
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
       beforeLogin: ['@/components/BeforeLogin'],
@@ -70,8 +85,31 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories,Users, Patients, MedicalRecods, Appointments, Rooms,Departments, 
+  collections: [
+    Pages,
+    Posts,
+    Categories,
+    Medicalorders,
+    Media,
+    Users,
+    medicalUsages,
+    Orders,
+    Patients,
+    MedicalRecods,
+    Suppliers,
+    Medications,
+    medicalSupplies,
+    Inventory,
+    InventoryTransactions,
+    Pharmacies,
+    Appointments,
+    Rooms,
+    PhieuXuat,
+    Departments,
+    Class,
+    baoGia,
   ],
+
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -96,6 +134,6 @@ export default buildConfig({
         return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
     },
-    tasks: []
+    tasks: [],
   },
 })

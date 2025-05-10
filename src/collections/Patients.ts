@@ -1,22 +1,30 @@
 import { CollectionConfig } from 'payload'
 import { lichkham } from '@/fields/sky/look'
 import { checkvalue } from '@/hooks/checkvaluepatients'
-import { APIError } from 'payload'
+import { v4 as uuidv4 } from 'uuid'
+import { isAdmin,isBacSiYTaTruongKhoa ,isAdminDuocSi} from '@/hooks/AccessAdmin'
 export const Patients: CollectionConfig = {
   slug: 'patients',
+  access: {
+    create: (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    delete:  (args) => isAdmin(args) ,
+    update:  (args) => isAdmin(args) || isBacSiYTaTruongKhoa(args),
+    read: (args) => isAdminDuocSi(args) || isBacSiYTaTruongKhoa(args),
+  },
   labels: {
-    singular: 'BỆNH NHÂN',
-    plural: 'BỆNH NHÂN',
+    singular: 'Bệnh Nhân',
+    plural: 'Bệnh Nhân',
   },
   admin: {
     useAsTitle: 'ten',
+    group: 'Bệnh Nhân & Điều Trị',
   },
   fields: [
     {
       name: 'IDbenhnhan',
       label: 'ID Bệnh nhân',
       type: 'text',
-
+      index: true,
       admin: {
         readOnly: true,
       },
@@ -25,7 +33,6 @@ export const Patients: CollectionConfig = {
       name: 'ten',
       label: 'Họ và tên',
       type: 'text',
-      required: true,
     },
     {
       name: 'bhyt',
@@ -36,11 +43,13 @@ export const Patients: CollectionConfig = {
         { label: 'Có', value: 'co' },
         { label: 'Không', value: 'khong' },
       ],
+      defaultValue: 'khong'
     },
     {
       name: 'idbaohiem',
       label: 'Mã số BHYT',
       type: 'text',
+      index: true,
       admin: {
         condition: (data) => data?.bhyt === 'co',
       },
@@ -61,25 +70,21 @@ export const Patients: CollectionConfig = {
       name: 'cccd',
       label: 'Căn cước công dân',
       type: 'text',
-      required: true,
+      index: true,
       validate: (value) => {
-        const regex = /^(0\d{8}|\d{11}$)/ // Chấp nhận 9 hoặc 12 chữ số (hàm biểu thức chính quy)
+        const regex = /^(\d{9}|\d{12})$/ // Chấp nhận 9 hoặc 12 chữ số
         return regex.test(value) ? true : 'Số CCCD phải có 12 chữ số hoặc CMND phải có 9 chữ số!'
       },
     },
     {
-      name: 'tuoi',
-      label: 'Tuổi',
-      type: 'number',
-      required: true,
-      min: 0,
-      max: 120,
-      validate: (value) => {
-        if (!Number.isInteger(value)) {
-          //giá trị nhập phải là số nguyên
-          return 'Tuổi phải là số nguyên!'
-        }
-        return true
+      name: 'ngaysinh',
+      label: 'Ngày sinh',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'dd-MM-yyy',
+        },
       },
     },
     {
@@ -115,10 +120,9 @@ export const Patients: CollectionConfig = {
       name: 'sdt',
       label: 'Số điện thoại',
       type: 'text',
-
-      required: true,
+      index: true,
       validate: (value) => {
-        const regex = /^0\d{9}$/ //hàm biểu thức chính quy
+        const regex = /^(0[2-9])[0-9]{8}$/ // Chỉ cho phép các đầu số từ 02 đến 09
         return regex.test(value) ? true : 'Số điện thoại không hợp lệ!'
       },
     },
@@ -126,15 +130,26 @@ export const Patients: CollectionConfig = {
       name: 'email',
       label: 'Email',
       type: 'email',
-
-      required: true,
     },
     {
       type: 'tabs',
       tabs: [
         {
           fields: [lichkham],
-          label: 'LỊCH KHÁM',
+          label: 'Lịch Khám',
+        },
+        {
+          fields: [
+            {
+              name: 'hosobenhan',
+              label: '',
+              type: 'join',
+              collection: 'MedicalRecods',
+              on: 'thongtinbenhnhan',
+
+            },
+          ],
+          label: 'Hồ Sơ Bệnh Án',
         },
       ],
     },
@@ -145,11 +160,7 @@ export const Patients: CollectionConfig = {
         if (!data) return
 
         if (!data.IDbenhnhan) {
-          data.IDbenhnhan = `ID-${Date.now()}-${Math.floor(Math.random() * 10000)}`
-        }
-        // Kiểm tra trường Bảo hiểm y tế và Mã số BHYT
-        if (data.bhyt === 'co' && (!data.idbaohiem || data.idbaohiem.trim() === '')) {
-          throw new APIError('Hãy nhập đủ thông tin mã số BHYT!', 400)
+          data.IDbenhnhan = `BN-${uuidv4()}`
         }
       },
     ],

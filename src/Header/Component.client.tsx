@@ -30,12 +30,36 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   }, [headerTheme])
 
   return (
-    <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
-      <div className="py-8 flex justify-between">
-        <Link href="/">
-          <Logo loading="eager" priority="high" className="invert dark:invert-0" />
-        </Link>
-        <HeaderNav data={data} />
+    <header
+      className="relative z-20 top-0 left-0 w-full bg-white z-50"
+      {...(theme ? { 'data-theme': theme } : {})}
+    >
+      {' '}
+      <div className="container max-w-screen-xl mx-auto px-4">
+        {/* Dòng chữ chính giữa */}
+        <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none z-0">
+          <div className="text-blue-900 font-bold text-[18px] sm:text-[24px] md:text-[28px] lg:text-[32px] text-center hidden sm:block">
+            Bệnh viện Tai-Mũi-Họng Thái Bình
+          </div>
+
+          {/* Dòng chữ chất lượng đã được khẳng định */}
+          <div className="text-blue-400 font-cursive text-[18px] mt-1 text-center">
+            Chất lượng đã được khẳng định
+          </div>
+        </div>
+
+        {/* Flex container cho Logo và Nav */}
+
+        <div className="py-2 sm:py-4 md:py-6 flex justify-between items-center">
+          <Link href="/">
+            <Logo loading="eager" priority="high" className="h-10 w-auto" />
+          </Link>
+
+          {/* Nav (ẩn trên mobile nếu muốn) */}
+          <div className="hidden sm:block">
+            <HeaderNav data={data} />
+          </div>
+        </div>
       </div>
     </header>
   )
